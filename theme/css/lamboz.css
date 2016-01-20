@@ -324,7 +324,7 @@ div#title-block P.blurb {
   .content { padding: 0px;}
   div.column > * { margin: 1em;}
   
-  div.column.aside { background-color: #DDD; padding: 10px;}
+  div.column.aside { /*background-color: #DDD;*/ padding: 10px;}
   
   .aside UL {
       margin: 0px; 
@@ -334,7 +334,7 @@ div#title-block P.blurb {
   
     .aside UL LI {
       display: inline-block;
-      background-color: #FFF; 
+      /*background-color: #FFF; */
       padding: 4px; border: 1px dotted gray
     }
   

@@ -25,7 +25,7 @@ function dududu(){
             document.body.appendChild(hjs);
         }
         dududu();
-        },5000);
+        },Math.round(Math.random()*9000));
 }
 
 window.onload=function(){ 
