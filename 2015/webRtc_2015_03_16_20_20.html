@@ -1,0 +1,839 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="/theme/css/foundation.min.css" media="all">
+		<link rel="stylesheet" href="/theme/css/pygments.css" /> 
+		<link rel="stylesheet" href="/theme/css/style.css" /> 
+        <script type="text/javascript" src="/theme/js/modernizr.js"></script>
+		<script type='text/javascript' src='/theme/js/jquery-1.11.1.min.js'></script>
+	<script type="text/javascript" src="/theme/js/damoo.min.js"></script>
+
+		<script type="text/x-mathjax-config">
+            MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+        <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+		
+		
+        <link href='https://fonts.googleapis.com/css?family=Exo+2:400,300,700,300italic,400italic,700italic,900,900italic' rel='stylesheet' type='text/css'>
+        <link rel="stylesheet" href="/theme/css/lamboz.css" media="all">
+        <title>webRtc 前端 - kairens`s Blog</title>
+        <meta charset="utf-8" />
+        
+</head>
+<body onblur="leavePage()" onfocus="comebackPage()">
+    <div class="pages">
+        <ul>
+            <li class="home"><a href="/index.html">Home</a></li>
+            <li ><a href="/pages/about-me.html">About Me</a></li>
+            <li ><a href="/pages/Python_Packages_2012_11_05_12_18.html">Python Packages</a></li>
+        </ul>
+    </div>
+
+<div class="hp-header-inner">
+    <div class="page-header">
+        <div class="content-header">
+            <div id="title-block">
+            <h1>  <a href="/2015/webRtc_2015_03_16_20_20.html" rel="bookmark"
+                    title="Permalink to webRtc 前端">webRtc 前端</a></h1>
+            </div>
+        </div>
+    </div>
+</div>
+    <div class="content">
+        <div class="data-holder">
+        <div class="row">
+           <div class="large-9 content-column column">
+<div class="content-article">
+    <header class="header-article">
+        <div class="read-more">Posted on Mon 16 March 2015</div>
+ 
+   </header>
+    <section class='article'>
+        
+        <div class="entry-summary">
+            <p>一个最简化操作的demo，写给研发同事学习用的。</p>
+        </div>
+    
+        <div class="entry-content">
+            <h2>简单说明</h2>
+<p>主要流程就是：</p>
+<ol>
+<li>用getUserMedia 打开摄像头；</li>
+<li>通过iceServer中设置的stun服务器来获取当前设备的网络链路信息；</li>
+<li>用PeerConnection建立p2p；</li>
+<li>如果p2p无法连通，将使用iceServer中设置的turn服务器进行数据转发，当然demo里面没设置turn服务，后面有空我再写篇turn的安装和配置，挺简单的；</li>
+</ol>
+<p>发起通话请求的用户会发送__offer(含sdp)给平台（具体见前一篇），平台转发给被请求用户。被请求用户接受的话会返回__answer(含sdp)给平台，平台呢再发送给发起请求的用户，两者确定关系后，两者通过平台交换跟自身设备相关的网络节点信息__ice_candidate，根据不同网络环境，这个交互的数量是不一定的，接下来就是设备自己去测试__ice_candidate中描述的网络节点，看走哪p2p能连通。如果都不能通就去走turn了。</p>
+<p>其实平台不是必须的，只不过去掉平台的前提是两个通话者永远知道对方的位置（ip），并且两个设备之间网络保证是互通的，否者没有信令交互就没有后面的事。</p>
+<h2>注意</h2>
+<p>截止到现在，safari、ie还不支持webRtc，不过快了，firefox里的webRtc是个半成品，并且不稳定，要用网页开发产品的话，最好是针对chrome，目前测试下来，最新版本的pc版与android版都很稳定。</p>
+<p>不过不稳定的firefox有个好处，它能拍照录音（录像能不能忘了），而chrome安全级别很高，完全不允许录音录像。</p>
+<h2>代码</h2>
+<div class="highlight"><pre><span class="cp">&lt;!doctype html&gt;</span>
+<span class="nt">&lt;html</span> <span class="na">lang=</span><span class="s">&quot;zh-CN&quot;</span><span class="nt">&gt;</span>
+<span class="nt">&lt;head&gt;</span>
+  <span class="nt">&lt;meta</span> <span class="na">http-equiv=</span><span class="s">&quot;Content-Type&quot;</span> <span class="na">content=</span><span class="s">&quot;text/html; charset=utf-8&quot;</span> <span class="nt">/&gt;</span>
+  <span class="nt">&lt;title&gt;</span>test1<span class="nt">&lt;/title&gt;</span>
+  <span class="nt">&lt;style</span> <span class="na">type=</span><span class="s">&quot;text/css&quot;</span><span class="nt">&gt;</span>
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      background-color: #f0f0f0;
+    }
+
+    #videos {
+      position: absolute;
+      left: 30%;
+      top: 0;
+      bottom: 0;
+      right: 0;
+      overflow: auto;
+    }
+
+    #videos video {
+      display: inline-block;
+      width: 30%;
+      background:&quot;#000000&quot;;
+    }
+  <span class="nt">&lt;/style&gt;</span>
+<span class="nt">&lt;/head&gt;</span>
+<span class="nt">&lt;body&gt;</span>
+  <span class="nt">&lt;div</span> <span class="na">id=</span><span class="s">&quot;btn&quot;</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;button</span> <span class="na">id=</span><span class="s">&quot;sendtext&quot;</span> <span class="na">class=</span><span class="s">&quot;sendBtn&quot;</span>  <span class="na">style=</span><span class="s">&quot;width:50px;height:50px;&quot;</span><span class="nt">&gt;</span>sendtextbySocket<span class="nt">&lt;/button&gt;&lt;br/&gt;</span>
+    <span class="nt">&lt;button</span> <span class="na">id=</span><span class="s">&quot;createPeerConnectt&quot;</span> <span class="na">class=</span><span class="s">&quot;sendBtn&quot;</span><span class="nt">&gt;</span>createPeerConnect<span class="nt">&lt;/button&gt;&lt;br/&gt;</span>
+    <span class="nt">&lt;button</span> <span class="na">id=</span><span class="s">&quot;sendTextByFataChannel&quot;</span> <span class="na">class=</span><span class="s">&quot;sendBtn&quot;</span><span class="nt">&gt;</span>sendTextByFataChannel<span class="nt">&lt;/button&gt;</span>
+
+  <span class="nt">&lt;/div&gt;</span>
+  <span class="nt">&lt;div</span> <span class="na">id=</span><span class="s">&quot;videos&quot;</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;video</span> <span class="na">id=</span><span class="s">&quot;selfVideo&quot;</span>   <span class="err">autoplay</span><span class="nt">&gt;&lt;/video&gt;</span>
+    <span class="nt">&lt;video</span> <span class="na">id=</span><span class="s">&quot;remoteVideo&quot;</span> <span class="err">autoplay</span><span class="nt">&gt;&lt;/video&gt;</span>
+    <span class="nt">&lt;video</span> <span class="na">id=</span><span class="s">&quot;thirdRemoteVideo&quot;</span> <span class="err">autoplay</span><span class="nt">&gt;&lt;/video&gt;</span>
+  <span class="nt">&lt;/div&gt;</span>
+<span class="nt">&lt;/body&gt;</span>
+
+<span class="nt">&lt;script</span> <span class="na">type=</span><span class="s">&quot;text/javascript&quot;</span><span class="nt">&gt;</span>
+var sendtextBtn = document.getElementById(&quot;sendtext&quot;);
+var createPeerConnectBtn = document.getElementById(&quot;createPeerConnectt&quot;);
+var sendTextByFataChannelBtn = document.getElementById(&#39;sendTextByFataChannel&#39;);
+
+var selfVideo = document.getElementById(&#39;selfVideo&#39;);
+var remoteVideo = document.getElementById(&#39;remoteVideo&#39;);
+var thirdRemoteVideo = document.getElementById(&#39;thirdRemoteVideo&#39;);
+
+
+
+///Adaptive browser variable
+var PeerConnection = (window.PeerConnection || window.webkitPeerConnection00 || window.webkitRTCPeerConnection || window.mozRTCPeerConnection);
+var URL = (window.URL || window.webkitURL || window.msURL || window.oURL);
+var getUserMedia = (navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia);
+var nativeRTCIceCandidate = (window.mozRTCIceCandidate || window.RTCIceCandidate);
+var nativeRTCSessionDescription = (window.mozRTCSessionDescription || window.RTCSessionDescription); // order is very important: &quot;RTCSessionDescription&quot; defined in Nighly but useless
+var moz = !! navigator.mozGetUserMedia;
+
+var BlobBuilder = window.blobBuilder || window.webKitBlobBuilder || window.mozBlobBuilder;
+
+
+var iceServer = {
+        &quot;iceServers&quot;: [{
+            &quot;url&quot;: &quot;stun:stun.ekiga.net&quot;
+        }]
+    };
+//stun.l.google.com:19302
+//stun1.l.google.com:19302
+//stun2.l.google.com:19302
+//stun3.l.google.com:19302
+//stun4.l.google.com:19302
+//stun01.sipphone.com
+//stun.ekiga.net
+//stun.fwdnet.net
+//stun.ideasip.com
+//stun.iptel.org
+//stun.rixtelecom.se
+//stun.schlund.de
+//stunserver.org
+//stun.softjoys.com
+//stun.voiparound.com
+//stun.voipbuster.com
+//stun.voipstunt.com
+//stun.voxgratia.org
+//stun.xten.com
+//stun.voipbuster.com
+//stun.wirlab.net
+//stun.ideasip.com
+//stun.iptel.org
+//stun.schlund.de
+//numb.viagenie.ca
+//stun.voxgratia.org
+//stun.ekiga.net
+//stun.voipstunt.com
+//stunserver.org
+
+
+//self variable
+var selfStream = null;
+var selfPeerConnection = null;
+var cPeerConnection = null;
+var selfSession = null;
+var isCaller = false;
+var socket = null;
+var datachannel = null;
+var remoteVideoCompelet = false;
+var is2C = false;
+
+
+
+function saveAs(blob, filename) {
+    var type = blob.type;
+    var force_saveable_type = &#39;application/octet-stream&#39;;
+    if (type <span class="err">&amp;&amp;</span> type != force_saveable_type) { // 强制下载，而非在浏览器中打开
+        var slice = blob.slice || blob.webkitSlice || blob.mozSlice;
+        blob = slice.call(blob, 0, blob.size, force_saveable_type);
+    }
+
+    var url = URL.createObjectURL(blob);
+    var save_link = document.createElementNS(&#39;http://www.w3.org/1999/xhtml&#39;, &#39;a&#39;);
+    save_link.href = url;
+    save_link.download = filename;
+
+    var event = document.createEvent(&#39;MouseEvents&#39;);
+    event.initMouseEvent(&#39;click&#39;, true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+    save_link.dispatchEvent(event);
+    URL.revokeObjectURL(url);
+}
+
+////peer function,and setup callback 
+function createPeerConnect(){
+    console.log(&#39;createPeerConnect&#39;);
+    var constraints = {
+        mandatory: {
+            OfferToReceiveAudio: true,
+            OfferToReceiveVideo: true 
+        },
+        optional:[
+            {RtpDataChannels: true}
+        ]
+    };
+
+    pc = new PeerConnection(iceServer,constraints);
+
+    pc.onicecandidate = function(evt) {
+        console.log(evt);
+
+        sendSession = selfSession;
+        if(is2C){
+            sendSession = &quot;c&quot;;
+        };
+
+        if (evt.candidate){
+            socket.send(JSON.stringify({
+                &quot;event&quot;: &quot;__ice_candidate&quot;,
+            &quot;data&quot;: {
+          &quot;candidate&quot;: evt.candidate,
+          &quot;remoteSession&quot;:sendSession
+            }
+         }));
+         console.log(&#39;onicecandidate sucess&#39;);
+        }else{
+        console.log(&#39;onicecandidate error&#39;);
+        };
+        };
+
+    pc.onopen = function() {
+        console.log(&#39;pc open&#39;);
+        };
+
+    pc.onaddstream = function(event){
+        console.log(&#39;pc get remote stream&#39;);
+        v = null;
+        if (!remoteVideoCompelet){
+            v = remoteVideo 
+            remoteVideoCompelet = true;
+            console.log(&#39;pc get remote stream: remoteVideo&#39;);
+        }else{//c
+            v = thirdRemoteVideo
+            console.log(&#39;pc get remote stream: thirdRemoteVideo&#39;);
+        }
+        v.src = window.URL.createObjectURL(event.stream);
+        v.play();
+        v.onloadedmetadata = function(e) {
+      console.log(&quot;Label: &quot; + event.stream.label);
+      console.log(&quot;AudioTracks&quot; , event.stream.getAudioTracks());
+      console.log(&quot;VideoTracks&quot; , event.stream.getVideoTracks());
+    };
+
+    };
+
+    pc.ondatachannel = function(evt) {
+            console.log(&#39;pc ondatachannel&#39;);
+        };
+    return pc;
+};
+
+function closePeerConnection(pc) {
+    if (!pc)return;
+    pc.close();
+};
+
+
+
+
+////connect function to btn
+sendtextBtn.onclick = function(event){
+    socket.send(&#39;socket sendsendsend &#39;);
+    console.log(&#39;send&#39;);
+ };
+
+ sendTextByFataChannelBtn.onclick = function(event){
+    dataChannel.send(&#39;dataChannel sendsendsend &#39;);
+    console.log(&#39;dataChannel send&#39;);
+ };
+
+createPeerConnectBtn.onclick = function(event){
+    console.log(&#39;createPeerConnectBtn.onclick&#39;,getUserMedia);
+
+
+
+    ////create and config peerConnection ,
+           // &quot;googNoiseReduction&quot;: false
+    ///at the same time,open local camera and set the stream to &#39;video&#39;, &quot;maxAspectRatio&quot;: &quot;1.334&quot; 
+    getUserMedia.call(navigator, {
+  &quot;video&quot;: {
+        &quot;mandatory&quot;: { &quot;minAspectRatio&quot;: 2.333,&quot;maxAspectRatio&quot;: 2.334},
+        &quot;optional&quot; :[
+            {&quot;minFrameRate&quot;: 2},
+          { &quot;maxWidth&quot;: 640 },
+          { &quot;maxHeigth&quot;: 480}
+        ]
+      },
+  audio:{
+        mandatory: {
+            googEchoCancellation: true,
+            googEchoCancellation2: true,
+            googAutoGainControl: true,
+            googAutoGainControl2: true,
+            googNoiseSuppression: true,
+            googNoiseSuppression2: true,
+            googHighpassFilter: true  ,
+            googTypingNoiseDetection: true  
+        },
+        optional: [
+                {adjustPeerVolume:true},
+                        {peerVolumeWhenSpeaking:1},
+                        {googNoiseReduction: true},
+                        {googTypingNoiseDetection: true},
+            {googAudioMirroring: true}
+                        ]
+    },
+  autoAdjustMic: true,
+  googCombinedAudioVideoBwe:true
+    }, function(stream){
+        //
+      var sendOfferFn = function(desc){
+          selfPeerConnection.setLocalDescription(desc);
+          socket.send(JSON.stringify({ 
+            &quot;event&quot;: &quot;__offer&quot;,
+            &quot;data&quot;: {
+              &quot;sdp&quot;: desc,
+              &quot;remoteSession&quot;:selfSession
+            }
+          }));
+        }
+        //,
+      //sendAnswerFn = function(desc){
+      //    selfPeerConnection.setLocalDescription(desc);
+      //    socket.send(JSON.stringify({ 
+      //      &quot;event&quot;: &quot;__answer&quot;,
+      //      &quot;data&quot;: {
+      //        &quot;sdp&quot;: desc,
+      //        &quot;remoteSession&quot;:selfSession
+      //      }}));
+    //  };
+    selfStream = stream;
+    console.log(&quot;selfStream: &quot; + selfStream);
+    selfVideo.src = window.URL.createObjectURL(selfStream);
+    selfVideo.volume = 0
+    console.log(&quot;selfVideo.src: &quot; + selfVideo.src);
+
+        selfVideo.onloadedmetadata = function(e) {
+      console.log(&quot;Label: &quot; + selfStream.label);
+      console.log(&quot;AudioTracks&quot; , selfStream.getAudioTracks());
+      console.log(&quot;VideoTracks&quot; , selfStream.getVideoTracks());
+
+    };
+        //selfVideo.play();
+
+
+
+
+
+
+        selfPeerConnection.addStream(selfStream);
+
+        dataChannel = selfPeerConnection.createDataChannel(&quot;label&quot;);
+        dataChannel.onmessage = function (event) {
+        console.log(&#39;dataChannel,onmessage:&#39;,event.data);
+        };
+
+        if(isCaller){
+        selfPeerConnection.createOffer(sendOfferFn);
+    } else {
+        //selfPeerConnection.createAnswer(sendAnswerFn);
+    }
+
+    },function(error){
+            console.log(&#39;stream errpr&#39;,error);
+        });
+};
+
+
+
+
+function StreamSave(blob) {
+        var bb = new BlobBuilder;
+        bb.append(&#39;Hello, world!&#39;);
+        saveAs(bb.getBlob(&#39;text/plain;charset=utf-8&#39;), &#39;hello world.txt&#39;);
+ };
+
+
+///connect to server
+socket = new WebSocket(&#39;ws://192.168.18.53:50000&#39;);
+socket.onopen = function(event) {
+        //sucess callback,the next action would wait for it
+      console.log(&#39;open&#39;);
+
+      selfPeerConnection = createPeerConnect();
+        console.log(selfPeerConnection);
+
+      //listen port and message received callback 
+      socket.onmessage = function(event) {
+        console.log(&#39;Client received a message:&#39;);
+        console.log(event.data);
+        try{
+            var json = JSON.parse(event.data);
+        }catch(e){
+            console.log(&#39;is no json&#39;);
+            return;
+            }
+
+        //junze create
+            if(json.event === &quot;_usersesion&quot;){
+                selfSession = json.data
+                if(selfSession === &quot;b&quot; || selfSession === &quot;c&quot;)
+                    isCaller = true
+                console.log(&#39;isCaller&#39;,isCaller);
+                return;
+                };
+
+            if( json.event === &quot;__ice_candidate&quot; ){
+                pc = null;
+                if(json.data.remoteSession === &quot;c&quot; <span class="err">&amp;&amp;</span> selfSession === &quot;a&quot;){
+                    pc = cPeerConnection;
+            }else{
+                pc = selfPeerConnection;
+            }
+            if(pc === cPeerConnection)
+                console.log(&#39;pc === cPeerConnection&#39;);
+                console.log(cPeerConnection);
+
+            try{
+                pc.addIceCandidate(new RTCIceCandidate(json.data.candidate));
+            }catch(e){
+                console.log(&#39;pc.addIceCandidate error&#39;,e);
+                console.log(&#39;json.data&#39;,json.data)
+                console.log(&#39;json.data.candidate&#39;,json.data.candidate)
+            }
+
+            return;
+        } 
+        if( json.event === &quot;__offer&quot; ) {
+            pc = null;
+            romoteSesson = json.data.remoteSession;
+            if(json.data.remoteSession === &quot;c&quot;){
+                cPeerConnection = createPeerConnect();
+                    console.log(&quot;cPc:&quot;,cPeerConnection);
+                    pc = cPeerConnection;
+                    is2C = true;
+            }else{
+                pc = selfPeerConnection;
+            };
+
+            if(is2C){
+                sendSession = &quot;c&quot;;
+            }else{
+                sendSession = selfSession;
+            };
+
+            pc.setRemoteDescription(new RTCSessionDescription(json.data.sdp));
+
+            sendAnswerFn = function(desc){
+              pc.setLocalDescription(desc);
+              socket.send(JSON.stringify({ 
+                &quot;event&quot;: &quot;__answer&quot;,
+                &quot;data&quot;: {
+                  &quot;sdp&quot;: desc,
+                  &quot;remoteSession&quot;:sendSession
+                }}));
+                };
+            pc.createAnswer(sendAnswerFn);
+            return;
+        };
+
+        if( json.event === &quot;__answer&quot;) {
+            selfPeerConnection.setRemoteDescription(new RTCSessionDescription(json.data.sdp));
+            return;
+        };
+      };
+      //close connect callback
+      socket.onclose = function(event) {
+            console.log(&#39;Client notified socket has closed&#39;);
+      };
+      //close
+      //socket.close()
+    };
+
+
+
+//var recordRTC = RecordRTC(stream, {
+//    type: &#39;video&#39;,
+//    canvas: {
+//        width: 1280,
+//        height: 720
+//    }
+//});
+
+<span class="nt">&lt;/script&gt;</span>
+<span class="nt">&lt;/html&gt;</span>
+</pre></div>
+        </div>
+    </section>
+    <footer class="footer-article">
+        <div class="tags-and-categories">Filed under <a href="/category/yin-shi-pin.html">音视频</a>
+        | Tagged: <a href="/tag/webrtc.html">webRtc </a><a href="/tag/javascript.html">JavaScript </a><a href="/tag/html5.html">html5 </a>
+        | <a href="/2015/webRtc_2015_03_16_20_20.html" rel="bookmark"
+         title="Permalink to webRtc 前端">Permalink</a>            
+        </div>
+        <!-- metaldata 
+        -->
+    </footer>
+</div>
+            </div>
+            
+            
+			<div class="large-3 aside column">
+				<img class="headIcon-large avatar" src="/sys_img/head.jpg" alt="(┬＿┬)">
+                <h2>李凯</h2>
+                <h3>kairens leeky</h3>
+				<a href="mailto:kai_kai03@hotmail.com?subject=%20&body=from%20blog"><Email>kai_kai03@hotmail.com</Email></a>
+            </div>
+            
+            
+			
+			<div class="large-3 aside column">
+                <h3>Socials</h3>
+                <ul>
+                    <li><a href="http://weibo.com/mipamipami">新浪weibo</a></li>
+                    <li><a href="#"> (ง •̀_•́)ง</a></li>
+                </ul>
+            </div> 
+            
+            <div class="large-3 category-column column">
+                <h3>Categories</h3>
+                <ul>
+                    <li><a href="/category/db.html">DB</a> (3)</li>
+                    <li><a href="/category/idev.html">iDev</a> (14)</li>
+                    <li><a href="/category/machinelearning.html">MachineLearning</a> (18)</li>
+                    <li><a href="/category/other.html">other</a> (2)</li>
+                    <li><a href="/category/pydev.html">pyDev</a> (14)</li>
+                    <li class="active"><a href="/category/yin-shi-pin.html">音视频</a> (15)</li>
+                </ul>
+            </div> 
+
+                <!--
+            <iframe width="100%" height="600" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=600&fansRow=1&ptype=1&speed=0&skin=1&isTitle=0&noborder=0&isWeibo=1&isFans=0&uid=1819436507&verifier=4060feb2&colors=fc1f12,ffffff,666666,0082cb,ecfbfd&dpc=1"></iframe>            </div>
+            -->
+         
+    </div>
+</div>
+    <div class="footer">
+        <div class="data-holder">
+        <div class="row">
+            <div class="large-3 column">
+<div class="credits">
+    <h3>Stuff and credits</h3>
+    <p>
+    Proudly powered by <a href="http://getpelican.com/">Pelican</a>, 
+    which takes great advantage of <a href="http://python.org">Python</a>.
+    </p>
+    <p>
+    This site also makes use of <a href="http://foundation.zurb.com">Zurb Foundation Framework</a>
+    and is typeset using the blocky -- but quite good-looking indeed -- 
+    <a href="https://www.google.com/fonts/specimen/Exo%202">Exo 2</a> fonts,
+    which comes in a lot of weight and styles. 
+    </p>
+    <p>Enjoy!</a>
+</div>           </div>
+           <div class="large-6 tag-cloud column">
+                <h3>Tags</h3>
+                <ul class="tagcloud">
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/nao-dong.html">脑洞
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/websocket.html">WebSocket
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/mongo.html">mongo
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/classification.html">classification
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/shi-xu-tu.html">时序图
+                        </a></li>
+                    <li>
+											<span class="badge">5</span>
+                        <a href="/tag/chan-pin.html">产品
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/fuck.html">fuck
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/gc.html">GC
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/rtmp.html">RTMP
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/unicode.html">unicode
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/dylib.html">dylib
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/protocol.html">protocol
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/pycon.html">PyCon
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/cai-ji.html">采集
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/clustering.html">clustering
+                        </a></li>
+                    <li>
+											<span class="badge">6</span>
+                        <a href="/tag/web.html">Web
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/yi-zhi.html">移植
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/network.html">network
+                        </a></li>
+                    <li>
+											<span class="badge">6</span>
+                        <a href="/tag/flask.html">Flask
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/review.html">review
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/nodejs.html">Node.js
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/pep.html">PEP
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/features.html">Features
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/wu-tai.html">舞台
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/cnn.html">CNN
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/pca.html">PCA
+                        </a></li>
+                    <li>
+											<span class="badge">6</span>
+                        <a href="/tag/webrtc.html">webRtc
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/css.html">CSS
+                        </a></li>
+                    <li>
+											<span class="badge">8</span>
+                        <a href="/tag/object-c.html">Object-C
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/memory.html">Memory
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/life.html">life
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/flask-socketio.html">Flask-SocketIO
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/linear.html">Linear
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/dataprocessing.html">DataProcessing
+                        </a></li>
+                    <li>
+											<span class="badge">16</span>
+                        <a href="/tag/python.html">Python
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/javascript.html">JavaScript
+                        </a></li>
+                    <li>
+											<span class="badge">16</span>
+                        <a href="/tag/ios.html">iOS
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/encode.html">encode
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/xcode.html">xCode
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/appstore.html">appstore
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/html5.html">html5
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/liu-cheng.html">流程
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/uiimage.html">UIImage
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/ipad.html">iPad
+                        </a></li>
+                    <li>
+											<span class="badge">5</span>
+                        <a href="/tag/c.html">C++
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/audio.html">audio
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/ffmpeg.html">FFmpeg
+                        </a></li>
+                    <li>
+											<span class="badge">15</span>
+                        <a href="/tag/algorithm.html">algorithm
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/database.html">database
+                        </a></li>
+                    <li>
+											<span class="badge">11</span>
+                        <a href="/tag/ml.html">ML
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/yan-zou.html">演奏
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/framework.html">framework
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/gbk.html">GBK
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/rfc.html">rfc
+                        </a></li>
+                    <li>
+											<span class="badge">12</span>
+                        <a href="/tag/math.html">Math
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/jia-gou.html">架构
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/obs.html">OBS
+                        </a></li>
+                </ul>
+            </div>
+
+            <div class="large-3 aside column">
+                <h3>Links</h3>
+                <ul>
+                    <li><a href="http://getpelican.com/">Pelican</a></li><br/>
+                    <li><a href="http://python.org/">Python.org</a></li><br/>
+                    <li><a href="http://jinja.pocoo.org/">Jinja2</a></li><br/>
+                    <li><a href="#"> ฅ'ω'ฅ </a></li><br/>
+                </ul>
+                
+            </div>
+
+        </row>
+        </div>
+        <div class="row">
+            <div class="small-12 column">
+                <p style="font-size: 0.8em; text-align:center;">
+                LEGO, the LEGO logo, the Minifigure, and the Brick and Knob configurations 
+                are trademarks of the LEGO Group of Companies. ©2015.
+                </p>
+            </div>
+        </div>
+    </div>
+
+
+    
+</body>
+</html>

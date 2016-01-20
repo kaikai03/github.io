@@ -1,0 +1,688 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="/theme/css/foundation.min.css" media="all">
+		<link rel="stylesheet" href="/theme/css/pygments.css" /> 
+		<link rel="stylesheet" href="/theme/css/style.css" /> 
+        <script type="text/javascript" src="/theme/js/modernizr.js"></script>
+		<script type='text/javascript' src='/theme/js/jquery-1.11.1.min.js'></script>
+	<script type="text/javascript" src="/theme/js/damoo.min.js"></script>
+
+		<script type="text/x-mathjax-config">
+            MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+        <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+		
+		
+        <link href='https://fonts.googleapis.com/css?family=Exo+2:400,300,700,300italic,400italic,700italic,900,900italic' rel='stylesheet' type='text/css'>
+        <link rel="stylesheet" href="/theme/css/lamboz.css" media="all">
+        <title>逻辑回归实现 - kairens`s Blog</title>
+        <meta charset="utf-8" />
+        
+</head>
+<body onblur="leavePage()" onfocus="comebackPage()">
+    <div class="pages">
+        <ul>
+            <li class="home"><a href="/index.html">Home</a></li>
+            <li ><a href="/pages/about-me.html">About Me</a></li>
+            <li ><a href="/pages/Python_Packages_2012_11_05_12_18.html">Python Packages</a></li>
+        </ul>
+    </div>
+
+<div class="hp-header-inner">
+    <div class="page-header">
+        <div class="content-header">
+            <div id="title-block">
+            <h1>  <a href="/2014/Logistic_regression_python_2014_08_09_20_07.html" rel="bookmark"
+                    title="Permalink to 逻辑回归实现">逻辑回归实现</a></h1>
+            </div>
+        </div>
+    </div>
+</div>
+    <div class="content">
+        <div class="data-holder">
+        <div class="row">
+           <div class="large-9 content-column column">
+<div class="content-article">
+    <header class="header-article">
+        <div class="read-more">Posted on Sat 09 August 2014</div>
+ 
+   </header>
+    <section class='article'>
+        
+        <div class="entry-summary">
+            <p>读书笔记--Python版的</p>
+        </div>
+    
+        <div class="entry-content">
+            <h2>Logistic regression in Python</h2>
+<p>本文基于yhat上<a href="http://blog.yhathq.com/posts/logistic-regression-and-python.html">Logistic Regression in Python</a>，作了中文翻译，并相应补充了一些内容。本文并不研究逻辑回归具体算法实现，而是使用了一些算法库，旨在帮助需要用Python来做逻辑回归的训练和预测的读者快速上手。</p>
+<p>逻辑回归是一项可用于预测二分类结果(binary outcome)的统计技术，广泛应用于金融、医学、犯罪学和其他社会科学中。逻辑回归使用简单且非常有效，你可以在许多机器学习、应用统计的书中的前几章中找到个关于逻辑回归的介绍。逻辑回归在许多统计课程中都会用到。</p>
+<p>我们不难找到使用R语言的高质量的逻辑回归实例，如UCLA的教程R Data Analysis Examples: Logit Regression就是一个很好的资源。Python是机器学习领域最流行的语言之一，并且已有许多Python的资源涵盖了支持向量积和文本分类等话题，但少有关于逻辑回归的资料。</p>
+<p>本文介绍了如何使用Python来完成逻辑回归。</p>
+<h3>逻辑回归的实例</h3>
+<p>在此使用与<a href="http://www.ats.ucla.edu/stat/r/dae/logit.htm">Logit Regression in R</a>相同的数据集来研究Python中的逻辑回归，目的是要辨别不同的因素对研究生录取的影响。</p>
+<p>数据集中的前三列可作为预测变量(predictor variables)：</p>
+<ul>
+<li><code>gpa</code></li>
+<li><code>gre</code> 分数</li>
+<li><code>rank</code> 表示本科生母校的声望</li>
+</ul>
+<p>第四列<code>admit</code>则是二分类目标变量(binary target variable)，它表明考生最终是否被录用。</p>
+<h3>加载数据</h3>
+<p>使用 <code>pandas.read_csv</code>加载数据，这样我们就有了可用于探索数据的<code>DataFrame</code>。</p>
+<div class="highlight"><pre><span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">statsmodels.api</span> <span class="kn">as</span> <span class="nn">sm</span>
+<span class="kn">import</span> <span class="nn">pylab</span> <span class="kn">as</span> <span class="nn">pl</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="c1"># 加载数据</span>
+<span class="c1"># 备用地址: http://cdn.powerxing.com/files/lr-binary.csv</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;http://www.ats.ucla.edu/stat/data/binary.csv&quot;</span><span class="p">)</span>
+<span class="c1"># 浏览数据集</span>
+<span class="k">print</span> <span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<span class="c1">#    admit  gre   gpa  rank</span>
+<span class="c1"># 0      0  380  3.61     3</span>
+<span class="c1"># 1      1  660  3.67     3</span>
+<span class="c1"># 2      1  800  4.00     1</span>
+<span class="c1"># 3      1  640  3.19     4</span>
+<span class="c1"># 4      0  520  2.93     4</span>
+<span class="c1"># 重命名&#39;rank&#39;列，因为dataframe中有个方法名也为&#39;rank&#39;</span>
+<span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;admit&quot;</span><span class="p">,</span> <span class="s2">&quot;gre&quot;</span><span class="p">,</span> <span class="s2">&quot;gpa&quot;</span><span class="p">,</span> <span class="s2">&quot;prestige&quot;</span><span class="p">]</span>
+<span class="k">print</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span>
+<span class="c1"># array([admit, gre, gpa, prestige], dtype=object)</span>
+</pre></div>
+
+
+<p>注意到有一列属性名为<code>ran</code>k，但因为<code>rank</code>也是<code>pandas dataframe</code>中一个方法的名字，因此需要将该列重命名为<code>prestige</code>.</p>
+<h3>统计摘要(Summary Statistics) 以及 查看数据</h3>
+<p>现在我们就将需要的数据正确载入到Python中了，现在来看下数据。我们可以使用<code>pandas</code>的函数<code>describe</code>来给出数据的摘要<code>describe</code>与R语言中的<code>summay</code>类似。这里也有一个用于计算标准差的函数<code>std</code>，但在<code>describe</code>中已包括了计算标准差。</p>
+<p>我特别喜欢<code>pandas</code>的<code>pivot_table/crosstab</code>聚合功能。<code>crosstab</code>可方便的实现多维频率表(frequency tables)(有点像R语言中的<code>table</code>)。你可以用它来查看不同数据所占的比例。</p>
+<div class="highlight"><pre># summarize the data
+print df.describe()
+#             admit         gre         gpa   prestige
+# count  400.000000  400.000000  400.000000  400.00000
+# mean     0.317500  587.700000    3.389900    2.48500
+# std      0.466087  115.516536    0.380567    0.94446
+# min      0.000000  220.000000    2.260000    1.00000
+# 25%      0.000000  520.000000    3.130000    2.00000
+# 50%      0.000000  580.000000    3.395000    2.00000
+# 75%      1.000000  660.000000    3.670000    3.00000
+# max      1.000000  800.000000    4.000000    4.00000
+# 查看每一列的标准差
+print df.std()
+# admit      0.466087
+# gre      115.516536
+# gpa        0.380567
+# prestige   0.944460
+# 频率表，表示prestige与admin的值相应的数量关系
+print pd.crosstab(df[&#39;admit&#39;], df[&#39;prestige&#39;], rownames=[&#39;admit&#39;])
+# prestige   1   2   3   4
+# admit                   
+# 0         28  97  93  55
+# 1         33  54  28  12
+# plot all of the columns
+df.hist()
+pl.show()
+</pre></div>
+
+
+<p>运行代码后，绘制的柱状统计图如下所示：
+<center><img alt="logit_hist.png" src="/article_img/Logistic_regression_python_2014_08_09_20_07/logit_hist.png" /></center></p>
+<h3>虚拟变量(dummy variables)</h3>
+<p>虚拟变量，也叫哑变量，可用来表示分类变量、非数量因素可能产生的影响。在计量经济学模型，需要经常考虑属性因素的影响。例如，职业、文化程度、季节等属性因素往往很难直接度量它们的大小。只能给出它们的“Yes—D=1”或”No—D=0”，或者它们的程度或等级。为了反映属性因素和提高模型的精度，必须将属性因素“量化”。通过构造0-1型的人工变量来量化属性因素。</p>
+<p><code>pandas</code>提供了一系列分类变量的控制。我们可以用<code>get_dummies</code>来将<code>prestige</code>一列虚拟化。</p>
+<p><code>get_dummies</code>为每个指定的列创建了新的带二分类预测变量的<code>DataFrame</code>，在本例中，<code>prestige</code>有四个级别：1，2，3以及4（1代表最有声望），<code>prestige</code>作为分类变量更加合适。当调用<code>get_dummies</code>时，会产生四列的<code>dataframe</code>，每一列表示四个级别中的一个。</p>
+<div class="highlight"><pre># 将prestige设为虚拟变量
+dummy_ranks = pd.get_dummies(df[&#39;prestige&#39;], prefix=&#39;prestige&#39;)
+print dummy_ranks.head()
+#    prestige_1  prestige_2  prestige_3  prestige_4
+# 0           0           0           1           0
+# 1           0           0           1           0
+# 2           1           0           0           0
+# 3           0           0           0           1
+# 4           0           0           0           1
+# 为逻辑回归创建所需的data frame
+# 除admit、gre、gpa外，加入了上面常见的虚拟变量（注意，引入的虚拟变量列数应为虚拟变量总列数减1，减去的1列作为基准）
+cols_to_keep = [&#39;admit&#39;, &#39;gre&#39;, &#39;gpa&#39;]
+data = df[cols_to_keep].join(dummy_ranks.ix[:, &#39;prestige_2&#39;:])
+print data.head()
+#    admit  gre   gpa  prestige_2  prestige_3  prestige_4
+# 0      0  380  3.61           0           1           0
+# 1      1  660  3.67           0           1           0
+# 2      1  800  4.00           0           0           0
+# 3      1  640  3.19           0           0           1
+# 4      0  520  2.93           0           0           1
+# 需要自行添加逻辑回归所需的intercept变量
+data[&#39;intercept&#39;] = 1.0
+</pre></div>
+
+
+<p>这样，数据原本的<code>prestige</code>属性就被<code>prestige_x</code>代替了，例如原本的数值为2，则<code>prestige_2</code>为1，<code>prestige_1</code>、<code>prestige_3</code>、<code>prestige_4</code>都为0。</p>
+<p>将新的虚拟变量加入到了原始的数据集中后，就不再需要原来的<code>prestige</code>列了。在此要强调一点，生成m个虚拟变量后，只要引入m-1个虚拟变量到数据集中，未引入的一个是作为基准对比的。</p>
+<p>最后，还需加上常数<code>intercept</code>，<code>statemodels</code>实现的逻辑回归需要显式指定。</p>
+<h3>执行逻辑回归</h3>
+<p>实际上完成逻辑回归是相当简单的，首先指定要预测变量的列，接着指定模型用于做预测的列，剩下的就由算法包去完成了。</p>
+<p>本例中要预测的是<code>admin</code>列，使用到<code>gre</code>、<code>gpa</code>和虚拟变量<code>prestige_2</code>、<code>prestige_3</code>、<code>prestige_4</code>。<code>prestige_1</code>作为基准，所以排除掉，以防止<a href="http://en.wikipedia.org/wiki/Multicollinearity#Remedies_for_multicollinearity">多元共线性</a>(multicollinearity)和引入分类变量的所有虚拟变量值所导致的陷阱(<a href="http://en.wikipedia.org/wiki/Dummy_variable_(statistics)">dummy variable trap</a>)。</p>
+<div class="highlight"><pre># 指定作为训练变量的列，不含目标列`admit`
+train_cols = data.columns[1:]
+# Index([gre, gpa, prestige_2, prestige_3, prestige_4], dtype=object)
+logit = sm.Logit(data[&#39;admit&#39;], data[train_cols])
+# 拟合模型
+result = logit.fit()
+</pre></div>
+
+
+<p>在这里是使用了<code>statesmodels</code>的<code>Logit</code>函数，更多的模型细节可以查阅<code>statesmodels</code>的文档。</p>
+<h3>使用训练模型预测数据</h3>
+<div class="highlight"><pre><span class="c1"># 构建预测集</span>
+<span class="c1"># 与训练集相似，一般也是通过 pd.read_csv() 读入</span>
+<span class="c1"># 在这边为方便，我们将训练集拷贝一份作为预测集（不包括 admin 列）</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="n">combos</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+<span class="c1"># 数据中的列要跟预测时用到的列一致</span>
+<span class="n">predict_cols</span> <span class="o">=</span> <span class="n">combos</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+<span class="c1"># 预测集也要添加intercept变量</span>
+<span class="n">combos</span><span class="p">[</span><span class="s1">&#39;intercept&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+<span class="c1"># 进行预测，并将预测评分存入 predict 列中</span>
+<span class="n">combos</span><span class="p">[</span><span class="s1">&#39;predict&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">combos</span><span class="p">[</span><span class="n">predict_cols</span><span class="p">])</span>
+<span class="c1"># 预测完成后，predict 的值是介于 [0, 1] 间的概率值</span>
+<span class="c1"># 我们可以根据需要，提取预测结果</span>
+<span class="c1"># 例如，假定 predict &gt; 0.5，则表示会被录取</span>
+<span class="c1"># 在这边我们检验一下上述选取结果的精确度</span>
+<span class="n">total</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">hit</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">combos</span><span class="o">.</span><span class="n">values</span><span class="p">:</span>
+  <span class="c1"># 预测分数 predict, 是数据中的最后一列</span>
+  <span class="n">predict</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+  <span class="c1"># 实际录取结果</span>
+  <span class="n">admit</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+  <span class="c1"># 假定预测概率大于0.5则表示预测被录取</span>
+  <span class="k">if</span> <span class="n">predict</span> <span class="o">&gt;</span> <span class="mf">0.5</span><span class="p">:</span>
+    <span class="n">total</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="c1"># 表示预测命中</span>
+    <span class="k">if</span> <span class="n">admit</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+      <span class="n">hit</span> <span class="o">+=</span> <span class="mi">1</span>
+<span class="c1"># 输出结果</span>
+<span class="k">print</span> <span class="s1">&#39;Total: </span><span class="si">%d</span><span class="s1">, Hit: </span><span class="si">%d</span><span class="s1">, Precision: </span><span class="si">%.2f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">total</span><span class="p">,</span> <span class="n">hit</span><span class="p">,</span> <span class="mf">100.0</span><span class="o">*</span><span class="n">hit</span><span class="o">/</span><span class="n">total</span><span class="p">)</span>
+<span class="c1"># Total: 49, Hit: 30, Precision: 61.22</span>
+</pre></div>
+
+
+<p>在这里，我是简单的将原始数据再作为待预测的数据进行检验。通过上述步骤得到的是一个概率值，而不是一个直接的二分类结果（被录取/不被录取）。通常，我们可以设定一个阈值，若 <code>predict</code> 大于该阈值，则认为是被录取了，反之，则表示不被录取。</p>
+<p>在上面的例子中，假定预测概率大于 0.5 则表示预测被录取，一共预测有 49 个被录取，其中有 30 个预测命中，精确度为 61.22%。</p>
+<h3>结果解释</h3>
+<p><code>statesmodels</code>提供了结果的摘要，如果你使用过R语言，你会发现结果的输出与之相似。</p>
+<div class="highlight"><pre># 查看数据的要点
+print result.summary()
+
+Logit Regression Results                           
+==============================================================================
+Dep. Variable:                  admit   No. Observations:                  400
+Model:                          Logit   Df Residuals:                      394
+Method:                           MLE   Df Model:                            5
+Date:                Sun, 03 Mar 2013   Pseudo R-squ.:                 0.08292
+Time:                        12:34:59   Log-Likelihood:                -229.26
+converged:                       True   LL-Null:                       -249.99
+                                        LLR p-value:                 7.578e-08
+==============================================================================
+                 coef    std err          z      P&gt;|z|      [95.0% Conf. Int.]
+------------------------------------------------------------------------------
+gre            0.0023      0.001      2.070      0.038         0.000     0.004
+gpa            0.8040      0.332      2.423      0.015         0.154     1.454
+prestige_2    -0.6754      0.316     -2.134      0.033        -1.296    -0.055
+prestige_3    -1.3402      0.345     -3.881      0.000        -2.017    -0.663
+prestige_4    -1.5515      0.418     -3.713      0.000        -2.370    -0.733
+intercept     -3.9900      1.140     -3.500      0.000        -6.224    -1.756
+==============================================================================
+</pre></div>
+
+
+<p>你可以看到模型的系数，系数拟合的效果，以及总的拟合质量，以及一些统计度量。[待补充: 模型结果主要参数的含义]</p>
+<p>当然你也可以只观察结果的某部分，如置信区间(confidence interval)可以看出模型系数的健壮性。</p>
+<div class="highlight"><pre># 查看每个系数的置信区间
+print result.conf_int()
+#                    0         1
+# gre         0.000120  0.004409
+# gpa         0.153684  1.454391
+# prestige_2 -1.295751 -0.055135
+# prestige_3 -2.016992 -0.663416
+# prestige_4 -2.370399 -0.732529
+# intercept  -6.224242 -1.755716
+</pre></div>
+
+
+<p>在这个例子中，我们可以肯定被录取的可能性与应试者毕业学校的声望存在着逆相关的关系。</p>
+<p>换句话说，高排名学校（prestige_1==True）的湘鄂生呗录取的概率比低排名学校（prestige_4==True）要高。</p>
+<h3>相对危险度（odds ratio）</h3>
+<blockquote>
+<p>odds ratio<br>OR值，是相对危险度，又称比值比、优势比。</p>
+</blockquote>
+<p>使用每个变量系数的指数来生成odds ratio，可知变量每单位的增加、减少对录取几率的影响。例如，如果学校的声望为2，则我们可以期待被录取的几率减少大概50%。UCLA上有一个对odds ratio更为深入的解释: <a href="http://www.ats.ucla.edu/stat/mult_pkg/faq/general/odds_ratio.htm">在逻辑回归中如何解释odds ratios?</a>。</p>
+<div class="highlight"><pre># 输出 odds ratio
+print np.exp(result.params)
+# gre           1.002267
+# gpa           2.234545
+# prestige_2    0.508931
+# prestige_3    0.261792
+# prestige_4    0.211938
+# intercept     0.018500
+</pre></div>
+
+
+<p>我们也可以使用置信区间来计算系数的影响，来更好地估计一个变量影响录取率的不确定性。</p>
+<div class="highlight"><pre># odds ratios and 95% CI
+params = result.params
+conf = result.conf_int()
+conf[&#39;OR&#39;] = params
+conf.columns = [&#39;2.5%&#39;, &#39;97.5%&#39;, &#39;OR&#39;]
+print np.exp(conf)
+#                   2.5%     97.5%        OR
+# gre           1.000120  1.004418  1.002267
+# gpa           1.166122  4.281877  2.234545
+# prestige_2    0.273692  0.946358  0.508931
+# prestige_3    0.133055  0.515089  0.261792
+# prestige_4    0.093443  0.480692  0.211938
+# intercept     0.001981  0.172783  0.018500
+</pre></div>
+
+
+<h3>更深入的挖掘</h3>
+<p>为了评估我们分类器的效果，我们将使用每个输入值的逻辑组合（logical combination）来重新创建数据集，如此可以得知在不同的变量下预测录取可能性的增加、减少。首先我们使用名为 <code>cartesian</code> 的辅助函数来生成组合值（来源于: <a href="http://stackoverflow.com/questions/1208118/using-numpy-to-build-an-array-of-all-combinations-of-two-arrays">如何使用numpy构建两个数组的组合</a>）</p>
+<p>我们使用 <code>np.linspace</code> 创建 <code>gre</code> 和 <code>gpa</code> 值的一个范围，即从指定的最大、最小值来创建一个线性间隔的值的范围。在本例子中，取已知的最大、最小值。</p>
+<div class="highlight"><pre># 根据最大、最小值生成 GRE、GPA 均匀分布的10个值，而不是生成所有可能的值
+gres = np.linspace(data[&#39;gre&#39;].min(), data[&#39;gre&#39;].max(), 10)
+print gres
+# array([ 220.        ,  284.44444444,  348.88888889,  413.33333333,
+#         477.77777778,  542.22222222,  606.66666667,  671.11111111,
+#         735.55555556,  800.        ])
+gpas = np.linspace(data[&#39;gpa&#39;].min(), data[&#39;gpa&#39;].max(), 10)
+print gpas
+# array([ 2.26      ,  2.45333333,  2.64666667,  2.84      ,  3.03333333,
+#         3.22666667,  3.42      ,  3.61333333,  3.80666667,  4.        ])
+# 枚举所有的可能性
+combos = pd.DataFrame(cartesian([gres, gpas, [1, 2, 3, 4], [1.]]))
+# 重新创建哑变量
+combos.columns = [&#39;gre&#39;, &#39;gpa&#39;, &#39;prestige&#39;, &#39;intercept&#39;]
+dummy_ranks = pd.get_dummies(combos[&#39;prestige&#39;], prefix=&#39;prestige&#39;)
+dummy_ranks.columns = [&#39;prestige_1&#39;, &#39;prestige_2&#39;, &#39;prestige_3&#39;, &#39;prestige_4&#39;]
+# 只保留用于预测的列
+cols_to_keep = [&#39;gre&#39;, &#39;gpa&#39;, &#39;prestige&#39;, &#39;intercept&#39;]
+combos = combos[cols_to_keep].join(dummy_ranks.ix[:, &#39;prestige_2&#39;:])
+# 使用枚举的数据集来做预测
+combos[&#39;admit_pred&#39;] = result.predict(combos[train_cols])
+print combos.head()
+#    gre       gpa  prestige  intercept  prestige_2  prestige_3  prestige_4  admit_pred
+# 0  220  2.260000         1          1           0           0           0    0.157801
+# 1  220  2.260000         2          1           1           0           0    0.087056
+# 2  220  2.260000         3          1           0           1           0    0.046758
+# 3  220  2.260000         4          1           0           0           1    0.038194
+# 4  220  2.453333         1          1           0           0           0    0.179574
+</pre></div>
+
+
+<p>现在我们已生成了预测结果，接着通过画图来呈现结果。我编写了一个名为 <code>isolate_and_plot</code> 的辅助函数，可以比较给定的变量与不同的声望等级、组合的平均可能性。为了分离声望和其他变量，我使用了 <code>pivot_table</code> 来简单地聚合数据。</p>
+<div class="highlight"><pre>def isolate_and_plot(variable):
+    # isolate gre and class rank
+    grouped = pd.pivot_table(combos, values=[&#39;admit_pred&#39;], index=[variable, &#39;prestige&#39;],
+                            aggfunc=np.mean)
+    # in case you&#39;re curious as to what this looks like
+    # print grouped.head()
+    #                      admit_pred
+    # gre        prestige            
+    # 220.000000 1           0.282462
+    #            2           0.169987
+    #            3           0.096544
+    #            4           0.079859
+    # 284.444444 1           0.311718
+    # make a plot
+    colors = &#39;rbgyrbgy&#39;
+    for col in combos.prestige.unique():
+        plt_data = grouped.ix[grouped.index.get_level_values(1)==col]
+        pl.plot(plt_data.index.get_level_values(0), plt_data[&#39;admit_pred&#39;],
+                color=colors[int(col)])
+    pl.xlabel(variable)
+    pl.ylabel(&quot;P(admit=1)&quot;)
+    pl.legend([&#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;], loc=&#39;upper left&#39;, title=&#39;Prestige&#39;)
+    pl.title(&quot;Prob(admit=1) isolating &quot; + variable + &quot; and presitge&quot;)
+    pl.show()
+isolate_and_plot(&#39;gre&#39;)
+isolate_and_plot(&#39;gpa&#39;)
+</pre></div>
+
+
+<p><center><img alt="isolated_rank_and_gre.png" src="/article_img/Logistic_regression_python_2014_08_09_20_07/isolated_rank_and_gre.png" /></center></p>
+<p><center><img alt="isolated_rank_and_gpa.png" src="/article_img/Logistic_regression_python_2014_08_09_20_07/isolated_rank_and_gpa.png" /></center></p>
+<p>结果图显示了 gre, gpa 和 prestige 如何影响录取。可以看出，随着 gre 和 gpa 的增加，录取可能性如何逐渐增加，并且，不同的学校声望对录取可能性的增加程度相差很大。</p>
+<h3>结束语</h3>
+<p>逻辑回归是用于分类的优秀算法，尽管有一些更加性感的，或是黑盒分类器算法，如SVM和随机森林（RandomForest）在一些情况下性能更好，但深入了解你正在使用的模型是很有价值的。很多时候你可以使用随机森林来筛选模型的特征，并基于筛选出的最佳的特征，使用逻辑回归来重建模型。</p>
+        </div>
+    </section>
+    <footer class="footer-article">
+        <div class="tags-and-categories">Filed under <a href="/category/machinelearning.html">MachineLearning</a>
+        | Tagged: <a href="/tag/classification.html">classification </a><a href="/tag/algorithm.html">algorithm </a><a href="/tag/python.html">Python </a>
+        | <a href="/2014/Logistic_regression_python_2014_08_09_20_07.html" rel="bookmark"
+         title="Permalink to 逻辑回归实现">Permalink</a>            
+        </div>
+        <!-- metaldata 
+        -->
+    </footer>
+</div>
+            </div>
+            
+            
+			<div class="large-3 aside column">
+				<img class="headIcon-large avatar" src="/sys_img/head.jpg" alt="(┬＿┬)">
+                <h2>李凯</h2>
+                <h3>kairens leeky</h3>
+				<a href="mailto:kai_kai03@hotmail.com?subject=%20&body=from%20blog"><Email>kai_kai03@hotmail.com</Email></a>
+            </div>
+            
+            
+			
+			<div class="large-3 aside column">
+                <h3>Socials</h3>
+                <ul>
+                    <li><a href="http://weibo.com/mipamipami">新浪weibo</a></li>
+                    <li><a href="#"> (ง •̀_•́)ง</a></li>
+                </ul>
+            </div> 
+            
+            <div class="large-3 category-column column">
+                <h3>Categories</h3>
+                <ul>
+                    <li><a href="/category/db.html">DB</a> (3)</li>
+                    <li><a href="/category/idev.html">iDev</a> (14)</li>
+                    <li class="active"><a href="/category/machinelearning.html">MachineLearning</a> (18)</li>
+                    <li><a href="/category/other.html">other</a> (2)</li>
+                    <li><a href="/category/pydev.html">pyDev</a> (14)</li>
+                    <li><a href="/category/yin-shi-pin.html">音视频</a> (15)</li>
+                </ul>
+            </div> 
+
+                <!--
+            <iframe width="100%" height="600" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=600&fansRow=1&ptype=1&speed=0&skin=1&isTitle=0&noborder=0&isWeibo=1&isFans=0&uid=1819436507&verifier=4060feb2&colors=fc1f12,ffffff,666666,0082cb,ecfbfd&dpc=1"></iframe>            </div>
+            -->
+         
+    </div>
+</div>
+    <div class="footer">
+        <div class="data-holder">
+        <div class="row">
+            <div class="large-3 column">
+<div class="credits">
+    <h3>Stuff and credits</h3>
+    <p>
+    Proudly powered by <a href="http://getpelican.com/">Pelican</a>, 
+    which takes great advantage of <a href="http://python.org">Python</a>.
+    </p>
+    <p>
+    This site also makes use of <a href="http://foundation.zurb.com">Zurb Foundation Framework</a>
+    and is typeset using the blocky -- but quite good-looking indeed -- 
+    <a href="https://www.google.com/fonts/specimen/Exo%202">Exo 2</a> fonts,
+    which comes in a lot of weight and styles. 
+    </p>
+    <p>Enjoy!</a>
+</div>           </div>
+           <div class="large-6 tag-cloud column">
+                <h3>Tags</h3>
+                <ul class="tagcloud">
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/nao-dong.html">脑洞
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/websocket.html">WebSocket
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/mongo.html">mongo
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/classification.html">classification
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/shi-xu-tu.html">时序图
+                        </a></li>
+                    <li>
+											<span class="badge">5</span>
+                        <a href="/tag/chan-pin.html">产品
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/fuck.html">fuck
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/gc.html">GC
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/rtmp.html">RTMP
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/unicode.html">unicode
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/dylib.html">dylib
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/protocol.html">protocol
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/pycon.html">PyCon
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/cai-ji.html">采集
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/clustering.html">clustering
+                        </a></li>
+                    <li>
+											<span class="badge">6</span>
+                        <a href="/tag/web.html">Web
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/yi-zhi.html">移植
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/network.html">network
+                        </a></li>
+                    <li>
+											<span class="badge">6</span>
+                        <a href="/tag/flask.html">Flask
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/review.html">review
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/nodejs.html">Node.js
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/pep.html">PEP
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/features.html">Features
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/wu-tai.html">舞台
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/cnn.html">CNN
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/pca.html">PCA
+                        </a></li>
+                    <li>
+											<span class="badge">6</span>
+                        <a href="/tag/webrtc.html">webRtc
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/css.html">CSS
+                        </a></li>
+                    <li>
+											<span class="badge">8</span>
+                        <a href="/tag/object-c.html">Object-C
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/memory.html">Memory
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/life.html">life
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/flask-socketio.html">Flask-SocketIO
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/linear.html">Linear
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/dataprocessing.html">DataProcessing
+                        </a></li>
+                    <li>
+											<span class="badge">16</span>
+                        <a href="/tag/python.html">Python
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/javascript.html">JavaScript
+                        </a></li>
+                    <li>
+											<span class="badge">16</span>
+                        <a href="/tag/ios.html">iOS
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/encode.html">encode
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/xcode.html">xCode
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/appstore.html">appstore
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/html5.html">html5
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/liu-cheng.html">流程
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/uiimage.html">UIImage
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/ipad.html">iPad
+                        </a></li>
+                    <li>
+											<span class="badge">5</span>
+                        <a href="/tag/c.html">C++
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/audio.html">audio
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/ffmpeg.html">FFmpeg
+                        </a></li>
+                    <li>
+											<span class="badge">15</span>
+                        <a href="/tag/algorithm.html">algorithm
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/database.html">database
+                        </a></li>
+                    <li>
+											<span class="badge">11</span>
+                        <a href="/tag/ml.html">ML
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/yan-zou.html">演奏
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/framework.html">framework
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/gbk.html">GBK
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/rfc.html">rfc
+                        </a></li>
+                    <li>
+											<span class="badge">12</span>
+                        <a href="/tag/math.html">Math
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/jia-gou.html">架构
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/obs.html">OBS
+                        </a></li>
+                </ul>
+            </div>
+
+            <div class="large-3 aside column">
+                <h3>Links</h3>
+                <ul>
+                    <li><a href="http://getpelican.com/">Pelican</a></li><br/>
+                    <li><a href="http://python.org/">Python.org</a></li><br/>
+                    <li><a href="http://jinja.pocoo.org/">Jinja2</a></li><br/>
+                    <li><a href="#"> ฅ'ω'ฅ </a></li><br/>
+                </ul>
+                
+            </div>
+
+        </row>
+        </div>
+        <div class="row">
+            <div class="small-12 column">
+                <p style="font-size: 0.8em; text-align:center;">
+                LEGO, the LEGO logo, the Minifigure, and the Brick and Knob configurations 
+                are trademarks of the LEGO Group of Companies. ©2015.
+                </p>
+            </div>
+        </div>
+    </div>
+
+
+    
+</body>
+</html>

@@ -1,0 +1,848 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="/theme/css/foundation.min.css" media="all">
+		<link rel="stylesheet" href="/theme/css/pygments.css" /> 
+		<link rel="stylesheet" href="/theme/css/style.css" /> 
+        <script type="text/javascript" src="/theme/js/modernizr.js"></script>
+		<script type='text/javascript' src='/theme/js/jquery-1.11.1.min.js'></script>
+	<script type="text/javascript" src="/theme/js/damoo.min.js"></script>
+
+		<script type="text/x-mathjax-config">
+            MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+        <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+		
+		
+        <link href='https://fonts.googleapis.com/css?family=Exo+2:400,300,700,300italic,400italic,700italic,900,900italic' rel='stylesheet' type='text/css'>
+        <link rel="stylesheet" href="/theme/css/lamboz.css" media="all">
+        <title>Python Memory Management(1) - kairens`s Blog</title>
+        <meta charset="utf-8" />
+        
+</head>
+<body onblur="leavePage()" onfocus="comebackPage()">
+    <div class="pages">
+        <ul>
+            <li class="home"><a href="/index.html">Home</a></li>
+            <li ><a href="/pages/about-me.html">About Me</a></li>
+            <li ><a href="/pages/Python_Packages_2012_11_05_12_18.html">Python Packages</a></li>
+        </ul>
+    </div>
+
+<div class="hp-header-inner">
+    <div class="page-header">
+        <div class="content-header">
+            <div id="title-block">
+            <h1>  <a href="/2014/Python_Memory_Management_2014_09_09_20_04.html" rel="bookmark"
+                    title="Permalink to Python Memory Management(1)">Python Memory Management(1)</a></h1>
+            </div>
+        </div>
+    </div>
+</div>
+    <div class="content">
+        <div class="data-holder">
+        <div class="row">
+           <div class="large-9 content-column column">
+<div class="content-article">
+    <header class="header-article">
+        <div class="read-more">Posted on Tue 09 September 2014</div>
+ 
+   </header>
+    <section class='article'>
+        
+        <div class="entry-summary">
+            <p>Python源码阅读-内存管理机制(一)</p>
+        </div>
+    
+        <div class="entry-content">
+            <h2>Python的内存管理架构</h2>
+<h3>基本分层</h3>
+<p>在Objects/obmalloc.c源码中, 给了一个分层划分</p>
+<div class="highlight"><pre>    _____   ______   ______       ________
+   [ int ] [ dict ] [ list ] ... [ string ]       Python core         |
++3 | &lt;----- Object-specific memory -----&gt; | &lt;-- Non-object memory --&gt; |
+    _______________________________       |                           |
+   [   Python&#39;s object allocator   ]      |                           |
++2 | ####### Object memory ####### | &lt;------ Internal buffers ------&gt; |
+    ______________________________________________________________    |
+   [          Python&#39;s raw memory allocator (PyMem_ API)          ]   |
++1 | &lt;----- Python memory (under PyMem manager&#39;s control) ------&gt; |   |
+    __________________________________________________________________
+   [    Underlying general-purpose allocator (ex: C library malloc)   ]
+ 0 | &lt;------ Virtual memory allocated for the python process -------&gt; |
+
+   =========================================================================
+    _______________________________________________________________________
+   [                OS-specific Virtual Memory Manager (VMM)               ]
+-1 | &lt;--- Kernel dynamic storage allocation &amp; management (page-based) ---&gt; |
+    __________________________________   __________________________________
+   [                                  ] [                                  ]
+-2 | &lt;-- Physical memory: ROM/RAM --&gt; | | &lt;-- Secondary storage (swap) --&gt; |
+</pre></div>
+
+
+<p>可以看到</p>
+<div class="highlight"><pre>layer 3: Object-specific memory(int/dict/list/string....)
+         Python 实现并维护
+         更高抽象层次的内存管理策略, 主要是各类特定对象的缓冲池机制. 具体见前面几篇涉及的内存分配机制
+
+layer 2: Python&#39;s object allocator
+         Python 实现并维护
+         实现了创建/销毁Python对象的接口(PyObject_New/Del), 涉及对象参数/引用计数等
+
+layer 1: Python&#39;s raw memory allocator (PyMem_ API)
+         Python 实现并维护, 包装了第0层的内存管理接口, 提供统一的raw memory管理接口
+         封装的原因: 不同操作系统 C 行为不一定一致, 保证可移植性, 相同语义相同行为
+
+layer 0: Underlying general-purpose allocator (ex: C library malloc)
+         操作系统提供的内存管理接口, 由操作系统实现并管理, Python不能干涉这一层的行为
+</pre></div>
+
+
+<p>第三层layer 3前面已经介绍过了, 几乎每种常用的数据类型都伴有一套缓冲池机制。</p>
+<p>在这里, 我们关注的是layer 2/1，</p>
+<p>简要介绍下layer 1, 然后重点关注layer 2, 这才是重点。</p>
+<h3>layer 1: PyMem_ API</h3>
+<p><code>PyMem_ API</code>是对操作系统内存管理接口进行的封装</p>
+<p>查看pymem.h可以看到</p>
+<div class="highlight"><pre>// Raw memory interface
+// 这里存在三个宏定义, 宏可以避免一次函数调用的开销, 提高运行效率
+// 不允许非配空间大小为0的内存空间
+#define PyMem_MALLOC(n)     ((size_t)(n) &gt; (size_t)PY_SSIZE_T_MAX ? NULL \
+                : malloc((n) ? (n) : 1))
+
+
+#define PyMem_REALLOC(p, n) ((size_t)(n) &gt; (size_t)PY_SSIZE_T_MAX  ? NULL \
+                : realloc((p), (n) ? (n) : 1))
+#define PyMem_FREE      free
+
+// 这里做了三个函数的声明, 平台独立的 malloc/realloc/free
+PyAPI_FUNC(void *) PyMem_Malloc(size_t);
+PyAPI_FUNC(void *) PyMem_Realloc(void *, size_t);
+PyAPI_FUNC(void) PyMem_Free(void *);
+
+// ============================================================
+
+// Type-oriented memory interface
+// 这里还有三个类型相关的内存接口, 批量分配/重分配 n 个 类型为 type内存
+#define PyMem_New(type, n) \
+  ( ((size_t)(n) &gt; PY_SSIZE_T_MAX / sizeof(type)) ? NULL :  \
+    ( (type *) PyMem_Malloc((n) * sizeof(type)) ) )
+#define PyMem_NEW(type, n) \
+  ( ((size_t)(n) &gt; PY_SSIZE_T_MAX / sizeof(type)) ? NULL :  \
+    ( (type *) PyMem_MALLOC((n) * sizeof(type)) ) )
+
+#define PyMem_Resize(p, type, n) \
+  ( (p) = ((size_t)(n) &gt; PY_SSIZE_T_MAX / sizeof(type)) ? NULL :    \
+    (type *) PyMem_Realloc((p), (n) * sizeof(type)) )
+#define PyMem_RESIZE(p, type, n) \
+  ( (p) = ((size_t)(n) &gt; PY_SSIZE_T_MAX / sizeof(type)) ? NULL :    \
+    (type *) PyMem_REALLOC((p), (n) * sizeof(type)) )
+</pre></div>
+
+
+<p>然后<code>object.c</code>中, 我们关注实现, 三个实现的函数调用了对应的宏</p>
+<div class="highlight"><pre>// 使用 C 写Python扩展模块时使用函数而不是对应的宏
+void *
+PyMem_Malloc(size_t nbytes)
+{
+    return PyMem_MALLOC(nbytes);
+}
+
+void *
+PyMem_Realloc(void *p, size_t nbytes)
+{
+    return PyMem_REALLOC(p, nbytes);
+}
+
+void
+PyMem_Free(void *p)
+{
+    PyMem_FREE(p);
+}
+</pre></div>
+
+
+<p>这些接口都相对简单</p>
+<p>好了, 结束, 开始关注layer 2: Python's object allocator。</p>
+<hr />
+<h2>Python 的内存分配策略</h2>
+<p>先来看Objects/obmalloc.c中的一段注释</p>
+<div class="highlight"><pre><span class="cm">/*</span>
+<span class="cm"> * &quot;Memory management is where the rubber meets the road -- if we do the wrong</span>
+<span class="cm"> * thing at any level, the results will not be good. And if we don&#39;t make the</span>
+<span class="cm"> * levels work well together, we are in serious trouble.&quot; (1)</span>
+<span class="cm"> *</span>
+<span class="cm"> * (1) Paul R. Wilson, Mark S. Johnstone, Michael Neely, and David Boles,</span>
+<span class="cm"> *    &quot;Dynamic Storage Allocation: A Survey and Critical Review&quot;,</span>
+<span class="cm"> *    in Proc. 1995 Int&#39;l. Workshop on Memory Management, September 1995.</span>
+<span class="cm"> */</span><span class="w"></span>
+</pre></div>
+
+
+<p>Python引入了内存池机制, 用于管理对小块内存的申请和释放</p>
+<p>逻辑</p>
+<ul>
+<li>如果要分配的内存空间大于 SMALL_REQUEST_THRESHOLD bytes(512 bytes), 将直接使用layer 1的内存分配接口进行分配</li>
+<li>否则, 使用不同的block来满足分配需求</li>
+</ul>
+<p>整个小块内存池可以视为一个层次结构</p>
+<ol>
+<li>内存池(概念上的, 标识Python对于整个小块内存分配和释放的内存管理机制)</li>
+<li>arena</li>
+<li>pool</li>
+<li>block</li>
+</ol>
+<h3>block</h3>
+<p>Python内存的最小单位, 所有block长度都是8字节对齐的。</p>
+<p>注意这里block只是一个概念, 在源代码中并没有实体存在。</p>
+<p>不同类型block, 对应不同内存大小, 这个内存大小的值被称为size class。</p>
+<p>不同长度的block：</p>
+<div class="highlight"><pre> * Request in bytes     Size of allocated block      Size class idx
+ * ----------------------------------------------------------------
+ *        1-8                     8                       0
+ *        9-16                   16                       1
+ *       17-24                   24                       2
+ *       25-32                   32                       3
+ *       33-40                   40                       4
+ *       41-48                   48                       5
+ *       49-56                   56                       6
+ *       57-64                   64                       7
+ *       65-72                   72                       8
+ *        ...                   ...                     ...
+ *      497-504                 504                      62
+ *      505-512                 512                      63
+ *
+ *      0, SMALL_REQUEST_THRESHOLD + 1 and up: routed to the underlying
+ *      allocator.
+ */
+</pre></div>
+
+
+<p>例如</p>
+<div class="highlight"><pre>申请一块大小28字节的内存, 实际从内存中划到32字节的一个block (从size class index为3的pool里面划出)
+</pre></div>
+
+
+<p><center><img alt="" src="{filename}/article_img/Python_Memory_Management_2014_09_09_20_04/python-memory-blocks.png" /></center></p>
+<p>注意: 这里有个<code>Size class idx</code>, 这个主要为了后面pool中用到。</p>
+<p>size class和size class index之间的转换</p>
+<div class="highlight"><pre>#define ALIGNMENT               8               /* must be 2^N */
+#define ALIGNMENT_SHIFT         3
+#define ALIGNMENT_MASK          (ALIGNMENT - 1)
+
+// size class index =&gt; size class
+#define INDEX2SIZE(I) (((uint)(I) + 1) &lt;&lt; ALIGNMENT_SHIFT)
+
+/* 即
+    (0+1) * 8 = 8
+    (1+1) * 8 = 16
+*/
+
+// size class =&gt; size class index
+size = (uint)(nbytes - 1) &gt;&gt; ALIGNMENT_SHIFT;
+
+/* 即
+    (8 - 1) / 8 = 0
+    (16 - 8) / 8 = 1
+*/
+</pre></div>
+
+
+<h3>pool</h3>
+<p>pool管理block, 一个pool管理着一堆有固定大小的内存块</p>
+<p>本质: pool管理着一大块内存, 它有一定的策略, 将这块大的内存划分为多个大小一致的小块内存。</p>
+<h3>pool size</h3>
+<p>在Python中, 一个pool的大小通常为一个系统内存页， 4kB。</p>
+<p><em>obmalloc.c</em></p>
+<div class="highlight"><pre>#define SYSTEM_PAGE_SIZE        (4 * 1024)
+#define SYSTEM_PAGE_SIZE_MASK   (SYSTEM_PAGE_SIZE - 1)
+
+#define POOL_SIZE               SYSTEM_PAGE_SIZE        /* must be 2^N */
+#define POOL_SIZE_MASK          SYSTEM_PAGE_SIZE_MASK
+</pre></div>
+
+
+<h3>pool组成</h3>
+<blockquote>
+<p>pool的4kB内存 = pool_header + block集合(N多大小一样的block)</p>
+</blockquote>
+<p>pool_header
+    /<em> Pool for small blocks. </em>/
+    struct pool_header {
+        union { block <em>_padding;
+                uint count; } ref;          /</em> number of allocated blocks    <em>/
+        block </em>freeblock;                   /<em> pool's free list head         </em>/
+        struct pool_header <em>nextpool;       /</em> next pool of this size class  <em>/
+        struct pool_header </em>prevpool;       /<em> previous pool       ""        </em>/
+        uint arenaindex;                    /<em> index into arenas of base adr </em>/
+        uint szidx;                         /<em> block size class index        </em>/ - size class index
+        uint nextoffset;                    /<em> bytes to virgin block         </em>/
+        uint maxnextoffset;                 /<em> largest valid nextoffset      </em>/
+    };</p>
+<p>pool_header的作用</p>
+<ul>
+<li>与其他pool链接, 组成双向链表</li>
+<li>维护pool中可用的block, 单链表</li>
+<li>保存 szidx , 这个和该pool中block的大小有关系, (block size=8, szidx=0), (block size=16, szidx=1)...用于内存分配时匹配到拥有对应大小block的pool</li>
+<li>arenaindex, 后面说</li>
+</ul>
+<p>结构图: </p>
+<p><center><img alt="" src="{filename}/article_img/Python_Memory_Management_2014_09_09_20_04/python-memory-pools.png" /></center></p>
+<h3>pool初始化</h3>
+<p>从内存中初始化一个全新的空的<code>pool</code></p>
+<p><em>Objects/obmalloc.c</em>的</p>
+<div class="highlight"><pre>void *
+PyObject_Malloc(size_t nbytes)
+{
+  ...
+    init_pool:
+    // 1. 连接到 used_pools 双向链表, 作为表头
+    // 注意, 这里 usedpools[0] 保存着 block size = 8 的所有used_pools的表头
+    /* Frontlink to used pools. */
+    next = usedpools[size + size]; /* == prev */
+    pool-&gt;nextpool = next;
+    pool-&gt;prevpool = next;
+    next-&gt;nextpool = pool;
+    next-&gt;prevpool = pool;
+    pool-&gt;ref.count = 1;
+
+    // 如果已经初始化过了...这里看初始化, 跳过
+    if (pool-&gt;szidx == size) {
+    /* Luckily, this pool last contained blocks
+    * of the same size class, so its header
+    * and free list are already initialized.
+    */
+        bp = pool-&gt;freeblock;
+        pool-&gt;freeblock = *(block **)bp;
+        UNLOCK();
+        return (void *)bp;
+    }
+
+
+    /*
+     * Initialize the pool header, set up the free list to
+     * contain just the second block, and return the first
+     * block.
+     */
+    // 开始初始化pool_header
+    // 这里 size = (uint)(nbytes - 1) &gt;&gt; ALIGNMENT_SHIFT;  其实是Size class idx, 即szidx
+
+    pool-&gt;szidx = size;
+
+    // 计算获得每个block的size
+    size = INDEX2SIZE(size);
+
+    // 注意 #define POOL_OVERHEAD           ROUNDUP(sizeof(struct pool_header))
+    // bp =&gt; 初始化为pool + pool_header size,  跳过pool_header的内存
+    bp = (block *)pool + POOL_OVERHEAD;
+
+    // 计算偏移量, 这里的偏移量是绝对值
+    // #define POOL_SIZE               SYSTEM_PAGE_SIZE        /* must be 2^N */
+    // POOL_SIZE = 4kb, POOL_OVERHEAD = pool_header size
+    // 下一个偏移位置: pool_header size + 2 * size
+
+    pool-&gt;nextoffset = POOL_OVERHEAD + (size &lt;&lt; 1);
+    // 4kb - size
+    pool-&gt;maxnextoffset = POOL_SIZE - size;
+
+    // freeblock指向 bp + size = pool_header size + size
+    pool-&gt;freeblock = bp + size;
+
+    // 赋值NULL
+    *(block **)(pool-&gt;freeblock) = NULL;
+    UNLOCK();
+    return (void *)bp;
+}
+</pre></div>
+
+
+<p>初始化后的图</p>
+<p><center><img alt="" src="{filename}/article_img/Python_Memory_Management_2014_09_09_20_04/python-memory-pools2.png" /></center></p>
+<h3>pool进行block分配 - 0 总体代码</h3>
+<div class="highlight"><pre> if (pool != pool-&gt;nextpool) {   //
+    /*
+    * There is a used pool for this size class.
+    * Pick up the head block of its free list.
+    */
+    ++pool-&gt;ref.count;
+    bp = pool-&gt;freeblock; // 指针指向空闲block起始位置
+    assert(bp != NULL);
+
+    // 代码-1
+    // 调整 pool-&gt;freeblock (假设A节点)指向链表下一个, 即bp首字节指向的下一个节点(假设B节点) , 如果此时!= NULL
+    // 表示 A节点可用, 直接返回
+    if ((pool-&gt;freeblock = *(block **)bp) != NULL) {
+        UNLOCK();
+        return (void *)bp;
+    }
+
+    // 代码-2
+    /*
+    * Reached the end of the free list, try to extend it.
+    */
+    // 有足够的空间, 分配一个, pool-&gt;freeblock 指向后移
+    if (pool-&gt;nextoffset &lt;= pool-&gt;maxnextoffset) {
+        /* There is room for another block. */
+        // 变更位置信息
+        pool-&gt;freeblock = (block*)pool +
+                              pool-&gt;nextoffset;
+        pool-&gt;nextoffset += INDEX2SIZE(size);
+
+
+        *(block **)(pool-&gt;freeblock) = NULL; // 注意, 指向NULL
+        UNLOCK();
+
+        // 返回bp
+        return (void *)bp;
+    }
+
+    // 代码-3
+    /* Pool is full, unlink from used pools. */  // 满了, 需要从下一个pool获取
+    next = pool-&gt;nextpool;
+    pool = pool-&gt;prevpool;
+    next-&gt;prevpool = pool;
+    pool-&gt;nextpool = next;
+    UNLOCK();
+    return (void *)bp;
+}
+</pre></div>
+
+
+<h3>pool进行block分配 - 1 刚开始</h3>
+<p>内存块尚未分配完, 且此时不存在回收的block, 全新进来的时候, 分配第一块block。</p>
+<div class="highlight"><pre>(pool-&gt;freeblock = *(block **)bp) == NULL
+</pre></div>
+
+
+<p>所以进入的逻辑是代码-2</p>
+<div class="highlight"><pre>bp = pool-&gt;freeblock; // 指针指向空闲block起始位置
+
+.....
+
+
+// 代码-2
+/*
+ * Reached the end of the free list, try to extend it.
+ */
+// 有足够的空间, 分配一个, pool-&gt;freeblock 指向后移
+if (pool-&gt;nextoffset &lt;= pool-&gt;maxnextoffset) {
+    /* There is room for another block. */
+    // 变更位置信息
+    pool-&gt;freeblock = (block*)pool +
+    pool-&gt;nextoffset;
+    pool-&gt;nextoffset += INDEX2SIZE(size);
+
+    *(block **)(pool-&gt;freeblock) = NULL; // 注意, 指向NULL
+    UNLOCK();
+
+    // 返回bp
+    return (void *)bp;
+}
+</pre></div>
+
+
+<p>结果图示：</p>
+<p><center><img alt="" src="{filename}/article_img/Python_Memory_Management_2014_09_09_20_04/python-memory-pools3.png" /></center></p>
+<h3>pool进行block分配 - 2 回收了某几个block</h3>
+<p>回收涉及的代码</p>
+<div class="highlight"><pre>void
+PyObject_Free(void *p)
+{
+    poolp pool;
+    block *lastfree;
+    poolp next, prev;
+    uint size;
+
+    pool = POOL_ADDR(p);
+    if (Py_ADDRESS_IN_RANGE(p, pool)) {
+        /* We allocated this address. */
+        LOCK();
+        /* Link p to the start of the pool&#39;s freeblock list.  Since
+         * the pool had at least the p block outstanding, the pool
+         * wasn&#39;t empty (so it&#39;s already in a usedpools[] list, or
+         * was full and is in no list -- it&#39;s not in the freeblocks
+         * list in any case).
+         */
+        assert(pool-&gt;ref.count &gt; 0);            /* else it was empty */
+        // p被释放, p的第一个字节值被设置为当前freeblock的值
+        *(block **)p = lastfree = pool-&gt;freeblock;
+        // freeblock被更新为指向p的首地址
+        pool-&gt;freeblock = (block *)p;
+
+        // 相当于往list中头插入了一个节点
+
+     ...
+    }
+}
+</pre></div>
+
+
+<p>没释放一个block, 该block就会变成 <code>pool-&gt;freeblock</code> 的头节点, 而单链表一个节点如何指向下一个节点呢? 通过赋值, 节点内存空间保存着下个节点的地址, 最后一个节点指向NULL(知道上面代码-1的判断条件了吧&gt;_&lt;#)</p>
+<p>假设已经连续分配了5块, 第1块和第4块被释放</p>
+<p>此时内存图示：</p>
+<p><center><img alt="" src="{filename}/article_img/Python_Memory_Management_2014_09_09_20_04/python-memory-pools4.png" /></center></p>
+<p>此时再一个block分配调用进来, 执行分配, 进入的逻辑是代码-1</p>
+<div class="highlight"><pre>bp = pool-&gt;freeblock; // 指针指向空闲block起始位置
+// 代码-1
+// 调整 pool-&gt;freeblock (假设A节点)指向链表下一个, 即bp首字节指向的下一个节点(假设B节点) , 如果此时!= NULL
+// 表示 A节点可用, 直接返回
+if ((pool-&gt;freeblock = *(block **)bp) != NULL) {
+    UNLOCK();
+    return (void *)bp;
+}
+</pre></div>
+
+
+<p><center><img alt="" src="{filename}/article_img/Python_Memory_Management_2014_09_09_20_04/python-memory-pools5.png" /></center></p>
+<h3>pool进行block分配 - 3 pool用完了</h3>
+<p>pool中内存空间都用完了, 进入代码-3</p>
+<div class="highlight"><pre>bp = pool-&gt;freeblock; // 指针指向空闲block起始位置
+
+
+// 代码-3
+/* Pool is full, unlink from used pools. */  // 满了, 需要从下一个pool获取
+next = pool-&gt;nextpool;
+pool = pool-&gt;prevpool;
+next-&gt;prevpool = pool;
+pool-&gt;nextpool = next;
+UNLOCK();
+return (void *)bp;
+</pre></div>
+
+
+<p>获取下一个pool(链表上每个pool的block size都是一致的)
+好了, pool到此位置。</p>
+<hr />
+<p>版权声明：自由转载-非商用-非衍生-保持署名 | <a href="http://creativecommons.org/licenses/by-nc-nd/3.0/deed.zh">Creative Commons BY-NC-ND 3.0</a></p>
+        </div>
+    </section>
+    <footer class="footer-article">
+        <div class="tags-and-categories">Filed under <a href="/category/pydev.html">pyDev</a>
+        | Tagged: <a href="/tag/memory.html">Memory </a><a href="/tag/features.html">Features </a><a href="/tag/python.html">Python </a>
+        | <a href="/2014/Python_Memory_Management_2014_09_09_20_04.html" rel="bookmark"
+         title="Permalink to Python Memory Management(1)">Permalink</a>            
+        </div>
+        <!-- metaldata 
+        -->
+    </footer>
+</div>
+            </div>
+            
+            
+			<div class="large-3 aside column">
+				<img class="headIcon-large avatar" src="/sys_img/head.jpg" alt="(┬＿┬)">
+                <h2>李凯</h2>
+                <h3>kairens leeky</h3>
+				<a href="mailto:kai_kai03@hotmail.com?subject=%20&body=from%20blog"><Email>kai_kai03@hotmail.com</Email></a>
+            </div>
+            
+            
+			
+			<div class="large-3 aside column">
+                <h3>Socials</h3>
+                <ul>
+                    <li><a href="http://weibo.com/mipamipami">新浪weibo</a></li>
+                    <li><a href="#"> (ง •̀_•́)ง</a></li>
+                </ul>
+            </div> 
+            
+            <div class="large-3 category-column column">
+                <h3>Categories</h3>
+                <ul>
+                    <li><a href="/category/db.html">DB</a> (3)</li>
+                    <li><a href="/category/idev.html">iDev</a> (14)</li>
+                    <li><a href="/category/machinelearning.html">MachineLearning</a> (18)</li>
+                    <li><a href="/category/other.html">other</a> (2)</li>
+                    <li class="active"><a href="/category/pydev.html">pyDev</a> (14)</li>
+                    <li><a href="/category/yin-shi-pin.html">音视频</a> (15)</li>
+                </ul>
+            </div> 
+
+                <!--
+            <iframe width="100%" height="600" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=600&fansRow=1&ptype=1&speed=0&skin=1&isTitle=0&noborder=0&isWeibo=1&isFans=0&uid=1819436507&verifier=4060feb2&colors=fc1f12,ffffff,666666,0082cb,ecfbfd&dpc=1"></iframe>            </div>
+            -->
+         
+    </div>
+</div>
+    <div class="footer">
+        <div class="data-holder">
+        <div class="row">
+            <div class="large-3 column">
+<div class="credits">
+    <h3>Stuff and credits</h3>
+    <p>
+    Proudly powered by <a href="http://getpelican.com/">Pelican</a>, 
+    which takes great advantage of <a href="http://python.org">Python</a>.
+    </p>
+    <p>
+    This site also makes use of <a href="http://foundation.zurb.com">Zurb Foundation Framework</a>
+    and is typeset using the blocky -- but quite good-looking indeed -- 
+    <a href="https://www.google.com/fonts/specimen/Exo%202">Exo 2</a> fonts,
+    which comes in a lot of weight and styles. 
+    </p>
+    <p>Enjoy!</a>
+</div>           </div>
+           <div class="large-6 tag-cloud column">
+                <h3>Tags</h3>
+                <ul class="tagcloud">
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/nao-dong.html">脑洞
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/websocket.html">WebSocket
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/mongo.html">mongo
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/classification.html">classification
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/shi-xu-tu.html">时序图
+                        </a></li>
+                    <li>
+											<span class="badge">5</span>
+                        <a href="/tag/chan-pin.html">产品
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/fuck.html">fuck
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/gc.html">GC
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/rtmp.html">RTMP
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/unicode.html">unicode
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/dylib.html">dylib
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/protocol.html">protocol
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/pycon.html">PyCon
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/cai-ji.html">采集
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/clustering.html">clustering
+                        </a></li>
+                    <li>
+											<span class="badge">6</span>
+                        <a href="/tag/web.html">Web
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/yi-zhi.html">移植
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/network.html">network
+                        </a></li>
+                    <li>
+											<span class="badge">6</span>
+                        <a href="/tag/flask.html">Flask
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/review.html">review
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/nodejs.html">Node.js
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/pep.html">PEP
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/features.html">Features
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/wu-tai.html">舞台
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/cnn.html">CNN
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/pca.html">PCA
+                        </a></li>
+                    <li>
+											<span class="badge">6</span>
+                        <a href="/tag/webrtc.html">webRtc
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/css.html">CSS
+                        </a></li>
+                    <li>
+											<span class="badge">8</span>
+                        <a href="/tag/object-c.html">Object-C
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/memory.html">Memory
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/life.html">life
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/flask-socketio.html">Flask-SocketIO
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/linear.html">Linear
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/dataprocessing.html">DataProcessing
+                        </a></li>
+                    <li>
+											<span class="badge">16</span>
+                        <a href="/tag/python.html">Python
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/javascript.html">JavaScript
+                        </a></li>
+                    <li>
+											<span class="badge">16</span>
+                        <a href="/tag/ios.html">iOS
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/encode.html">encode
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/xcode.html">xCode
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/appstore.html">appstore
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/html5.html">html5
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/liu-cheng.html">流程
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/uiimage.html">UIImage
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/ipad.html">iPad
+                        </a></li>
+                    <li>
+											<span class="badge">5</span>
+                        <a href="/tag/c.html">C++
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/audio.html">audio
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/ffmpeg.html">FFmpeg
+                        </a></li>
+                    <li>
+											<span class="badge">15</span>
+                        <a href="/tag/algorithm.html">algorithm
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/database.html">database
+                        </a></li>
+                    <li>
+											<span class="badge">11</span>
+                        <a href="/tag/ml.html">ML
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/yan-zou.html">演奏
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/framework.html">framework
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/gbk.html">GBK
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/rfc.html">rfc
+                        </a></li>
+                    <li>
+											<span class="badge">12</span>
+                        <a href="/tag/math.html">Math
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/jia-gou.html">架构
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/obs.html">OBS
+                        </a></li>
+                </ul>
+            </div>
+
+            <div class="large-3 aside column">
+                <h3>Links</h3>
+                <ul>
+                    <li><a href="http://getpelican.com/">Pelican</a></li><br/>
+                    <li><a href="http://python.org/">Python.org</a></li><br/>
+                    <li><a href="http://jinja.pocoo.org/">Jinja2</a></li><br/>
+                    <li><a href="#"> ฅ'ω'ฅ </a></li><br/>
+                </ul>
+                
+            </div>
+
+        </row>
+        </div>
+        <div class="row">
+            <div class="small-12 column">
+                <p style="font-size: 0.8em; text-align:center;">
+                LEGO, the LEGO logo, the Minifigure, and the Brick and Knob configurations 
+                are trademarks of the LEGO Group of Companies. ©2015.
+                </p>
+            </div>
+        </div>
+    </div>
+
+
+    
+</body>
+</html>

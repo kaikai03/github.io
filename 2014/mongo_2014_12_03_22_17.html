@@ -1,0 +1,479 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="/theme/css/foundation.min.css" media="all">
+		<link rel="stylesheet" href="/theme/css/pygments.css" /> 
+		<link rel="stylesheet" href="/theme/css/style.css" /> 
+        <script type="text/javascript" src="/theme/js/modernizr.js"></script>
+		<script type='text/javascript' src='/theme/js/jquery-1.11.1.min.js'></script>
+	<script type="text/javascript" src="/theme/js/damoo.min.js"></script>
+
+		<script type="text/x-mathjax-config">
+            MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+        <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+		
+		
+        <link href='https://fonts.googleapis.com/css?family=Exo+2:400,300,700,300italic,400italic,700italic,900,900italic' rel='stylesheet' type='text/css'>
+        <link rel="stylesheet" href="/theme/css/lamboz.css" media="all">
+        <title>mongo api - kairens`s Blog</title>
+        <meta charset="utf-8" />
+        
+</head>
+<body onblur="leavePage()" onfocus="comebackPage()">
+    <div class="pages">
+        <ul>
+            <li class="home"><a href="/index.html">Home</a></li>
+            <li ><a href="/pages/about-me.html">About Me</a></li>
+            <li ><a href="/pages/Python_Packages_2012_11_05_12_18.html">Python Packages</a></li>
+        </ul>
+    </div>
+
+<div class="hp-header-inner">
+    <div class="page-header">
+        <div class="content-header">
+            <div id="title-block">
+            <h1>  <a href="/2014/mongo_2014_12_03_22_17.html" rel="bookmark"
+                    title="Permalink to mongo api">mongo api</a></h1>
+            </div>
+        </div>
+    </div>
+</div>
+    <div class="content">
+        <div class="data-holder">
+        <div class="row">
+           <div class="large-9 content-column column">
+<div class="content-article">
+    <header class="header-article">
+        <div class="read-more">Posted on Wed 03 December 2014</div>
+ 
+   </header>
+    <section class='article'>
+        
+        <div class="entry-summary">
+            <p>算是读书（doc）笔记？</p>
+        </div>
+    
+        <div class="entry-content">
+            <h2>前言</h2>
+<p>为了提高股票数据的处理速度中的第一步，准备把陪伴多年的mysql换成文件存储，调了好几个，决定用moongo。so，最近在看moongo怎么用。</p>
+<p>这篇东西当做常用功能的快捷查询吧。</p>
+<h2>常用api</h2>
+<div class="highlight"><pre><span class="s s-Atom">mongo</span> <span class="s s-Atom">–path</span>
+<span class="s s-Atom">db</span><span class="p">.</span><span class="nv">AddUser</span><span class="p">(</span><span class="s s-Atom">username</span><span class="p">,</span><span class="s s-Atom">password</span><span class="p">)</span> <span class="s s-Atom">添加用户</span>
+<span class="s s-Atom">db</span><span class="p">.</span><span class="nf">auth</span><span class="p">(</span><span class="s s-Atom">usrename</span><span class="p">,</span><span class="s s-Atom">password</span><span class="p">)</span> <span class="s s-Atom">设置数据库连接验证</span>
+<span class="s s-Atom">db</span><span class="p">.</span><span class="nf">cloneDataBase</span><span class="p">(</span><span class="s s-Atom">fromhost</span><span class="p">)</span> <span class="s s-Atom">从目标服务器克隆一个数据库</span>
+<span class="s s-Atom">db</span><span class="p">.</span><span class="nf">commandHelp</span><span class="p">(</span><span class="s s-Atom">name</span><span class="p">)</span> <span class="s s-Atom">returns</span> <span class="s s-Atom">the</span> <span class="s s-Atom">help</span> <span class="s s-Atom">for</span> <span class="s s-Atom">the</span> <span class="s s-Atom">command</span>
+<span class="s s-Atom">db</span><span class="p">.</span><span class="nf">copyDatabase</span><span class="p">(</span><span class="s s-Atom">fromdb</span><span class="p">,</span><span class="s s-Atom">todb</span><span class="p">,</span><span class="s s-Atom">fromhost</span><span class="p">)</span> <span class="s s-Atom">复制数据库fromdb—源数据库名称，todb—目标数据库名称，fromhost—源数据库服务器地址</span>
+<span class="s s-Atom">db</span><span class="p">.</span><span class="nf">createCollection</span><span class="p">(</span><span class="s s-Atom">name</span><span class="p">,{</span><span class="nn">size</span><span class="p">:</span><span class="mi">3333</span><span class="p">,</span><span class="nn">capped</span><span class="p">:</span><span class="mi">333</span><span class="p">,</span><span class="nn">max</span><span class="p">:</span><span class="mi">88888</span><span class="p">})</span> <span class="s s-Atom">创建一个数据集，相当于一个表</span>
+<span class="s s-Atom">db</span><span class="p">.</span><span class="nf">currentOp</span><span class="p">()</span> <span class="s s-Atom">取消当前库的当前操作</span>
+<span class="s s-Atom">db</span><span class="p">.</span><span class="nf">dropDataBase</span><span class="p">()</span> <span class="s s-Atom">删除当前数据库</span>
+<span class="s s-Atom">db</span><span class="p">.</span><span class="nf">eval</span><span class="p">(</span><span class="s s-Atom">func</span><span class="p">,</span><span class="s s-Atom">args</span><span class="p">)</span> <span class="s s-Atom">run</span> <span class="s s-Atom">code</span> <span class="s s-Atom">server</span><span class="o">-</span><span class="s s-Atom">side</span>
+<span class="s s-Atom">db</span><span class="p">.</span><span class="nf">getCollection</span><span class="p">(</span><span class="s s-Atom">cname</span><span class="p">)</span> <span class="s s-Atom">取得一个数据集合，同用法：db</span><span class="p">[</span><span class="s s-Atom">&#39;cname&#39;</span><span class="p">]</span> <span class="s s-Atom">or</span> <span class="s s-Atom">db</span><span class="p">.</span><span class="s s-Atom">cname</span>
+<span class="s s-Atom">db</span><span class="p">.</span><span class="nf">getCollenctionNames</span><span class="p">()</span> <span class="s s-Atom">取得所有数据集合的名称列表</span>
+<span class="s s-Atom">db</span><span class="p">.</span><span class="nf">getLastError</span><span class="p">()</span> <span class="s s-Atom">返回最后一个错误的提示消息</span>
+<span class="s s-Atom">db</span><span class="p">.</span><span class="nf">getLastErrorObj</span><span class="p">()</span> <span class="s s-Atom">返回最后一个错误的对象</span>
+<span class="s s-Atom">db</span><span class="p">.</span><span class="nf">getMongo</span><span class="p">()</span> <span class="s s-Atom">取得当前服务器的连接对象get</span> <span class="s s-Atom">the</span> <span class="s s-Atom">server</span> <span class="s s-Atom">connection</span> <span class="s s-Atom">object</span>
+<span class="s s-Atom">db</span><span class="p">.</span><span class="nf">getMondo</span><span class="p">().</span><span class="nf">setSlaveOk</span><span class="p">()</span> <span class="s s-Atom">allow</span> <span class="s s-Atom">this</span> <span class="s s-Atom">connection</span> <span class="s s-Atom">to</span> <span class="s s-Atom">read</span> <span class="s s-Atom">from</span> <span class="s s-Atom">then</span> <span class="s s-Atom">nonmaster</span> <span class="s s-Atom">membr</span> <span class="s s-Atom">of</span> <span class="s s-Atom">a</span> <span class="s s-Atom">replica</span> <span class="s s-Atom">pair</span>
+<span class="s s-Atom">db</span><span class="p">.</span><span class="nf">getName</span><span class="p">()</span> <span class="s s-Atom">返回当操作数据库的名称</span>
+<span class="s s-Atom">db</span><span class="p">.</span><span class="nf">getPrevError</span><span class="p">()</span> <span class="s s-Atom">返回上一个错误对象</span>
+<span class="s s-Atom">db</span><span class="p">.</span><span class="nf">getProfilingLevel</span><span class="p">()</span> <span class="s s-Atom">?什么等级</span>
+<span class="s s-Atom">db</span><span class="p">.</span><span class="nf">getReplicationInfo</span><span class="p">()</span> <span class="s s-Atom">?什么信息</span>
+<span class="s s-Atom">db</span><span class="p">.</span><span class="nf">getSisterDB</span><span class="p">(</span><span class="s s-Atom">name</span><span class="p">)</span> <span class="s s-Atom">get</span> <span class="s s-Atom">the</span> <span class="s s-Atom">db</span> <span class="s s-Atom">at</span> <span class="s s-Atom">the</span> <span class="s s-Atom">same</span> <span class="s s-Atom">server</span> <span class="s s-Atom">as</span> <span class="s s-Atom">this</span> <span class="s s-Atom">onew</span>
+<span class="s s-Atom">db</span><span class="p">.</span><span class="nf">killOp</span><span class="p">()</span> <span class="s s-Atom">停止（杀死）在当前库的当前操作</span>
+<span class="s s-Atom">db</span><span class="p">.</span><span class="nf">printCollectionStats</span><span class="p">()</span> <span class="s s-Atom">返回当前库的数据集状态</span>
+<span class="s s-Atom">db</span><span class="p">.</span><span class="nf">printReplicationInfo</span><span class="p">()</span>
+<span class="s s-Atom">db</span><span class="p">.</span><span class="nf">printSlaveReplicationInfo</span><span class="p">()</span>
+<span class="s s-Atom">db</span><span class="p">.</span><span class="nf">printShardingStatus</span><span class="p">()</span> <span class="s s-Atom">返回当前数据库是否为共享数据库</span>
+<span class="s s-Atom">db</span><span class="p">.</span><span class="nf">removeUser</span><span class="p">(</span><span class="s s-Atom">username</span><span class="p">)</span> <span class="s s-Atom">删除用户</span>
+<span class="s s-Atom">db</span><span class="p">.</span><span class="nf">repairDatabase</span><span class="p">()</span> <span class="s s-Atom">修复当前数据库</span>
+<span class="s s-Atom">db</span><span class="p">.</span><span class="nf">resetError</span><span class="p">()</span>
+<span class="s s-Atom">db</span><span class="p">.</span><span class="nf">runCommand</span><span class="p">(</span><span class="s s-Atom">cmdObj</span><span class="p">)</span> <span class="s s-Atom">run</span> <span class="s s-Atom">a</span> <span class="s s-Atom">database</span> <span class="s s-Atom">command</span><span class="p">.</span> <span class="s s-Atom">if</span> <span class="s s-Atom">cmdObj</span> <span class="o">is</span> <span class="s s-Atom">a</span> <span class="s s-Atom">string</span><span class="p">,</span> <span class="s s-Atom">turns</span> <span class="s s-Atom">it</span> <span class="s s-Atom">into</span> <span class="p">{</span><span class="s s-Atom">cmdObj:</span><span class="mi">1</span><span class="p">}</span>
+<span class="s s-Atom">db</span><span class="p">.</span><span class="nf">setProfilingLevel</span><span class="p">(</span><span class="s s-Atom">level</span><span class="p">)</span> <span class="mi">0</span><span class="o">=</span><span class="s s-Atom">off</span><span class="p">,</span><span class="mi">1</span><span class="o">=</span><span class="s s-Atom">slow</span><span class="p">,</span><span class="mi">2</span><span class="o">=</span><span class="s s-Atom">all</span>
+<span class="s s-Atom">db</span><span class="p">.</span><span class="nf">shutdownServer</span><span class="p">()</span> <span class="s s-Atom">关闭当前服务程序</span>
+<span class="s s-Atom">db</span><span class="p">.</span><span class="nf">version</span><span class="p">()</span> <span class="s s-Atom">返回当前程序的版本信息</span>
+
+<span class="s s-Atom">db</span><span class="p">.</span><span class="s s-Atom">xxxxdb</span><span class="p">.</span><span class="nf">find</span><span class="p">({</span><span class="nn">id</span><span class="p">:</span><span class="mi">10</span><span class="p">})</span> <span class="s s-Atom">返回xxxxdb数据集ID</span><span class="o">=</span><span class="mi">10</span><span class="s s-Atom">的数据集</span>
+<span class="s s-Atom">db</span><span class="p">.</span><span class="s s-Atom">xxxxdb</span><span class="p">.</span><span class="nf">find</span><span class="p">({</span><span class="nn">id</span><span class="p">:</span><span class="mi">10</span><span class="p">}).</span><span class="nf">count</span><span class="p">()</span> <span class="s s-Atom">返回xxxxdb数据集ID</span><span class="o">=</span><span class="mi">10</span><span class="s s-Atom">的数据总数</span>
+<span class="s s-Atom">db</span><span class="p">.</span><span class="s s-Atom">xxxxdb</span><span class="p">.</span><span class="nf">find</span><span class="p">({</span><span class="nn">id</span><span class="p">:</span><span class="mi">10</span><span class="p">}).</span><span class="nf">limit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="s s-Atom">返回xxxxdb数据集ID</span><span class="o">=</span><span class="mi">10</span><span class="s s-Atom">的数据集从第二条开始的数据集</span>
+<span class="s s-Atom">db</span><span class="p">.</span><span class="s s-Atom">xxxxdb</span><span class="p">.</span><span class="nf">find</span><span class="p">({</span><span class="nn">id</span><span class="p">:</span><span class="mi">10</span><span class="p">}).</span><span class="nf">skip</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span> <span class="s s-Atom">返回xxxxdb数据集ID</span><span class="o">=</span><span class="mi">10</span><span class="s s-Atom">的数据集从0到第八条的数据集</span>
+<span class="s s-Atom">db</span><span class="p">.</span><span class="s s-Atom">xxxxdb</span><span class="p">.</span><span class="nf">find</span><span class="p">({</span><span class="nn">id</span><span class="p">:</span><span class="mi">10</span><span class="p">}).</span><span class="nf">limit</span><span class="p">(</span><span class="mi">2</span><span class="p">).</span><span class="nf">skip</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span> <span class="s s-Atom">返回xxxxdb数据集ID</span><span class="o">=</span><span class="mi">1</span><span class="s s-Atom">=的数据集从第二条到第八条的数据</span>
+<span class="s s-Atom">db</span><span class="p">.</span><span class="s s-Atom">xxxxdb</span><span class="p">.</span><span class="nf">find</span><span class="p">({</span><span class="nn">id</span><span class="p">:</span><span class="mi">10</span><span class="p">}).</span><span class="nf">sort</span><span class="p">()</span> <span class="s s-Atom">返回xxxxdb数据集ID</span><span class="o">=</span><span class="mi">10</span><span class="s s-Atom">的排序数据集</span>
+<span class="s s-Atom">db</span><span class="p">.</span><span class="s s-Atom">xxxxdb</span><span class="p">.</span><span class="nf">findOne</span><span class="p">([</span><span class="s s-Atom">query</span><span class="p">])</span> <span class="s s-Atom">返回符合条件的一条数据</span>
+<span class="s s-Atom">db</span><span class="p">.</span><span class="s s-Atom">xxxxdb</span><span class="p">.</span><span class="nf">getDB</span><span class="p">()</span> <span class="s s-Atom">返回此数据集所属的数据库名称</span>
+<span class="s s-Atom">db</span><span class="p">.</span><span class="s s-Atom">xxxxdb</span><span class="p">.</span><span class="nf">getIndexes</span><span class="p">()</span> <span class="s s-Atom">返回些数据集的索引信息</span>
+<span class="s s-Atom">db</span><span class="p">.</span><span class="s s-Atom">xxxxdb</span><span class="p">.</span><span class="nf">group</span><span class="p">({</span><span class="nn">key</span><span class="p">:</span><span class="s s-Atom">…</span><span class="p">,</span><span class="nn">initial</span><span class="p">:</span><span class="s s-Atom">…</span><span class="p">,</span><span class="nn">reduce</span><span class="p">:</span><span class="s s-Atom">…</span><span class="p">[,</span><span class="nn">cond</span><span class="p">:...]})</span>
+<span class="s s-Atom">db</span><span class="p">.</span><span class="s s-Atom">xxxxdb</span><span class="p">.</span><span class="nf">mapReduce</span><span class="p">(</span><span class="s s-Atom">mayFunction</span><span class="p">,</span><span class="s s-Atom">reduceFunction</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="s s-Atom">db</span><span class="p">.</span><span class="s s-Atom">xxxxdb</span><span class="p">.</span><span class="nf">remove</span><span class="p">(</span><span class="s s-Atom">query</span><span class="p">)</span> <span class="s s-Atom">在数据集中删除一条数据</span>
+<span class="s s-Atom">db</span><span class="p">.</span><span class="s s-Atom">xxxxdb</span><span class="p">.</span><span class="nf">renameCollection</span><span class="p">(</span><span class="s s-Atom">newName</span><span class="p">)</span> <span class="s s-Atom">重命名些数据集名称</span>
+<span class="s s-Atom">db</span><span class="p">.</span><span class="s s-Atom">xxxxdb</span><span class="p">.</span><span class="nf">save</span><span class="p">(</span><span class="s s-Atom">obj</span><span class="p">)</span> <span class="s s-Atom">往数据集中插入一条数据</span>
+<span class="s s-Atom">db</span><span class="p">.</span><span class="s s-Atom">xxxxdb</span><span class="p">.</span><span class="nf">stats</span><span class="p">()</span> <span class="s s-Atom">返回此数据集的状态</span>
+<span class="s s-Atom">db</span><span class="p">.</span><span class="s s-Atom">xxxxdb</span><span class="p">.</span><span class="nf">storageSize</span><span class="p">()</span> <span class="s s-Atom">返回此数据集的存储大小</span>
+<span class="s s-Atom">db</span><span class="p">.</span><span class="s s-Atom">xxxxdb</span><span class="p">.</span><span class="nf">totalIndexSize</span><span class="p">()</span> <span class="s s-Atom">返回此数据集的索引文件大小</span>
+<span class="s s-Atom">db</span><span class="p">.</span><span class="s s-Atom">xxxxdb</span><span class="p">.</span><span class="nf">totalSize</span><span class="p">()</span> <span class="s s-Atom">返回些数据集的总大小</span>
+<span class="s s-Atom">db</span><span class="p">.</span><span class="s s-Atom">xxxxdb</span><span class="p">.</span><span class="nf">update</span><span class="p">(</span><span class="s s-Atom">query</span><span class="p">,</span><span class="s s-Atom">object</span><span class="p">[,</span><span class="s s-Atom">upsert_bool</span><span class="p">])</span><span class="s s-Atom">在此数据集中更新一条数据</span>
+<span class="s s-Atom">db</span><span class="p">.</span><span class="s s-Atom">xxxxdb</span><span class="p">.</span><span class="nf">validate</span><span class="p">()</span> <span class="s s-Atom">验证此数据集</span>
+<span class="s s-Atom">db</span><span class="p">.</span><span class="s s-Atom">xxxxdb</span><span class="p">.</span><span class="nf">getShardVersion</span><span class="p">()</span> <span class="s s-Atom">返回数据集共享版本号</span>
+<span class="s s-Atom">db</span><span class="p">.</span><span class="s s-Atom">xxxxdb</span><span class="p">.</span><span class="nf">find</span><span class="p">({</span><span class="s s-Atom">‘name’:&#39;foobar’}) select * from xxxxdb where name=’foobar’</span>
+<span class="s s-Atom">db.xxxxdb.find() select * from xxxxdb</span>
+<span class="s s-Atom">db.xxxxdb.find({‘ID’:10}).count() select count(*) from xxxxdb where ID=10</span>
+<span class="s s-Atom">db.xxxxdb.find().skip(10).limit(20) 从查询结果的第十条开始读20条数据 select * from xxxxdb limit 10,20 ———-mysql</span>
+<span class="s s-Atom">db.xxxxdb.find({‘ID’:{$in:[25,35,45]}}) select * from xxxxdb where ID in (25,35,45)</span>
+<span class="s s-Atom">db.xxxxdb.find().sort({‘ID’:-1}) select * from xxxxdb order by ID desc</span>
+<span class="s s-Atom">db.xxxxdb.distinct(‘name’,{‘ID’:{$lt:20}}) select distinct(name) from xxxxdb where ID&lt;20</span>
+<span class="s s-Atom">db.xxxxdb.group({key:{&#39;name&#39;:true},cond:{&#39;name&#39;:&#39;foo&#39;},reduce:function(obj,prev){prev.msum+=obj.marks;},initial:{msum:0}})</span>
+<span class="s s-Atom">select name,sum(marks) from xxxxdb group by name</span>
+<span class="s s-Atom">db.xxxxdb.find(&#39;this</span><span class="p">.</span><span class="nv">ID</span><span class="o">&lt;</span><span class="mi">20</span><span class="s s-Atom">′</span><span class="p">,{</span><span class="nn">name</span><span class="p">:</span><span class="mi">1</span><span class="p">})</span> <span class="s s-Atom">select</span> <span class="s s-Atom">name</span> <span class="s s-Atom">from</span> <span class="s s-Atom">xxxxdb</span> <span class="s s-Atom">where</span> <span class="nv">ID</span><span class="o">&lt;</span><span class="mi">20</span>
+<span class="s s-Atom">db</span><span class="p">.</span><span class="s s-Atom">xxxxdb</span><span class="p">.</span><span class="nf">insert</span><span class="p">({</span><span class="s s-Atom">&#39;name&#39;:&#39;foobar’,&#39;age&#39;:25}) insert into xxxxdb (&#39;name&#39;,&#39;age’</span><span class="p">)</span><span class="nf">values</span><span class="p">(</span><span class="s s-Atom">&#39;foobar&#39;</span><span class="p">,</span><span class="mi">25</span><span class="p">)</span>
+<span class="s s-Atom">db</span><span class="p">.</span><span class="s s-Atom">xxxxdb</span><span class="p">.</span><span class="nf">insert</span><span class="p">({</span><span class="s s-Atom">&#39;name&#39;:&#39;foobar’,&#39;age&#39;:25,’email’:&#39;cclove2@</span><span class="mf">163.</span><span class="s s-Atom">com’</span><span class="p">})</span>
+<span class="s s-Atom">db</span><span class="p">.</span><span class="s s-Atom">xxxxdb</span><span class="p">.</span><span class="nf">remove</span><span class="p">({})</span> <span class="s s-Atom">delete</span> <span class="o">*</span> <span class="s s-Atom">from</span> <span class="s s-Atom">xxxxdb</span>
+<span class="s s-Atom">db</span><span class="p">.</span><span class="s s-Atom">xxxxdb</span><span class="p">.</span><span class="nf">remove</span><span class="p">({</span><span class="s s-Atom">&#39;age&#39;:</span><span class="mi">20</span><span class="p">})</span> <span class="s s-Atom">delete</span> <span class="s s-Atom">xxxxdb</span> <span class="s s-Atom">where</span> <span class="s s-Atom">age</span><span class="o">=</span><span class="mi">20</span>
+<span class="s s-Atom">db</span><span class="p">.</span><span class="s s-Atom">xxxxdb</span><span class="p">.</span><span class="nf">remove</span><span class="p">({</span><span class="s s-Atom">&#39;age&#39;:</span><span class="p">{</span><span class="err">$</span><span class="nn">lt</span><span class="p">:</span><span class="mi">20</span><span class="p">}})</span> <span class="s s-Atom">delete</span> <span class="s s-Atom">xxxxdb</span> <span class="s s-Atom">where</span> <span class="s s-Atom">age</span><span class="o">&lt;</span><span class="mi">20</span>
+<span class="s s-Atom">db</span><span class="p">.</span><span class="s s-Atom">xxxxdb</span><span class="p">.</span><span class="nf">remove</span><span class="p">({</span><span class="s s-Atom">&#39;age&#39;:</span><span class="p">{</span><span class="err">$</span><span class="nn">lte</span><span class="p">:</span><span class="mi">20</span><span class="p">}})</span> <span class="s s-Atom">delete</span> <span class="s s-Atom">xxxxdb</span> <span class="s s-Atom">where</span> <span class="s s-Atom">age&lt;=</span><span class="mi">20</span>
+<span class="s s-Atom">db</span><span class="p">.</span><span class="s s-Atom">xxxxdb</span><span class="p">.</span><span class="nf">remove</span><span class="p">({</span><span class="s s-Atom">&#39;age&#39;:</span><span class="p">{</span><span class="err">$</span><span class="nn">gt</span><span class="p">:</span><span class="mi">20</span><span class="p">}})</span> <span class="s s-Atom">delete</span> <span class="s s-Atom">xxxxdb</span> <span class="s s-Atom">where</span> <span class="s s-Atom">age</span><span class="o">&gt;</span><span class="mi">20</span>
+<span class="s s-Atom">db</span><span class="p">.</span><span class="s s-Atom">xxxxdb</span><span class="p">.</span><span class="nf">remove</span><span class="p">({</span><span class="s s-Atom">‘age’:</span><span class="p">{</span><span class="err">$</span><span class="nn">gte</span><span class="p">:</span><span class="mi">20</span><span class="p">}})</span> <span class="s s-Atom">delete</span> <span class="s s-Atom">xxxxdb</span> <span class="s s-Atom">where</span> <span class="s s-Atom">age</span><span class="o">&gt;=</span><span class="mi">20</span>
+<span class="s s-Atom">db</span><span class="p">.</span><span class="s s-Atom">xxxxdb</span><span class="p">.</span><span class="nf">remove</span><span class="p">({</span><span class="s s-Atom">‘age’:</span><span class="p">{</span><span class="err">$</span><span class="nn">ne</span><span class="p">:</span><span class="mi">20</span><span class="p">}})</span> <span class="s s-Atom">delete</span> <span class="s s-Atom">xxxxdb</span> <span class="s s-Atom">where</span> <span class="s s-Atom">age</span><span class="p">!</span><span class="o">=</span><span class="mi">20</span>
+<span class="s s-Atom">db</span><span class="p">.</span><span class="s s-Atom">xxxxdb</span><span class="p">.</span><span class="nf">update</span><span class="p">({</span><span class="s s-Atom">‘name’:&#39;foobar’},{‘$set’:{‘age’:36}}) update xxxxdb set age=36 where name=’foobar’</span>
+<span class="s s-Atom">db.xxxxdb.update({‘name’:&#39;foobar’</span><span class="p">},{</span><span class="s s-Atom">‘</span><span class="err">$</span><span class="s s-Atom">inc’:</span><span class="p">{</span><span class="s s-Atom">‘age’:</span><span class="mi">3</span><span class="p">}})</span> <span class="s s-Atom">update</span> <span class="s s-Atom">xxxxdb</span> <span class="s s-Atom">set</span> <span class="s s-Atom">age</span><span class="o">=</span><span class="s s-Atom">age</span><span class="o">+</span><span class="mi">3</span> <span class="s s-Atom">where</span> <span class="s s-Atom">name=’foobar’</span>
+</pre></div>
+
+
+<h2>提醒</h2>
+<p>在windows下，</p>
+<p>cmd窗口的默认编码是GBK，但mongodb的字符编码都是utf-8，所以修改cmd窗口的编码为utf-8就可以了。</p>
+<p>例如：
+1. chcp 65001
+2. 更改“属性”中的字体，除“点阵字体”外所有的都行
+再次运行就显示正常了。</p>
+        </div>
+    </section>
+    <footer class="footer-article">
+        <div class="tags-and-categories">Filed under <a href="/category/db.html">DB</a>
+        | Tagged: <a href="/tag/mongo.html">mongo </a><a href="/tag/database.html">database </a>
+        | <a href="/2014/mongo_2014_12_03_22_17.html" rel="bookmark"
+         title="Permalink to mongo api">Permalink</a>            
+        </div>
+        <!-- metaldata 
+        -->
+    </footer>
+</div>
+            </div>
+            
+            
+			<div class="large-3 aside column">
+				<img class="headIcon-large avatar" src="/sys_img/head.jpg" alt="(┬＿┬)">
+                <h2>李凯</h2>
+                <h3>kairens leeky</h3>
+				<a href="mailto:kai_kai03@hotmail.com?subject=%20&body=from%20blog"><Email>kai_kai03@hotmail.com</Email></a>
+            </div>
+            
+            
+			
+			<div class="large-3 aside column">
+                <h3>Socials</h3>
+                <ul>
+                    <li><a href="http://weibo.com/mipamipami">新浪weibo</a></li>
+                    <li><a href="#"> (ง •̀_•́)ง</a></li>
+                </ul>
+            </div> 
+            
+            <div class="large-3 category-column column">
+                <h3>Categories</h3>
+                <ul>
+                    <li class="active"><a href="/category/db.html">DB</a> (3)</li>
+                    <li><a href="/category/idev.html">iDev</a> (14)</li>
+                    <li><a href="/category/machinelearning.html">MachineLearning</a> (18)</li>
+                    <li><a href="/category/other.html">other</a> (2)</li>
+                    <li><a href="/category/pydev.html">pyDev</a> (14)</li>
+                    <li><a href="/category/yin-shi-pin.html">音视频</a> (15)</li>
+                </ul>
+            </div> 
+
+                <!--
+            <iframe width="100%" height="600" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=600&fansRow=1&ptype=1&speed=0&skin=1&isTitle=0&noborder=0&isWeibo=1&isFans=0&uid=1819436507&verifier=4060feb2&colors=fc1f12,ffffff,666666,0082cb,ecfbfd&dpc=1"></iframe>            </div>
+            -->
+         
+    </div>
+</div>
+    <div class="footer">
+        <div class="data-holder">
+        <div class="row">
+            <div class="large-3 column">
+<div class="credits">
+    <h3>Stuff and credits</h3>
+    <p>
+    Proudly powered by <a href="http://getpelican.com/">Pelican</a>, 
+    which takes great advantage of <a href="http://python.org">Python</a>.
+    </p>
+    <p>
+    This site also makes use of <a href="http://foundation.zurb.com">Zurb Foundation Framework</a>
+    and is typeset using the blocky -- but quite good-looking indeed -- 
+    <a href="https://www.google.com/fonts/specimen/Exo%202">Exo 2</a> fonts,
+    which comes in a lot of weight and styles. 
+    </p>
+    <p>Enjoy!</a>
+</div>           </div>
+           <div class="large-6 tag-cloud column">
+                <h3>Tags</h3>
+                <ul class="tagcloud">
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/nao-dong.html">脑洞
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/websocket.html">WebSocket
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/mongo.html">mongo
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/classification.html">classification
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/shi-xu-tu.html">时序图
+                        </a></li>
+                    <li>
+											<span class="badge">5</span>
+                        <a href="/tag/chan-pin.html">产品
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/fuck.html">fuck
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/gc.html">GC
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/rtmp.html">RTMP
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/unicode.html">unicode
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/dylib.html">dylib
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/protocol.html">protocol
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/pycon.html">PyCon
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/cai-ji.html">采集
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/clustering.html">clustering
+                        </a></li>
+                    <li>
+											<span class="badge">6</span>
+                        <a href="/tag/web.html">Web
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/yi-zhi.html">移植
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/network.html">network
+                        </a></li>
+                    <li>
+											<span class="badge">6</span>
+                        <a href="/tag/flask.html">Flask
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/review.html">review
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/nodejs.html">Node.js
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/pep.html">PEP
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/features.html">Features
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/wu-tai.html">舞台
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/cnn.html">CNN
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/pca.html">PCA
+                        </a></li>
+                    <li>
+											<span class="badge">6</span>
+                        <a href="/tag/webrtc.html">webRtc
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/css.html">CSS
+                        </a></li>
+                    <li>
+											<span class="badge">8</span>
+                        <a href="/tag/object-c.html">Object-C
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/memory.html">Memory
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/life.html">life
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/flask-socketio.html">Flask-SocketIO
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/linear.html">Linear
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/dataprocessing.html">DataProcessing
+                        </a></li>
+                    <li>
+											<span class="badge">16</span>
+                        <a href="/tag/python.html">Python
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/javascript.html">JavaScript
+                        </a></li>
+                    <li>
+											<span class="badge">16</span>
+                        <a href="/tag/ios.html">iOS
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/encode.html">encode
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/xcode.html">xCode
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/appstore.html">appstore
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/html5.html">html5
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/liu-cheng.html">流程
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/uiimage.html">UIImage
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/ipad.html">iPad
+                        </a></li>
+                    <li>
+											<span class="badge">5</span>
+                        <a href="/tag/c.html">C++
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/audio.html">audio
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/ffmpeg.html">FFmpeg
+                        </a></li>
+                    <li>
+											<span class="badge">15</span>
+                        <a href="/tag/algorithm.html">algorithm
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/database.html">database
+                        </a></li>
+                    <li>
+											<span class="badge">11</span>
+                        <a href="/tag/ml.html">ML
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/yan-zou.html">演奏
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/framework.html">framework
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/gbk.html">GBK
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/rfc.html">rfc
+                        </a></li>
+                    <li>
+											<span class="badge">12</span>
+                        <a href="/tag/math.html">Math
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/jia-gou.html">架构
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/obs.html">OBS
+                        </a></li>
+                </ul>
+            </div>
+
+            <div class="large-3 aside column">
+                <h3>Links</h3>
+                <ul>
+                    <li><a href="http://getpelican.com/">Pelican</a></li><br/>
+                    <li><a href="http://python.org/">Python.org</a></li><br/>
+                    <li><a href="http://jinja.pocoo.org/">Jinja2</a></li><br/>
+                    <li><a href="#"> ฅ'ω'ฅ </a></li><br/>
+                </ul>
+                
+            </div>
+
+        </row>
+        </div>
+        <div class="row">
+            <div class="small-12 column">
+                <p style="font-size: 0.8em; text-align:center;">
+                LEGO, the LEGO logo, the Minifigure, and the Brick and Knob configurations 
+                are trademarks of the LEGO Group of Companies. ©2015.
+                </p>
+            </div>
+        </div>
+    </div>
+
+
+    
+</body>
+</html>

@@ -1,0 +1,605 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="/theme/css/foundation.min.css" media="all">
+		<link rel="stylesheet" href="/theme/css/pygments.css" /> 
+		<link rel="stylesheet" href="/theme/css/style.css" /> 
+        <script type="text/javascript" src="/theme/js/modernizr.js"></script>
+		<script type='text/javascript' src='/theme/js/jquery-1.11.1.min.js'></script>
+	<script type="text/javascript" src="/theme/js/damoo.min.js"></script>
+
+		<script type="text/x-mathjax-config">
+            MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+        <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+		
+		
+        <link href='https://fonts.googleapis.com/css?family=Exo+2:400,300,700,300italic,400italic,700italic,900,900italic' rel='stylesheet' type='text/css'>
+        <link rel="stylesheet" href="/theme/css/lamboz.css" media="all">
+        <title>图形识别的前置算法 - kairens`s Blog</title>
+        <meta charset="utf-8" />
+        
+</head>
+<body onblur="leavePage()" onfocus="comebackPage()">
+    <div class="pages">
+        <ul>
+            <li class="home"><a href="/index.html">Home</a></li>
+            <li ><a href="/pages/about-me.html">About Me</a></li>
+            <li ><a href="/pages/Python_Packages_2012_11_05_12_18.html">Python Packages</a></li>
+        </ul>
+    </div>
+
+<div class="hp-header-inner">
+    <div class="page-header">
+        <div class="content-header">
+            <div id="title-block">
+            <h1>  <a href="/2011/someAlgorithm_2011_10_07_20_14.html" rel="bookmark"
+                    title="Permalink to 图形识别的前置算法">图形识别的前置算法</a></h1>
+            </div>
+        </div>
+    </div>
+</div>
+    <div class="content">
+        <div class="data-holder">
+        <div class="row">
+           <div class="large-9 content-column column">
+<div class="content-article">
+    <header class="header-article">
+        <div class="read-more">Posted on Fri 07 October 2011</div>
+ 
+   </header>
+    <section class='article'>
+        
+        <div class="entry-summary">
+            <p>随便写了些，但是......</p>
+        </div>
+    
+        <div class="entry-content">
+            <h2>随笔</h2>
+<p>后面估计不会继续下去，小iPhone4的性能还是跟不上，视频里只做到去除光照影响，性能就已经跟不上了。更何况之前弄的背景建模还没移植过来.......</p>
+<p>以后真正要做的话还是上服务端吧。</p>
+<p>本文把写的代码备份下等以后也许有用。</p>
+<h2>零碎代码</h2>
+<p>FFmpeg解码出RGB:</p>
+<div class="highlight"><pre>-(void)convertFrameToRGB {  
+    sws_scale (img_convert_ctx, pFrame-&gt;data, pFrame-&gt;linesize,
+               0, pCodecCtx-&gt;height,
+               picture.data, picture.linesize); 
+}
+</pre></div>
+
+
+<p>最开始使用的二值化，精度实在是.....效果随着时间变化而线性变化，哈哈哈哈，原代码已经去掉了，这边留一份吧:</p>
+<div class="highlight"><pre>-(void)to2L
+{
+    unsigned char *input = picture.data[0];
+    for (int offset = 0; offset&lt;= outputWidth*outputHeight; offset++) {
+        unsigned char r = input[offset*3];
+        unsigned char g = input[offset*3 +1];
+        unsigned char b = input[offset*3 +2];
+        unsigned char mi = MIN(r, MIN(g, b));
+        unsigned char ma = MAX(r, MAX(g, b));
+        if (((unsigned short)mi + (unsigned short)ma) &gt; 170*2) {
+            input[offset*3] = input[offset*3+1] = input[offset*3 + 2] = 255;
+        }else{
+            input[offset*3] = input[offset*3+1] = input[offset*3 + 2] = 0;
+        }
+    }
+}
+</pre></div>
+
+
+<p>图像转为灰度图（r=g=b = 0.299r+0.587g+0.114b）：</p>
+<div class="highlight"><pre>-(void)toGrey
+{
+    unsigned char *input = picture.data[0];
+    for (int offset = 0; offset&lt;= outputWidth*outputHeight; offset++) {
+        int rgbOffset = offset *3;
+        unsigned char t = (unsigned char)((19595 * input[rgbOffset] + 38469 * input[rgbOffset +1] + 7471 * input[rgbOffset +2])&gt;&gt;16);
+
+        input[rgbOffset] = input[rgbOffset+1] = input[rgbOffset + 2] = t; 
+    }
+}
+</pre></div>
+
+
+<p>高斯平滑：</p>
+<div class="highlight"><pre>-(void)toSmoothGauss:(unsigned char *)rgba width:(int)width height:(int)height isGrey:(BOOL)isG
+{
+    unsigned char *input = rgba;
+    //unsigned char mask[9] = {1,2,1,2,4,2,1,2,1};
+    int columnLength = width*3;
+    for (int c=1; c&lt;=height-1; c++) {
+        for (int rb=1; rb&lt;=width*3-1; rb++) {
+            int rgbOffset = rb + c*columnLength;
+            input[rgbOffset] = (input[rgbOffset-columnLength-3] +
+                                input[rgbOffset-columnLength]*2 +
+                                input[rgbOffset-columnLength+3] +
+                                input[rgbOffset-3]*2 +
+                                input[rgbOffset]*4 +
+                                input[rgbOffset+3]*2 +
+                                input[rgbOffset+columnLength-3] +
+                                input[rgbOffset+columnLength]*2 +
+                                input[rgbOffset+columnLength+3] )/16;
+            if (isG) {
+                input[rgbOffset - 1] = input[rgbOffset + 1] =  input[rgbOffset];
+                rb+=2;
+            }
+
+        }
+    }
+}
+</pre></div>
+
+
+<p>平均灰度二值化：</p>
+<div class="highlight"><pre>-(void)to2VWithGrey:(unsigned char *)rgba width:(int)width height:(int)height
+{
+    unsigned char *input = rgba;
+    unsigned int greyAVE = 0;
+    for (int offset = 0; offset&lt;= width*height; offset++) {
+        int rgbOffset = offset *3;
+        unsigned char t = (unsigned char)((19595 * input[rgbOffset] + 38469 * input[rgbOffset +1] + 7471 * input[rgbOffset +1])&gt;&gt;16);
+        //input[rgbOffset] = input[rgbOffset+1] = input[rgbOffset + 2] = t;
+        greyAVE += t;
+    }
+    greyAVE = greyAVE/(width*height);
+    for (int offset = 0; offset&lt;= width*height; offset++) {
+        int rgbOffset = offset *3;
+        unsigned char t = (unsigned char)((19595 * input[rgbOffset] + 38469 * input[rgbOffset +1] + 7471 * input[rgbOffset +1])&gt;&gt;16);
+        //unsigned char t = (unsigned char)((0.299f * input[rgbOffset] + 0.587f * input[rgbOffset +1] + 0.114f * input[rgbOffset +1]));
+        if (t &gt;= greyAVE) {
+            input[rgbOffset] = input[rgbOffset+1] = input[rgbOffset + 2] = 255;
+        }else{
+            input[rgbOffset] = input[rgbOffset+1] = input[rgbOffset + 2] = 0;
+        }
+
+    }
+}
+</pre></div>
+
+
+<p>Sobel边界检测的二值化：</p>
+<div class="highlight"><pre>-(void)to2VFromSobel:(unsigned char *)rgba  width:(int)width height:(int)height
+{
+    unsigned char *wanted = malloc(width*height*3);
+    memset(wanted, 0, width*height*3);
+
+    unsigned char *input = rgba;
+    int columnLength = width*3;
+    for (int c=1; c&lt;=height-1; c++) {
+        for (int rb=3; rb&lt;=width*3-3; rb+=3) {
+            int rgbOffset = rb + c*columnLength;
+            int Dx = input[rgbOffset-columnLength+3] +
+                    input[rgbOffset+3]*2 +
+                    input[rgbOffset+columnLength+3] -
+                    input[rgbOffset-columnLength-3] -
+                    input[rgbOffset-3]*2 -
+                    input[rgbOffset+columnLength-3];
+            int Dy = input[rgbOffset+columnLength-3] +
+                input[rgbOffset+columnLength]*2 +
+                input[rgbOffset+columnLength+3] -
+                input[rgbOffset-columnLength-3] -
+                input[rgbOffset-columnLength]*2 -
+                input[rgbOffset-columnLength+3];
+            int mag =roundf(sqrtf(Dx*Dx+Dy*Dy));
+            //int mag = abs(Dx)+abs(Dy);
+            wanted[rgbOffset] = mag;
+        }
+    }
+    for (int c=1; c&lt;=height-1; c++) {
+        for (int rb=3; rb&lt;=width*3-3; rb+=3) {
+            int rgbOffset = rb + c*columnLength;
+            unsigned char mag = wanted[rgbOffset];
+            if (mag &gt;= sobelAlpha) {
+                input[rgbOffset] = input[rgbOffset+1] =input[rgbOffset+2] = 0;
+            }else{
+                input[rgbOffset] = input[rgbOffset+1] =input[rgbOffset+2] = 255;
+            }
+        }
+    }
+
+    free(wanted);
+
+    //free(rgba);
+    //rgba = wanted;
+
+}
+</pre></div>
+
+
+<p>高光判断：</p>
+<div class="highlight"><pre>-(void)totakeHighLight:(unsigned char *)rgba width:(int)width height:(int)height
+{
+    unsigned char *input = rgba;
+    for (int offset = 1; offset&lt;= width*height; offset++) {
+        int rgbOffset = offset *3;
+        //input[rgbOffset] = input[rgbOffset+1] = input[rgbOffset + 2] = t;
+        int r = (int)input[rgbOffset] + ((int)input[rgbOffset] - (int)input[rgbOffset-3])/2;
+        if (r&gt;255) {
+            input[rgbOffset] = 255;
+        }if (r &lt; 0) {
+            input[rgbOffset] = 0;
+        } else {
+            input[rgbOffset] = (unsigned char )r;
+        }
+
+        int g = (int)input[rgbOffset+1] + ((int)input[rgbOffset+1] - (int)input[rgbOffset-3+1])/2;
+        if (g&gt;255) {
+            input[rgbOffset+1] = 255;
+        }if (g &lt; 0) {
+            input[rgbOffset+1] = 0;
+        } else {
+            input[rgbOffset+1] = (unsigned char )g;
+        }
+
+        int b = (int)input[rgbOffset+2] + ((int)input[rgbOffset+2] - (int)input[rgbOffset-3+2])/2;
+        if (b&gt;255) {
+            input[rgbOffset+2] = 255;
+        }if (b &lt; 0) {
+            input[rgbOffset+2] = 0;
+        } else {
+            input[rgbOffset+2] = (unsigned char )b;
+        }
+    }
+}
+</pre></div>
+
+
+<p>最后记录一个将rgb转回UIImage控件的方法：</p>
+<div class="highlight"><pre><span class="p">-(</span><span class="bp">UIImage</span> <span class="o">*</span><span class="p">)</span><span class="nf">imageFromAVPicture:</span><span class="p">(</span><span class="n">AVPicture</span><span class="p">)</span><span class="nv">pict</span> <span class="nf">width:</span><span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="nv">width</span> <span class="nf">height:</span><span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="nv">height</span> <span class="p">{</span>
+    <span class="n">CGBitmapInfo</span> <span class="n">bitmapInfo</span> <span class="o">=</span> <span class="n">kCGBitmapByteOrderDefault</span><span class="p">;</span>
+    <span class="n">CFDataRef</span> <span class="n">data</span> <span class="o">=</span> <span class="n">CFDataCreateWithBytesNoCopy</span><span class="p">(</span><span class="n">kCFAllocatorDefault</span><span class="p">,</span> <span class="n">pict</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">pict</span><span class="p">.</span><span class="n">linesize</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">height</span><span class="p">,</span><span class="n">kCFAllocatorNull</span><span class="p">);</span>
+    <span class="n">CGDataProviderRef</span> <span class="n">provider</span> <span class="o">=</span> <span class="n">CGDataProviderCreateWithCFData</span><span class="p">(</span><span class="n">data</span><span class="p">);</span>
+    <span class="n">CGColorSpaceRef</span> <span class="n">colorSpace</span> <span class="o">=</span> <span class="n">CGColorSpaceCreateDeviceRGB</span><span class="p">();</span>
+    <span class="n">CGImageRef</span> <span class="n">cgImage</span> <span class="o">=</span> <span class="n">CGImageCreate</span><span class="p">(</span><span class="n">width</span><span class="p">,</span> 
+                                       <span class="n">height</span><span class="p">,</span> 
+                                       <span class="mi">8</span><span class="p">,</span> 
+                                       <span class="mi">24</span><span class="p">,</span> 
+                                       <span class="n">pict</span><span class="p">.</span><span class="n">linesize</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> 
+                                       <span class="n">colorSpace</span><span class="p">,</span> 
+                                       <span class="n">bitmapInfo</span><span class="p">,</span> 
+                                       <span class="n">provider</span><span class="p">,</span> 
+                                       <span class="nb">NULL</span><span class="p">,</span> 
+                                       <span class="nb">NO</span><span class="p">,</span> 
+                                       <span class="n">kCGRenderingIntentDefault</span><span class="p">);</span>
+    <span class="n">CGColorSpaceRelease</span><span class="p">(</span><span class="n">colorSpace</span><span class="p">);</span>
+    <span class="bp">UIImage</span> <span class="o">*</span><span class="n">image</span> <span class="o">=</span> <span class="p">[</span><span class="bp">UIImage</span> <span class="nl">imageWithCGImage</span><span class="p">:</span><span class="n">cgImage</span><span class="p">];</span>
+    <span class="n">CGImageRelease</span><span class="p">(</span><span class="n">cgImage</span><span class="p">);</span>
+    <span class="n">CGDataProviderRelease</span><span class="p">(</span><span class="n">provider</span><span class="p">);</span>
+    <span class="n">CFRelease</span><span class="p">(</span><span class="n">data</span><span class="p">);</span>
+
+    <span class="k">return</span> <span class="n">image</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+        </div>
+    </section>
+    <footer class="footer-article">
+        <div class="tags-and-categories">Filed under <a href="/category/yin-shi-pin.html">音视频</a>
+        | Tagged: <a href="/tag/c.html">C </a><a href="/tag/object-c.html">Object-C </a><a href="/tag/algorithm.html">algorithm </a><a href="/tag/ffmpeg.html">FFmpeg </a><a href="/tag/uiimage.html">UIImage </a><a href="/tag/ios.html">iOS </a>
+        | <a href="/2011/someAlgorithm_2011_10_07_20_14.html" rel="bookmark"
+         title="Permalink to 图形识别的前置算法">Permalink</a>            
+        </div>
+        <!-- metaldata 
+        -->
+    </footer>
+</div>
+            </div>
+            
+            
+			<div class="large-3 aside column">
+				<img class="headIcon-large avatar" src="/sys_img/head.jpg" alt="(┬＿┬)">
+                <h2>李凯</h2>
+                <h3>kairens leeky</h3>
+				<a href="mailto:kai_kai03@hotmail.com?subject=%20&body=from%20blog"><Email>kai_kai03@hotmail.com</Email></a>
+            </div>
+            
+            
+			
+			<div class="large-3 aside column">
+                <h3>Socials</h3>
+                <ul>
+                    <li><a href="http://weibo.com/mipamipami">新浪weibo</a></li>
+                    <li><a href="#"> (ง •̀_•́)ง</a></li>
+                </ul>
+            </div> 
+            
+            <div class="large-3 category-column column">
+                <h3>Categories</h3>
+                <ul>
+                    <li><a href="/category/db.html">DB</a> (3)</li>
+                    <li><a href="/category/idev.html">iDev</a> (14)</li>
+                    <li><a href="/category/machinelearning.html">MachineLearning</a> (18)</li>
+                    <li><a href="/category/other.html">other</a> (2)</li>
+                    <li><a href="/category/pydev.html">pyDev</a> (14)</li>
+                    <li class="active"><a href="/category/yin-shi-pin.html">音视频</a> (15)</li>
+                </ul>
+            </div> 
+
+                <!--
+            <iframe width="100%" height="600" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=600&fansRow=1&ptype=1&speed=0&skin=1&isTitle=0&noborder=0&isWeibo=1&isFans=0&uid=1819436507&verifier=4060feb2&colors=fc1f12,ffffff,666666,0082cb,ecfbfd&dpc=1"></iframe>            </div>
+            -->
+         
+    </div>
+</div>
+    <div class="footer">
+        <div class="data-holder">
+        <div class="row">
+            <div class="large-3 column">
+<div class="credits">
+    <h3>Stuff and credits</h3>
+    <p>
+    Proudly powered by <a href="http://getpelican.com/">Pelican</a>, 
+    which takes great advantage of <a href="http://python.org">Python</a>.
+    </p>
+    <p>
+    This site also makes use of <a href="http://foundation.zurb.com">Zurb Foundation Framework</a>
+    and is typeset using the blocky -- but quite good-looking indeed -- 
+    <a href="https://www.google.com/fonts/specimen/Exo%202">Exo 2</a> fonts,
+    which comes in a lot of weight and styles. 
+    </p>
+    <p>Enjoy!</a>
+</div>           </div>
+           <div class="large-6 tag-cloud column">
+                <h3>Tags</h3>
+                <ul class="tagcloud">
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/nao-dong.html">脑洞
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/websocket.html">WebSocket
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/mongo.html">mongo
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/classification.html">classification
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/shi-xu-tu.html">时序图
+                        </a></li>
+                    <li>
+											<span class="badge">5</span>
+                        <a href="/tag/chan-pin.html">产品
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/fuck.html">fuck
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/gc.html">GC
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/rtmp.html">RTMP
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/unicode.html">unicode
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/dylib.html">dylib
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/protocol.html">protocol
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/pycon.html">PyCon
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/cai-ji.html">采集
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/clustering.html">clustering
+                        </a></li>
+                    <li>
+											<span class="badge">6</span>
+                        <a href="/tag/web.html">Web
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/yi-zhi.html">移植
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/network.html">network
+                        </a></li>
+                    <li>
+											<span class="badge">6</span>
+                        <a href="/tag/flask.html">Flask
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/review.html">review
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/nodejs.html">Node.js
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/pep.html">PEP
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/features.html">Features
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/wu-tai.html">舞台
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/cnn.html">CNN
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/pca.html">PCA
+                        </a></li>
+                    <li>
+											<span class="badge">6</span>
+                        <a href="/tag/webrtc.html">webRtc
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/css.html">CSS
+                        </a></li>
+                    <li>
+											<span class="badge">8</span>
+                        <a href="/tag/object-c.html">Object-C
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/memory.html">Memory
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/life.html">life
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/flask-socketio.html">Flask-SocketIO
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/linear.html">Linear
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/dataprocessing.html">DataProcessing
+                        </a></li>
+                    <li>
+											<span class="badge">16</span>
+                        <a href="/tag/python.html">Python
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/javascript.html">JavaScript
+                        </a></li>
+                    <li>
+											<span class="badge">16</span>
+                        <a href="/tag/ios.html">iOS
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/encode.html">encode
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/xcode.html">xCode
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/appstore.html">appstore
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/html5.html">html5
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/liu-cheng.html">流程
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/uiimage.html">UIImage
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/ipad.html">iPad
+                        </a></li>
+                    <li>
+											<span class="badge">5</span>
+                        <a href="/tag/c.html">C++
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/audio.html">audio
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/ffmpeg.html">FFmpeg
+                        </a></li>
+                    <li>
+											<span class="badge">15</span>
+                        <a href="/tag/algorithm.html">algorithm
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/database.html">database
+                        </a></li>
+                    <li>
+											<span class="badge">11</span>
+                        <a href="/tag/ml.html">ML
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/yan-zou.html">演奏
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/framework.html">framework
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/gbk.html">GBK
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/rfc.html">rfc
+                        </a></li>
+                    <li>
+											<span class="badge">12</span>
+                        <a href="/tag/math.html">Math
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/jia-gou.html">架构
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/obs.html">OBS
+                        </a></li>
+                </ul>
+            </div>
+
+            <div class="large-3 aside column">
+                <h3>Links</h3>
+                <ul>
+                    <li><a href="http://getpelican.com/">Pelican</a></li><br/>
+                    <li><a href="http://python.org/">Python.org</a></li><br/>
+                    <li><a href="http://jinja.pocoo.org/">Jinja2</a></li><br/>
+                    <li><a href="#"> ฅ'ω'ฅ </a></li><br/>
+                </ul>
+                
+            </div>
+
+        </row>
+        </div>
+        <div class="row">
+            <div class="small-12 column">
+                <p style="font-size: 0.8em; text-align:center;">
+                LEGO, the LEGO logo, the Minifigure, and the Brick and Knob configurations 
+                are trademarks of the LEGO Group of Companies. ©2015.
+                </p>
+            </div>
+        </div>
+    </div>
+
+
+    
+</body>
+</html>
