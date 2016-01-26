@@ -54,6 +54,15 @@ H3 { font-size: 1.23em; }
 H4 { font-size: 1.1em; }
 H5,H6 { font-size: 1.05em; }
  
+.Verse p {
+    font-size: 11pt;
+    line-height:110%
+}
+
+.Verse p1 {
+    font-size: 12pt;
+    font-weight: bold;
+}
 
 .header H1 {
   font-size:3em;

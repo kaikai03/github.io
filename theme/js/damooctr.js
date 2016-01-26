@@ -34,5 +34,6 @@ window.onload=function(){
 } 
 
 function blabla(bla){
-        damoo.emit({ text: bla["author"]+"："+bla["hitokoto"], color: "#FFF", shadow: { color: "#f49" }});
-    }
+    damoo.emit({ text: bla["author"]+"："+bla["hitokoto"], color: "#FFF", shadow: { color: "#f49" }});
+    ukagaka.insert_kotoba(bla["hitokoto"])
+}
