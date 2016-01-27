@@ -18,6 +18,9 @@
         <link rel="stylesheet" href="/theme/css/lamboz.css" media="all">
         <title>Python Memory Management(2) - kairns`s Blog</title>
         <meta charset="utf-8" />
+        <link href="/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="kairns`s Blog Full Atom Feed" />
+        <link href="/feeds/all.rss.xml" type="application/rss+xml" rel="alternate" title="kairns`s Blog Full RSS Feed" />
+        <link href="/feeds/pydev.atom.xml" type="application/atom+xml" rel="alternate" title="kairns`s Blog Categories Atom Feed" />
         
 </head>
 <body onblur="leavePage()" onfocus="comebackPage()">
@@ -128,7 +131,7 @@ struct arena_object {
 <li>pool_header和管理的blocks内存是一块连续的内存 =&gt; pool_header被申请时, 其管理的block集合的内存一并被申请</li>
 <li>arena_object和其管理的内存是分离的 =&gt; arena_object被申请时, 其管理的pool集合的内存没有被申请, 而是在某一时刻建立的联系</li>
 </ul>
-<p><center><img alt="" src="{filename}/article_img/Python_Memory_Management_2014_09_10_23_17/python-memory-arena.png" /></center></p>
+<p><center><img alt="" src="/article_img/Python_Memory_Management_2014_09_10_23_17/python-memory-arena.png" /></center></p>
 <h3>arena的两种状态</h3>
 <p>arena存在两种状态: 未使用(没有建立联系)/可用(建立了联系)</p>
 <p>全局由两个链表维护着</p>
@@ -301,9 +304,9 @@ static<span class="w"> </span>struct<span class="w"> </span>arena_object<span cl
 
 
 <p>图示: 初始化arenas数组, 初始化后的所有arena都在<code>unused_arena_objects</code>单链表里面
-<center><img alt="" src="{filename}/article_img/Python_Memory_Management_2014_09_10_23_17/python-memory-arena2.png" /></center>
+<center><img alt="" src="/article_img/Python_Memory_Management_2014_09_10_23_17/python-memory-arena2.png" /></center>
 图示: 从arenas取一个arena进行初始化
-<center><img alt="" src="{filename}/article_img/Python_Memory_Management_2014_09_10_23_17/python-memory-arena3.png" /></center></p>
+<center><img alt="" src="/article_img/Python_Memory_Management_2014_09_10_23_17/python-memory-arena3.png" /></center></p>
 <h3>没有可用的arena?</h3>
 <p>此时</p>
 <div class="highlight"><pre>// 判断成立
@@ -354,7 +357,7 @@ if (unused_arena_objects == NULL) {
 
 
 <p>图示: 从全新的arena中获取一个pool</p>
-<p><center><img alt="" src="{filename}/article_img/Python_Memory_Management_2014_09_10_23_17/python-memory-arena4.png" /></center></p>
+<p><center><img alt="" src="/article_img/Python_Memory_Management_2014_09_10_23_17/python-memory-arena4.png" /></center></p>
 <p>假设arena是旧的, 怎么分配的pool</p>
 <div class="highlight"><pre>pool = usable_arenas-&gt;freepools;
 if (pool != NULL) {
@@ -381,7 +384,7 @@ PyObject_Free(void *p)
 
 <p>也就是说, 在pool整块被释放的时候, 会将pool加入到<code>arena-&gt;freepools</code>作为单链表的表头, 然后, 在从非全新arena中分配pool时, 优先从<code>arena-&gt;freepools</code>里面取, 如果取不到, 再从arena内存块里面获取。</p>
 <p>图示</p>
-<p><center><img alt="" src="{filename}/article_img/Python_Memory_Management_2014_09_10_23_17/python-memory-arena5.png" /></center></p>
+<p><center><img alt="" src="/article_img/Python_Memory_Management_2014_09_10_23_17/python-memory-arena5.png" /></center></p>
 <h3>一个arena满了之后呢</h3>
 <p>很自然, 从下一个arena中获取</p>
 <div class="highlight"><pre>void *
@@ -543,7 +546,7 @@ static poolp usedpools[128] = {
 
 <p>为了看懂这步的trick, 心好累&gt;_&lt;#</p>
 <p>直接上图：</p>
-<p><center><img alt="" src="{filename}/article_img/Python_Memory_Management_2014_09_10_23_17/python-memory-usedpool.png" /></center></p>
+<p><center><img alt="" src="/article_img/Python_Memory_Management_2014_09_10_23_17/python-memory-usedpool.png" /></center></p>
 <h3>new一个pool时维护</h3>
 <p>init获得的情况, 其实就是将刚刚从arena中获取的pool加入到 usedpools 对应的双向链表中, 然后初始化, 然后返回block。</p>
 <div class="highlight"><pre>     init_pool:
@@ -635,7 +638,7 @@ static poolp usedpools[128] = {
 
 
 <h3>全局结构</h3>
-<p><center><img alt="" src="{filename}/article_img/Python_Memory_Management_2014_09_10_23_17/python-memory-usedpool2.png" /></center></p>
+<p><center><img alt="" src="/article_img/Python_Memory_Management_2014_09_10_23_17/python-memory-usedpool2.png" /></center></p>
 <hr />
 <p>先这样吧, Python中整个内存池基本结构和机制大概如此, 是不是发现有好多数组/链表等等, 在分配/回收上处理下做成各种池.....
 后面还有内存相关的就是垃圾收集了, 后面再说了吧wklken2015-08-29</p>
@@ -688,6 +691,17 @@ static poolp usedpools[128] = {
                     <li><a href="/category/yin-shi-pin.html">音视频</a> (15)</li>
                 </ul>
             </div> 
+            
+            <div class="large-3 category-column column">
+                <h3>Feed</h3>
+                <ul>
+                    <li ><a href="/feeds/all.atom.xml" type="application/atom+xml">Atom Feed</a></li>
+                    <li ><a href="/feeds/all.rss.xml" type="application/rss+xml">RSS Feed</a></li>
+                </ul>
+            </div>
+            
+        
+        
 
                 <!--
             <iframe width="100%" height="600" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=600&fansRow=1&ptype=1&speed=0&skin=1&isTitle=0&noborder=0&isWeibo=1&isFans=0&uid=1819436507&verifier=4060feb2&colors=fc1f12,ffffff,666666,0082cb,ecfbfd&dpc=1"></iframe>            </div>

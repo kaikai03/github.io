@@ -18,6 +18,9 @@
         <link rel="stylesheet" href="/theme/css/lamboz.css" media="all">
         <title>Python Memory Management(1) - kairns`s Blog</title>
         <meta charset="utf-8" />
+        <link href="/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="kairns`s Blog Full Atom Feed" />
+        <link href="/feeds/all.rss.xml" type="application/rss+xml" rel="alternate" title="kairns`s Blog Full RSS Feed" />
+        <link href="/feeds/pydev.atom.xml" type="application/atom+xml" rel="alternate" title="kairns`s Blog Categories Atom Feed" />
         
 </head>
 <body onblur="leavePage()" onfocus="comebackPage()">
@@ -224,7 +227,7 @@ PyMem_Free(void *p)
 </pre></div>
 
 
-<p><center><img alt="" src="{filename}/article_img/Python_Memory_Management_2014_09_09_20_04/python-memory-blocks.png" /></center></p>
+<p><center><img alt="" src="/article_img/Python_Memory_Management_2014_09_09_20_04/python-memory-blocks.png" /></center></p>
 <p>注意: 这里有个<code>Size class idx</code>, 这个主要为了后面pool中用到。</p>
 <p>size class和size class index之间的转换</p>
 <div class="highlight"><pre>#define ALIGNMENT               8               /* must be 2^N */
@@ -288,7 +291,7 @@ size = (uint)(nbytes - 1) &gt;&gt; ALIGNMENT_SHIFT;
 <li>arenaindex, 后面说</li>
 </ul>
 <p>结构图: </p>
-<p><center><img alt="" src="{filename}/article_img/Python_Memory_Management_2014_09_09_20_04/python-memory-pools.png" /></center></p>
+<p><center><img alt="" src="/article_img/Python_Memory_Management_2014_09_09_20_04/python-memory-pools.png" /></center></p>
 <h3>pool初始化</h3>
 <p>从内存中初始化一个全新的空的<code>pool</code></p>
 <p><em>Objects/obmalloc.c</em>的</p>
@@ -358,7 +361,7 @@ PyObject_Malloc(size_t nbytes)
 
 
 <p>初始化后的图</p>
-<p><center><img alt="" src="{filename}/article_img/Python_Memory_Management_2014_09_09_20_04/python-memory-pools2.png" /></center></p>
+<p><center><img alt="" src="/article_img/Python_Memory_Management_2014_09_09_20_04/python-memory-pools2.png" /></center></p>
 <h3>pool进行block分配 - 0 总体代码</h3>
 <div class="highlight"><pre> if (pool != pool-&gt;nextpool) {   //
     /*
@@ -443,7 +446,7 @@ if (pool-&gt;nextoffset &lt;= pool-&gt;maxnextoffset) {
 
 
 <p>结果图示：</p>
-<p><center><img alt="" src="{filename}/article_img/Python_Memory_Management_2014_09_09_20_04/python-memory-pools3.png" /></center></p>
+<p><center><img alt="" src="/article_img/Python_Memory_Management_2014_09_09_20_04/python-memory-pools3.png" /></center></p>
 <h3>pool进行block分配 - 2 回收了某几个block</h3>
 <p>回收涉及的代码</p>
 <div class="highlight"><pre>void
@@ -481,7 +484,7 @@ PyObject_Free(void *p)
 <p>没释放一个block, 该block就会变成 <code>pool-&gt;freeblock</code> 的头节点, 而单链表一个节点如何指向下一个节点呢? 通过赋值, 节点内存空间保存着下个节点的地址, 最后一个节点指向NULL(知道上面代码-1的判断条件了吧&gt;_&lt;#)</p>
 <p>假设已经连续分配了5块, 第1块和第4块被释放</p>
 <p>此时内存图示：</p>
-<p><center><img alt="" src="{filename}/article_img/Python_Memory_Management_2014_09_09_20_04/python-memory-pools4.png" /></center></p>
+<p><center><img alt="" src="/article_img/Python_Memory_Management_2014_09_09_20_04/python-memory-pools4.png" /></center></p>
 <p>此时再一个block分配调用进来, 执行分配, 进入的逻辑是代码-1</p>
 <div class="highlight"><pre>bp = pool-&gt;freeblock; // 指针指向空闲block起始位置
 // 代码-1
@@ -494,7 +497,7 @@ if ((pool-&gt;freeblock = *(block **)bp) != NULL) {
 </pre></div>
 
 
-<p><center><img alt="" src="{filename}/article_img/Python_Memory_Management_2014_09_09_20_04/python-memory-pools5.png" /></center></p>
+<p><center><img alt="" src="/article_img/Python_Memory_Management_2014_09_09_20_04/python-memory-pools5.png" /></center></p>
 <h3>pool进行block分配 - 3 pool用完了</h3>
 <p>pool中内存空间都用完了, 进入代码-3</p>
 <div class="highlight"><pre>bp = pool-&gt;freeblock; // 指针指向空闲block起始位置
@@ -562,6 +565,17 @@ return (void *)bp;
                     <li><a href="/category/yin-shi-pin.html">音视频</a> (15)</li>
                 </ul>
             </div> 
+            
+            <div class="large-3 category-column column">
+                <h3>Feed</h3>
+                <ul>
+                    <li ><a href="/feeds/all.atom.xml" type="application/atom+xml">Atom Feed</a></li>
+                    <li ><a href="/feeds/all.rss.xml" type="application/rss+xml">RSS Feed</a></li>
+                </ul>
+            </div>
+            
+        
+        
 
                 <!--
             <iframe width="100%" height="600" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=600&fansRow=1&ptype=1&speed=0&skin=1&isTitle=0&noborder=0&isWeibo=1&isFans=0&uid=1819436507&verifier=4060feb2&colors=fc1f12,ffffff,666666,0082cb,ecfbfd&dpc=1"></iframe>            </div>
