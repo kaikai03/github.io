@@ -28,7 +28,7 @@ ukagaka.sayAnima = function(bla){
 
 
 ukagaka.sawaru = function(){
-    css_value="transparent url('/ukagaka/surface000"+parseInt(4*Math.random())+".png') no-repeat scroll 0% 0%";
+    css_value="transparent url('/ukagaka/surface000"+parseInt(3*Math.random())+".png') no-repeat scroll 0% 0%";
     $("#ukagaka_img").css("background",css_value);
 }
 
