@@ -1,0 +1,526 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="/theme/css/foundation.min.css" media="all">
+		<link rel="stylesheet" href="/theme/css/pygments.css" /> 
+		<link rel="stylesheet" href="/theme/css/style.css" />
+		<link rel="stylesheet" href="/theme/css/ukagaka.css" /> 
+        <script type="text/javascript" src="/theme/js/modernizr.js"></script>
+		<script type='text/javascript' src='/theme/js/jquery-1.11.1.min.js'></script>
+	    <script type="text/javascript" src="/theme/js/damoo.min.js"></script>
+		<script type="text/x-mathjax-config">MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});</script>
+        <script type="text/javascript">var js=document.createElement('script');js.setAttribute('src',(('https:' == document.location.protocol) ? ' https://' : ' http://')+'cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML');document.head.appendChild(js);</script>
+
+        <link href='https://fonts.useso.com/css?family=Exo+2:400,300,700,300italic,400italic,700italic,900,900italic' rel='stylesheet' type='text/css'>
+        <link rel="stylesheet" href="/theme/css/lamboz.css" media="all">
+        <title>matrix - kairns`s Blog</title>
+        <meta charset="utf-8" />
+        <link href="/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="kairns`s Blog Full Atom Feed" />
+        <link href="/feeds/all.rss.xml" type="application/rss+xml" rel="alternate" title="kairns`s Blog Full RSS Feed" />
+        <link href="/feeds/machinelearning.atom.xml" type="application/atom+xml" rel="alternate" title="kairns`s Blog Categories Atom Feed" />
+        
+</head>
+<body onblur="leavePage()" onfocus="comebackPage()">
+    <div class="pages">
+        <ul>
+            <li class="home"><a href="/index.html">Home</a></li>
+            <li ><a href="/pages/about-me.html">About Me</a></li>
+            <li ><a href="/pages/Python_Packages_2012_11_05_12_18.html">Python Packages</a></li>
+        </ul>
+    </div>
+
+<div class="hp-header-inner">
+    <div class="page-header">
+        <div class="content-header">
+            <div id="title-block">
+            <h1>  <a href="/2014/matrix_2014_08_17_10_44.html" rel="bookmark"
+                    title="Permalink to matrix">matrix</a></h1>
+            </div>
+        </div>
+    </div>
+</div>
+    <div class="content">
+        <div class="data-holder">
+        <div class="row">
+           <div class="large-9 content-column column">
+<div class="content-article">
+    <header class="header-article">
+        <div class="read-more">Posted on Sun 17 August 2014</div>
+ 
+   </header>
+    <section class='article'>
+        
+        <div class="entry-summary">
+            <p>前两天看PCA发现矩阵忘得差不多了，补一下概念！</p>
+        </div>
+    
+        <div class="entry-content">
+            <h2>矩阵基本概念</h2>
+<h3>梯度</h3>
+<p>量度标量场改变的速度与方向；标量场的斜度是个向量。</p>
+<h3>旋度</h3>
+<p>量度向量场倾向绕著一个点旋转的程度；向量的卷曲是个向量场。</p>
+<h3>散度(divergence)</h3>
+<p>量度向量场倾向源于一点的程度。</p>
+<h3>点积</h3>
+<p>在数学中，数量积（dot product; scalar product，也称为点积）是接受在实数R上的两个向量并返回一个实数值标量的二元运算。它是欧几里得空间的标准内积。</p>
+<p>两个向量$ a = [a_1, a_2, \cdot \cdot \cdot , a_n] $和$ b = [b_1, b_2, \cdot \cdot \cdot , b_n] $的点积定义为：
+$$ a \cdot b=a_1b_1+a_2b_2+ \cdot \cdot \cdot +a_nb_n $$</p>
+<p>使用矩阵乘法并把（纵列）向量当作n*1矩阵，点积还可以写为：
+$ a\cdot b=a*b^T $，这里的$ b^T $指示矩阵b的转置。</p>
+<p>上边的为代数定义，如果要写成几何定义的话：$ \vec{a}\cdot \vec{b} = \mid \vec{a} \mid \mid \vec{b} \mid \cos \theta $，$ \theta $为两个向量的夹角。该定义只对二维和三维空间有效。</p>
+<h3>正交</h3>
+<p>两个向量正交意味着它们是相互垂直的。若向量α与β正交，则记为α⊥β。</p>
+<h3>正交函数系</h3>
+<p>在三角函数系中任何不同的两个函数的乘积在区间[-π,π]上的积分等于0，则称这样的三角函数组成的体系叫正交函数系。</p>
+<p>三角函数系{1,cosx,sinx,cos2x,sin2x,……,cosnx,sinnx,……}</p>
+<h3>正交矩阵</h3>
+<p>A是一个n阶方阵,$ A^{-1}=A^T $  或 $AA^T=A^TA=EA $,则A叫做正交矩阵。</p>
+<p>条件:</p>
+<ul>
+<li>A^T是正交矩阵</li>
+<li>$ AA^T=A^TA=EA $</li>
+<li>A的各行是单位向量且两两正交</li>
+<li>A的各列是单位向量且两两正交</li>
+<li>(Ax,Ay)=(x,y) x,y∈R</li>
+<li>|A| = 1或-1</li>
+</ul>
+<p>定理:</p>
+<ol>
+<li>方阵A正交的充要条件是A的行（列) 向量组是单位正交向量组；</li>
+<li>方阵A正交的充要条件是A的n个行（列)向量是n维向量空间的一组标准正交基；</li>
+<li>A是正交矩阵的充要条件是：A的行向量组两两正交且都是单位向量；</li>
+<li>A的列向量组也是正交单位向量组。</li>
+<li>正交方阵是欧氏空间中标准正交基到标准正交基的过渡矩阵。
+在矩阵论中，实数正交矩阵是方块矩阵Q，它的转置矩阵是它的逆矩阵，如果正交矩阵的行列式为 +1，则我们称之为特殊正交矩阵</li>
+</ol>
+<h3>基矩阵</h3>
+<p>矩阵里的基是指能组成其他矩阵形式的基本矩阵。现在我们用矩阵形式写出基向量和基，这样的矩阵我们叫它基矩阵。</p>
+<p>例如：在3-D空间中，我们用空间坐标系来规范物体的位置，空间坐标系由3个相互垂直的坐标轴组成，我们就把它们作为我们观察3-D空间的基础，空间中物体的位置可以通过它们来衡量。当我们把这3个坐标轴上单位长度的向量记为3个相互正交的单位向量i,j,k，空间中每一个点的位置都可以被这3个向量线性表出，如P&lt;1,-2,3&gt;这个点可以表为i-2j+3k。</p>
+<p>我们把这3个正交的单位向量称为空间坐标系的基，它们单位长度为1且正交，所以可以成为标准正交基。三个向量叫做基向量。现在我们用矩阵形式写出基向量和基。</p>
+<h3>极大线性无关组</h3>
+<p>极大线性无关组，就是其他的东西都可以由“基”线性表示，而这些“基”本身又是线性无关的。</p>
+<p>设S是一个n维向量组,$ α_1,α_2,\cdot \cdot \cdot α_r $ 是S的一个部分组，如果</p>
+<ol>
+<li>α1,α2,...αr 线性无关；</li>
+<li>向量组S中每一个向量均可由此部分组线性表示，</li>
+</ol>
+<p>那么α1,α2,...αr 称为向量组S的一个极大线性无关组,或极大无关组。</p>
+<p>性质 :</p>
+<ul>
+<li>极大线性无关组与向量组本身等价</li>
+<li>两个极大线性无关组都是等价的</li>
+<li>向量个数小于或等于后者</li>
+</ul>
+<h3>酉矩阵</h3>
+<p>n阶复方阵U的n个列向量是U空间的一个标准正交基，则U是酉矩阵(Unitary Matrix)。显然酉矩阵是正交矩阵往复数域上的推广。酉矩阵又称为幺正矩阵。</p>
+<p>U是酉矩阵的充分必要条件是，它的n个列向量是两两正交的单位向量。</p>
+<p>一个简单的充分必要判别准则是：$ U^{-1} = U^H $
+酉矩阵的共轭转置和它的逆矩阵相等。</p>
+<p>酉方阵在量子力学中有着重要的应用。酉等价是标准正交基到标准正交基的特殊基变换。</p>
+<h3>秩</h3>
+<p>讲到矩阵的秩，几乎必然要引入矩阵的SVD分解：X=USV'，U,V正交阵，S是对角阵。如果是完全SVD分解的话，那S对角线上非零元的个数就是这个矩阵的秩了（这些对角线元素叫做奇异值），还有些零元，这些零元对秩没有贡献。</p>
+<ol>
+<li>
+<p>把矩阵当做样本集合，每一行（或每一列，这个无所谓）是一个样本，那么矩阵的秩就是这些样本所张成的线性子空间维数。如果矩阵秩远小于样本维数（即矩阵列数），那么这些样本相当于只生活在外围空间中的一个低维子空间，这样就能实施降维操作。举个例子，同一个人在不同光照下采得的正脸图像，假设每一张都是192x168的，且采集了50张，那构成的数据矩阵就为50行192x168列的，但是如果你做SVD分解就会发现，大概只有前10个奇异值比较大，其他的奇异值都接近零，因此实际上可以将接近零的奇异值所对应的那些维度丢掉，只保留前10个奇异值对应的子空间，从而将数据降维到10维的子空间了。</p>
+</li>
+<li>
+<p>把矩阵当做一个映射，既然是映射，那就得考虑它作用在向量x上的效果Ax。注意Ax相当于A的列的某个线性组合，如果矩阵是低秩的，这意味着这些列所张成的空间是外围空间的一个低维子空间，这个空间由Ax表达（其中x任意）。换句话说，这个矩阵把R^n空间映射到R^m空间，但是其映射的像只在R^m空间的一个低维子空间内生活。从SVD理解的话，Ax=USV'x，因此有三个变换：第一是V'x，相当于在原始的R^n空间旋转了一下坐标轴，这样只是坐标的变化，不改变向量本身（例如长度不变）；第二是S(V'x)，这相当于沿着各个坐标轴做拉伸，并且如果S的对角线上某些元素为零，那么这些元素所对应的那些坐标轴就相当于直接丢掉了；最后再U(SV'x)，还是一个坐标轴旋转。总的来看，Ax就相当于把一个向量x沿着某些特定的方向做不同程度的拉伸（附带上一些不关乎本质的旋转），甚至丢弃，那些没被丢弃的方向个数就是秩了。</p>
+</li>
+</ol>
+<h2>矩阵基本计算</h2>
+<h3>矩阵加法</h3>
+<p>前提条件：同型矩阵<br>
+操作数：两个m*n矩阵$ A=[a_{ij}],B=[b_{ij}] $<br>
+基本动作：元素对应相加 <br></p>
+<p>$$ A+B = \begin{bmatrix} a_{11}+b_{11} &amp;a_{12}+b_{12} &amp;\cdot \cdot \cdot &amp;a_{1n}+b_{1n} \\ a_{21}+b_{21} &amp;a_{22}+b_{22} &amp;\cdot \cdot \cdot &amp;a_{2n}+b_{2n} \\ \cdot &amp;\cdot  &amp;\cdot  &amp;\cdot \\ a_{m1}+b_{m1} &amp;a_{m2}+b_{m2} &amp;\cdot \cdot \cdot &amp;a_{mn}+b_{mn} \end{bmatrix} = [a_{ij}+b_{ij}] $$</p>
+<h3>矩阵减法</h3>
+<p>前提条件：同型矩阵<br>
+操作数：两个m*n矩阵$A=[a_{ij}],B=[b_{ij}]$<br>
+基本动作：元素对应相减 <br></p>
+<p>$$ A-B = \begin{bmatrix} a_{11}-b_{11} &amp;a_{12}-b_{12} &amp;\cdot \cdot \cdot &amp;a_{1n}-b_{1n} \\ a_{21}-b_{21} &amp;a_{22}-b_{22} &amp;\cdot \cdot \cdot &amp;a_{2n}-b_{2n} \\ \cdot &amp;\cdot  &amp;\cdot  &amp;\cdot \\ a_{m1}-b_{m1} &amp;a_{m2}-b_{m2} &amp;\cdot \cdot \cdot &amp;a_{mn}-b_{mn} \end{bmatrix} = [a_{ij}-b_{ij}] $$</p>
+<h3>矩阵取负</h3>
+<p>前提条件：无<br>
+操作数：任意一个m*n矩阵$ A=[a_{ij}] $ <br>
+基本动作：元素对应取负 <br></p>
+<p>$$ -A = \begin{bmatrix} -a_{11} &amp;-a_{12} &amp;\cdot \cdot \cdot &amp;-a_{1n} \\ -a_{21} &amp;-a_{22} &amp;\cdot \cdot \cdot &amp;-a_{2n} \\ \cdot &amp;\cdot  &amp;\cdot  &amp;\cdot \\ -a_{m1} &amp;-a_{m2} &amp;\cdot \cdot \cdot &amp;-a_{mn} \end{bmatrix} = [-a_{ij}] $$</p>
+<h3>矩阵乘法</h3>
+<p>前提条件：左矩阵A的列数与右矩阵B的行数相等<br>
+操作数：m*n矩阵$ A=[a_{ij}]$，n*m矩阵$B=[b_{ij}]$，A是具有m行的行矩阵$ A = \begin{bmatrix} a_1 \\ a_2 \\ \cdot \\ a_m \end{bmatrix} $，B是具有n列的列矩阵$ B = \begin{bmatrix} b_1 &amp; b_2 &amp; \cdot \cdot \cdot &amp; b_n \end{bmatrix} $ <br>
+基本动作：行列积 <br></p>
+<p>$$ AB = \begin{bmatrix} a_1 \\ a_2 \\ \cdot \\ a_m \end{bmatrix} \begin{bmatrix} b_1 &amp; b_2 &amp; \cdot \cdot \cdot &amp; b_n \end{bmatrix}  = \begin{bmatrix} a_1 b_1 &amp;a_1 b_2  &amp;\cdot \cdot \cdot  &amp;a_1b_n \\ a_2 b_1 &amp;a_2 b_2  &amp;\cdot \cdot \cdot  &amp;a_2 b_n \\ \cdot &amp;\cdot  &amp;\cdot \cdot \cdot  &amp;\cdot \\ a_m b_1 &amp;a_m b_2  &amp;\cdot \cdot \cdot  &amp;a_m b_n \end{bmatrix} $$</p>
+<h3>矩阵数乘</h3>
+<p>前提条件：无<br>
+操作数：任意一个m*n矩阵$ A=[a_{ij}] $，数k<br>
+基本动作：数k乘以每一个元素 <br></p>
+<p>$$ kA = \begin{bmatrix} ka_{11} &amp;ka_{12}  &amp;\cdot \cdot \cdot  &amp;ka_{1n} \\ ka_{21} &amp;ka_{22}  &amp;\cdot \cdot \cdot  &amp;ka_{2n} \\ \cdot &amp;\cdot  &amp;\cdot \cdot \cdot  &amp;\cdot \\ ka_{m1} &amp;ka_{m2}  &amp;\cdot \cdot \cdot  &amp;ka_{mn} \end{bmatrix}= [ka_{ij}]$$</p>
+<h3>矩阵转置</h3>
+<p>前提条件：无<br>
+操作数：任意一个m*n矩阵$ A=[a_{ij}] $ <br>
+基本动作：行列互换，第i行第j列的元素换为第j行第i列的元素，m*n的矩阵转置后为n*m矩阵 <br></p>
+<p>$$ A^T = \begin{bmatrix} a_{11} &amp;a_{21}  &amp;\cdot \cdot \cdot  &amp;a_{m1} \\ a_{12} &amp;a_{22}  &amp;\cdot \cdot \cdot  &amp;a_{m2} \\ \cdot &amp;\cdot  &amp;\cdot \cdot \cdot  &amp;\cdot \\ a_{1n} &amp;a_{2n} &amp;\cdot \cdot \cdot  &amp;a_{mn} \end{bmatrix} $$</p>
+<p>矩阵运算不满足交换律和消去率。</p>
+        </div>
+    </section>
+    <footer class="footer-article">
+        <div class="tags-and-categories">Filed under <a href="/category/machinelearning.html">MachineLearning</a>
+        | Tagged: <a href="/tag/algorithm.html">algorithm </a><a href="/tag/math.html">Math </a>
+        | <a href="/2014/matrix_2014_08_17_10_44.html" rel="bookmark"
+         title="Permalink to matrix">Permalink</a>            
+        </div>
+        <!-- metaldata 
+        -->
+    </footer>
+</div>
+<div id="disqus_thread"></div>
+<script type="text/javascript" src="/theme/js/disqus.js"></script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+            </div>
+            
+            
+			<div class="large-3 aside column">
+				<img class="headIcon-large avatar" src="/sys_img/head.jpg" alt="(┬＿┬)">
+                <h2>李凯</h2>
+                <h3>kairns leeky</h3>
+				<a href="mailto:kai_kai03@hotmail.com?subject=%20&body=from%20blog"><Email>kai_kai03@hotmail.com</Email></a>
+            </div>
+            
+            
+			
+			<div class="large-3 aside column">
+                <h3>Socials</h3>
+                <ul>
+                    <li><a href="http://weibo.com/mipamipami">新浪weibo</a></li>
+                    <li><a href="https://plus.google.com/105166364351021934050">g+</a></li>
+                </ul>
+            </div> 
+            
+            <div class="large-3 category-column column">
+                <h3>Categories</h3>
+                <ul>
+                    <li><a href="/category/db.html">DB</a> (3)</li>
+                    <li><a href="/category/idev.html">iDev</a> (14)</li>
+                    <li class="active"><a href="/category/machinelearning.html">MachineLearning</a> (18)</li>
+                    <li><a href="/category/musical.html">Musical</a> (1)</li>
+                    <li><a href="/category/other.html">other</a> (2)</li>
+                    <li><a href="/category/pydev.html">pyDev</a> (17)</li>
+                    <li><a href="/category/yin-shi-pin.html">音视频</a> (15)</li>
+                </ul>
+            </div> 
+            
+            <div class="large-3 category-column column">
+                <h3>Feeds</h3>
+                <ul>
+                    <li ><a href="/feeds/all.atom.xml" type="application/atom+xml">Atom Feed</a></li>
+                    <li ><a href="/feeds/all.rss.xml" type="application/rss+xml">RSS Feed</a></li>
+                </ul>
+            </div>
+            
+        
+        
+
+                <!--
+            <iframe width="100%" height="600" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=600&fansRow=1&ptype=1&speed=0&skin=1&isTitle=0&noborder=0&isWeibo=1&isFans=0&uid=1819436507&verifier=4060feb2&colors=fc1f12,ffffff,666666,0082cb,ecfbfd&dpc=1"></iframe>            </div>
+            -->
+         
+    </div>
+</div>
+    <div class="footer">
+        <div class="data-holder">
+        <div class="row">
+            <div class="large-3 column">
+<div class="Verse">
+    <h3>bo主偈语</h3>
+    <p>これも欲しい</p>
+    <p>あれも欲しい</p>
+    <p1>金がなくて悲しい</p1>
+    <p>これもセール</p>
+    <p>あれもセール</p>
+    <p1>全部買うと責められる</p1>
+    <p>これかっこい</p>
+    <p>あれも可愛い</p>
+    <p1>買えないので悔しい</p1>
+    <p>いつ金が入る？</p>
+    <p>いつ金が入る？</p>
+    <p1>あの時まだ間に合う？</p1>
+    <p>phaも買った</p>
+    <p>hmzも買った</p>
+    <p>嬉しいけど.....</p>
+    <p1>土しか食べられるものは無かった</p1>
+    <p1>嗯...2015年...vps不续费了...</p1>
+</div>           </div>
+           <div class="large-6 tag-cloud column">
+                <h3>Tags</h3>
+                <ul class="tagcloud">
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/nao-dong.html">脑洞
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/chord.html">Chord
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/websocket.html">WebSocket
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/mongo.html">mongo
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/classification.html">classification
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/shi-xu-tu.html">时序图
+                        </a></li>
+                    <li>
+											<span class="badge">5</span>
+                        <a href="/tag/chan-pin.html">产品
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/fuck.html">fuck
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/gc.html">GC
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/rtmp.html">RTMP
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/unicode.html">unicode
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/dylib.html">dylib
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/protocol.html">protocol
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/pycon.html">PyCon
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/cai-ji.html">采集
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/clustering.html">clustering
+                        </a></li>
+                    <li>
+											<span class="badge">6</span>
+                        <a href="/tag/web.html">Web
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/yi-zhi.html">移植
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/network.html">network
+                        </a></li>
+                    <li>
+											<span class="badge">6</span>
+                        <a href="/tag/flask.html">Flask
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/review.html">review
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/nodejs.html">Node.js
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/pep.html">PEP
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/features.html">Features
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/wu-tai.html">舞台
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/cnn.html">CNN
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/pca.html">PCA
+                        </a></li>
+                    <li>
+											<span class="badge">6</span>
+                        <a href="/tag/webrtc.html">webRtc
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/css.html">CSS
+                        </a></li>
+                    <li>
+											<span class="badge">8</span>
+                        <a href="/tag/object-c.html">Object-C
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/memory.html">Memory
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/life.html">life
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/flask-socketio.html">Flask-SocketIO
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/linear.html">Linear
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/dataprocessing.html">DataProcessing
+                        </a></li>
+                    <li>
+											<span class="badge">17</span>
+                        <a href="/tag/python.html">Python
+                        </a></li>
+                    <li>
+											<span class="badge">6</span>
+                        <a href="/tag/javascript.html">JavaScript
+                        </a></li>
+                    <li>
+											<span class="badge">16</span>
+                        <a href="/tag/ios.html">iOS
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/encode.html">encode
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/xcode.html">xCode
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/appstore.html">appstore
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/html5.html">html5
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/liu-cheng.html">流程
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/uiimage.html">UIImage
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/decorator.html">Decorator
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/ipad.html">iPad
+                        </a></li>
+                    <li>
+											<span class="badge">5</span>
+                        <a href="/tag/c.html">C++
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/audio.html">audio
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/ffmpeg.html">FFmpeg
+                        </a></li>
+                    <li>
+											<span class="badge">15</span>
+                        <a href="/tag/algorithm.html">algorithm
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/database.html">database
+                        </a></li>
+                    <li>
+											<span class="badge">11</span>
+                        <a href="/tag/ml.html">ML
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/yan-zou.html">演奏
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/framework.html">framework
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/gbk.html">GBK
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/rfc.html">rfc
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/cache.html">cache
+                        </a></li>
+                    <li>
+											<span class="badge">12</span>
+                        <a href="/tag/math.html">Math
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/jia-gou.html">架构
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/obs.html">OBS
+                        </a></li>
+                </ul>
+            </div>
+
+            <div class="large-3 aside column">
+                <h3>Links</h3>
+                <ul>
+                    <li><a href="http://getpelican.com/">Pelican</a></li><br/>
+                    <li><a href="http://python.org/">Python.org</a></li><br/>
+                    <li><a href="http://jinja.pocoo.org/">Jinja2</a></li><br/>
+                    <li><a href="#"> ฅ'ω'ฅ </a></li><br/>
+                </ul>
+                
+            </div>
+
+        </row>
+        </div>
+        <div class="row">
+            <div class="small-12 column">
+                <p style="font-size: 0.7em; text-align:center;">
+                ∠( ᐛ 」∠)＿不会有人拉到这么下边的呀就算拉下来也不会去看的呀这么小的字也看不清的口牙！ ©2015.
+                <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1257347159'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1257347159%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+                <script type="text/javascript" src="/theme/js/analytics.js"></script>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    
+</body>
+</html>

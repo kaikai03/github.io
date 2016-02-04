@@ -1,0 +1,477 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="/theme/css/foundation.min.css" media="all">
+		<link rel="stylesheet" href="/theme/css/pygments.css" /> 
+		<link rel="stylesheet" href="/theme/css/style.css" />
+		<link rel="stylesheet" href="/theme/css/ukagaka.css" /> 
+        <script type="text/javascript" src="/theme/js/modernizr.js"></script>
+		<script type='text/javascript' src='/theme/js/jquery-1.11.1.min.js'></script>
+	    <script type="text/javascript" src="/theme/js/damoo.min.js"></script>
+		<script type="text/x-mathjax-config">MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});</script>
+        <script type="text/javascript">var js=document.createElement('script');js.setAttribute('src',(('https:' == document.location.protocol) ? ' https://' : ' http://')+'cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML');document.head.appendChild(js);</script>
+
+        <link href='https://fonts.useso.com/css?family=Exo+2:400,300,700,300italic,400italic,700italic,900,900italic' rel='stylesheet' type='text/css'>
+        <link rel="stylesheet" href="/theme/css/lamboz.css" media="all">
+        <title>极大似然估计 - kairns`s Blog</title>
+        <meta charset="utf-8" />
+        <link href="/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="kairns`s Blog Full Atom Feed" />
+        <link href="/feeds/all.rss.xml" type="application/rss+xml" rel="alternate" title="kairns`s Blog Full RSS Feed" />
+        <link href="/feeds/machinelearning.atom.xml" type="application/atom+xml" rel="alternate" title="kairns`s Blog Categories Atom Feed" />
+        
+</head>
+<body onblur="leavePage()" onfocus="comebackPage()">
+    <div class="pages">
+        <ul>
+            <li class="home"><a href="/index.html">Home</a></li>
+            <li ><a href="/pages/about-me.html">About Me</a></li>
+            <li ><a href="/pages/Python_Packages_2012_11_05_12_18.html">Python Packages</a></li>
+        </ul>
+    </div>
+
+<div class="hp-header-inner">
+    <div class="page-header">
+        <div class="content-header">
+            <div id="title-block">
+            <h1>  <a href="/2014/MLE_2014_08_07_19_09.html" rel="bookmark"
+                    title="Permalink to 极大似然估计">极大似然估计</a></h1>
+            </div>
+        </div>
+    </div>
+</div>
+    <div class="content">
+        <div class="data-holder">
+        <div class="row">
+           <div class="large-9 content-column column">
+<div class="content-article">
+    <header class="header-article">
+        <div class="read-more">Posted on Thu 07 August 2014</div>
+ 
+   </header>
+    <section class='article'>
+        
+        <div class="entry-summary">
+            <p>读书笔记--最大可能性！</p>
+        </div>
+    
+        <div class="entry-content">
+            <h2>Maximum Likelihood Estimate</h2>
+<h3>似然函数</h3>
+<p>在数理统计学中，似然函数是一种关于统计模型中的参数的函数，表示模型参数中的似然性。</p>
+<p>似然函数在统计推断中有重大作用，如在最大似然估计和费雪信息之中的应用等等。“似然性”与“或然性”或“概率”意思相近，都是指某种事件发生的可能性，但是在统计学中，“似然性”和“或然性”或“概率”又有明确的区分。</p>
+<p>概率 用于在已知一些参数的情况下，预测接下来的观测所得到的结果，而</p>
+<p>似然性 则是用于在已知某些观测所得到的结果时，对有关事物的性质的参数进行估计。</p>
+<p>在这种意义上，似然函数可以理解为条件概率的逆反。</p>
+<p>在已知某个参数<strong>B</strong>时，事件<strong>A</strong>会发生的概率写作 $ \mathbb{P}(A \mid B) $。</p>
+<p>$$ P(A \mid B) = \frac{P(A , B)}{P(B)} $$</p>
+<p>利用贝叶斯定理，</p>
+<p>$$ P(B \mid A) = \frac{P(A \mid B)\;P(B)}{P(A)} $$</p>
+<p>因此，我们可以反过来构造表示似然性的方法：已知有事件<strong>A</strong>发生，运用似然函数$$ \mathbb{L}(B \mid A) $$，我们估计参数<strong>B</strong>的可能性。</p>
+<p>形式上，似然函数也是一种条件概率函数，但我们关注的变量改变了：</p>
+<p>$$ b\mapsto P(A \mid B=b) $$</p>
+<p>注意到这里并不要求似然函数满足归一性：</p>
+<p>$$ \sum_{b \in \mathcal{B}}{P(A \mid B=b)} = 1  $$</p>
+<p>一个似然函数乘以一个正的常数之后仍然是似然函数。对所有$ \alpha &gt; 0 $，都可以有似然函数：</p>
+<p>$$ L(b \mid A) = \alpha \; P(A \mid B=b) $$</p>
+<p>例子：</p>
+<p>考虑投掷一枚硬币的实验。通常来说，已知投出的硬币正面朝上和反面朝上的概率各自是$ p_H = 0.5 $，便可以知道投掷若干次后出现各种结果的可能性。比如说，投两次都是正面朝上的概率是0.25。用条件概率表示，就是：</p>
+<p>$$ P(\mbox{HH} \mid p_H = 0.5) = 0.5^2 = 0.25 $$</p>
+<p>其中<strong>H</strong>表示正面朝上。</p>
+<p>在统计学中，我们关心的是在已知一系列投掷的结果时，关于硬币投掷时正面朝上的可能性的信息。我们可以建立一个统计模型：假设硬币投出时会有$ p_H $ 的概率正面朝上，而有$ 1 − p_H $的概率反面朝上。这时，条件概率可以改写成似然函数：</p>
+<p>$$ L(p_H = 0.5 \mid \mbox{HH}) = P(\mbox{HH}\mid p_H = 0.5) =0.25 $$</p>
+<p>也就是说，对于取定的似然函数，在观测到两次投掷都是正面朝上时，$ p_H = 0.5 $ 的似然性是0.25（这并不表示当观测到两次正面朝上时$ p_H = 0.5 $ 的<strong>概率</strong>是0.25）。</p>
+<p>如果考虑$ p_H = 0.6 $，那么似然函数的值也会改变。</p>
+<p>$$ L(p_H = 0.6 \mid \mbox{HH}) = P(\mbox{HH}\mid p_H = 0.6) =0.36 $$</p>
+<p>注意到似然函数的值变大了。这说明，如果参数$ p_H $的取值变成0.6的话，结果观测到连续两次正面朝上的概率要比假设$ p_H = 0.5 $时更大。也就是说，参数 $ p_H $ 取成0.6 要比取成0.5 更有说服力，更为“合理”。总之，似然函数的重要性不是它的具体取值，而是当参数变化时函数到底变小还是变大。对同一个似然函数，如果存在一个参数值，使得它的函数值达到最大的话，那么这个值就是最为“合理”的参数值。</p>
+<p>在这个例子中，似然函数实际上等于：
+$$ L(p_H = \theta \mid \mbox{HH}) = P(\mbox{HH}\mid p_H = \theta) =\theta^2 $$ 
+其中 $0 \le p_H \le 1 $。</p>
+<p>如果取$ p_H = 1 $ ，那么似然函数达到最大值1。也就是说，当连续观测到两次正面朝上时，假设硬币投掷时正面朝上的概率为1是最合理的。</p>
+<p>类似地，如果观测到的是三次投掷硬币，头两次正面朝上，第三次反面朝上，那么似然函数将会是：
+$$L(p_H = \theta \mid \mbox{HHT}) = P(\mbox{HHT}\mid p_H = \theta) =\theta^2(1 - \theta)$$ ，
+其中T表示反面朝上，$ 0 \le p_H \le 1 $ 。</p>
+<p>这时候，似然函数的最大值将会在$ p_H = \frac{2}{3} $的时候取到。也就是说，当观测到三次投掷中前两次正面朝上而后一次反面朝上时，估计硬币投掷时正面朝上的概率$ p_H = \frac{2}{3} $ 是最合理的。</p>
+<h3>似然估计</h3>
+<p>$$ L(\theta)=L(x_1,x_2,\cdot \cdot \cdot ,x_n;\theta) = \prod_{i=1}^{n}P(x_i;\theta),\theta\in \Theta $$</p>
+<p>既概率密度参数是 $ \theta $ 时，得到x组样本的概率。<br>
+x是已知的，只有 $ \theta $ 是未知的。<br>
+它是$ \theta $的函数，表示不同$ \theta $下取得当前样本的可能性。称为参数$ \theta $相对于样本集x的似然函数。</p>
+<h3>最大似然估计</h3>
+<p>$$ \theta = argmax L(\theta) $$</p>
+<p>有时候$ L(\theta) $ 是连乘的，还可以定义对数似然，将其变为连加：</p>
+<p>$$ H(\theta) = \ln L(\theta) = ln\prod_{i=1}^{n}P(x_i;\theta) = \sum_{i=1}^{n}\ln P(x_i;\theta) $$</p>
+<p>以上，要求 $ \theta $ ，只要使 $ \theta $ 的似然函数 $ L(\theta) $极大化，然后极大值对应的$ \theta $就是我们的估计。</p>
+<p>最值等于求导，导数为0，那么方程解就是$ \theta $了。<br>
+如果$ \theta $包括多个参数向量，那么求的是$ L(\theta) $对应所有参数的偏导，也就是梯度。</p>
+<p>n个未知数就是n个方程，方程组的解就是极值点，当然也就得到几个参数。</p>
+<p>总结：</p>
+<ol>
+<li>写出似然函数。</li>
+<li>对似然函数取对数，整理。</li>
+<li>求导数，令导数得0，得到似然方程。</li>
+<li>求解。</li>
+</ol>
+        </div>
+    </section>
+    <footer class="footer-article">
+        <div class="tags-and-categories">Filed under <a href="/category/machinelearning.html">MachineLearning</a>
+        | Tagged: <a href="/tag/algorithm.html">algorithm </a><a href="/tag/math.html">Math </a>
+        | <a href="/2014/MLE_2014_08_07_19_09.html" rel="bookmark"
+         title="Permalink to 极大似然估计">Permalink</a>            
+        </div>
+        <!-- metaldata 
+        -->
+    </footer>
+</div>
+<div id="disqus_thread"></div>
+<script type="text/javascript" src="/theme/js/disqus.js"></script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+            </div>
+            
+            
+			<div class="large-3 aside column">
+				<img class="headIcon-large avatar" src="/sys_img/head.jpg" alt="(┬＿┬)">
+                <h2>李凯</h2>
+                <h3>kairns leeky</h3>
+				<a href="mailto:kai_kai03@hotmail.com?subject=%20&body=from%20blog"><Email>kai_kai03@hotmail.com</Email></a>
+            </div>
+            
+            
+			
+			<div class="large-3 aside column">
+                <h3>Socials</h3>
+                <ul>
+                    <li><a href="http://weibo.com/mipamipami">新浪weibo</a></li>
+                    <li><a href="https://plus.google.com/105166364351021934050">g+</a></li>
+                </ul>
+            </div> 
+            
+            <div class="large-3 category-column column">
+                <h3>Categories</h3>
+                <ul>
+                    <li><a href="/category/db.html">DB</a> (3)</li>
+                    <li><a href="/category/idev.html">iDev</a> (14)</li>
+                    <li class="active"><a href="/category/machinelearning.html">MachineLearning</a> (18)</li>
+                    <li><a href="/category/musical.html">Musical</a> (1)</li>
+                    <li><a href="/category/other.html">other</a> (2)</li>
+                    <li><a href="/category/pydev.html">pyDev</a> (17)</li>
+                    <li><a href="/category/yin-shi-pin.html">音视频</a> (15)</li>
+                </ul>
+            </div> 
+            
+            <div class="large-3 category-column column">
+                <h3>Feeds</h3>
+                <ul>
+                    <li ><a href="/feeds/all.atom.xml" type="application/atom+xml">Atom Feed</a></li>
+                    <li ><a href="/feeds/all.rss.xml" type="application/rss+xml">RSS Feed</a></li>
+                </ul>
+            </div>
+            
+        
+        
+
+                <!--
+            <iframe width="100%" height="600" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=600&fansRow=1&ptype=1&speed=0&skin=1&isTitle=0&noborder=0&isWeibo=1&isFans=0&uid=1819436507&verifier=4060feb2&colors=fc1f12,ffffff,666666,0082cb,ecfbfd&dpc=1"></iframe>            </div>
+            -->
+         
+    </div>
+</div>
+    <div class="footer">
+        <div class="data-holder">
+        <div class="row">
+            <div class="large-3 column">
+<div class="Verse">
+    <h3>bo主偈语</h3>
+    <p>これも欲しい</p>
+    <p>あれも欲しい</p>
+    <p1>金がなくて悲しい</p1>
+    <p>これもセール</p>
+    <p>あれもセール</p>
+    <p1>全部買うと責められる</p1>
+    <p>これかっこい</p>
+    <p>あれも可愛い</p>
+    <p1>買えないので悔しい</p1>
+    <p>いつ金が入る？</p>
+    <p>いつ金が入る？</p>
+    <p1>あの時まだ間に合う？</p1>
+    <p>phaも買った</p>
+    <p>hmzも買った</p>
+    <p>嬉しいけど.....</p>
+    <p1>土しか食べられるものは無かった</p1>
+    <p1>嗯...2015年...vps不续费了...</p1>
+</div>           </div>
+           <div class="large-6 tag-cloud column">
+                <h3>Tags</h3>
+                <ul class="tagcloud">
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/nao-dong.html">脑洞
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/chord.html">Chord
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/websocket.html">WebSocket
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/mongo.html">mongo
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/classification.html">classification
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/shi-xu-tu.html">时序图
+                        </a></li>
+                    <li>
+											<span class="badge">5</span>
+                        <a href="/tag/chan-pin.html">产品
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/fuck.html">fuck
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/gc.html">GC
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/rtmp.html">RTMP
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/unicode.html">unicode
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/dylib.html">dylib
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/protocol.html">protocol
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/pycon.html">PyCon
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/cai-ji.html">采集
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/clustering.html">clustering
+                        </a></li>
+                    <li>
+											<span class="badge">6</span>
+                        <a href="/tag/web.html">Web
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/yi-zhi.html">移植
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/network.html">network
+                        </a></li>
+                    <li>
+											<span class="badge">6</span>
+                        <a href="/tag/flask.html">Flask
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/review.html">review
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/nodejs.html">Node.js
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/pep.html">PEP
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/features.html">Features
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/wu-tai.html">舞台
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/cnn.html">CNN
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/pca.html">PCA
+                        </a></li>
+                    <li>
+											<span class="badge">6</span>
+                        <a href="/tag/webrtc.html">webRtc
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/css.html">CSS
+                        </a></li>
+                    <li>
+											<span class="badge">8</span>
+                        <a href="/tag/object-c.html">Object-C
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/memory.html">Memory
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/life.html">life
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/flask-socketio.html">Flask-SocketIO
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/linear.html">Linear
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/dataprocessing.html">DataProcessing
+                        </a></li>
+                    <li>
+											<span class="badge">17</span>
+                        <a href="/tag/python.html">Python
+                        </a></li>
+                    <li>
+											<span class="badge">6</span>
+                        <a href="/tag/javascript.html">JavaScript
+                        </a></li>
+                    <li>
+											<span class="badge">16</span>
+                        <a href="/tag/ios.html">iOS
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/encode.html">encode
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/xcode.html">xCode
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/appstore.html">appstore
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/html5.html">html5
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/liu-cheng.html">流程
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/uiimage.html">UIImage
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/decorator.html">Decorator
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/ipad.html">iPad
+                        </a></li>
+                    <li>
+											<span class="badge">5</span>
+                        <a href="/tag/c.html">C++
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/audio.html">audio
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/ffmpeg.html">FFmpeg
+                        </a></li>
+                    <li>
+											<span class="badge">15</span>
+                        <a href="/tag/algorithm.html">algorithm
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/database.html">database
+                        </a></li>
+                    <li>
+											<span class="badge">11</span>
+                        <a href="/tag/ml.html">ML
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/yan-zou.html">演奏
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/framework.html">framework
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/gbk.html">GBK
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/rfc.html">rfc
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/cache.html">cache
+                        </a></li>
+                    <li>
+											<span class="badge">12</span>
+                        <a href="/tag/math.html">Math
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/jia-gou.html">架构
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/obs.html">OBS
+                        </a></li>
+                </ul>
+            </div>
+
+            <div class="large-3 aside column">
+                <h3>Links</h3>
+                <ul>
+                    <li><a href="http://getpelican.com/">Pelican</a></li><br/>
+                    <li><a href="http://python.org/">Python.org</a></li><br/>
+                    <li><a href="http://jinja.pocoo.org/">Jinja2</a></li><br/>
+                    <li><a href="#"> ฅ'ω'ฅ </a></li><br/>
+                </ul>
+                
+            </div>
+
+        </row>
+        </div>
+        <div class="row">
+            <div class="small-12 column">
+                <p style="font-size: 0.7em; text-align:center;">
+                ∠( ᐛ 」∠)＿不会有人拉到这么下边的呀就算拉下来也不会去看的呀这么小的字也看不清的口牙！ ©2015.
+                <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1257347159'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1257347159%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+                <script type="text/javascript" src="/theme/js/analytics.js"></script>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    
+</body>
+</html>

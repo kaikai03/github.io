@@ -1,0 +1,563 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="/theme/css/foundation.min.css" media="all">
+		<link rel="stylesheet" href="/theme/css/pygments.css" /> 
+		<link rel="stylesheet" href="/theme/css/style.css" />
+		<link rel="stylesheet" href="/theme/css/ukagaka.css" /> 
+        <script type="text/javascript" src="/theme/js/modernizr.js"></script>
+		<script type='text/javascript' src='/theme/js/jquery-1.11.1.min.js'></script>
+	    <script type="text/javascript" src="/theme/js/damoo.min.js"></script>
+		<script type="text/x-mathjax-config">MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});</script>
+        <script type="text/javascript">var js=document.createElement('script');js.setAttribute('src',(('https:' == document.location.protocol) ? ' https://' : ' http://')+'cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML');document.head.appendChild(js);</script>
+
+        <link href='https://fonts.useso.com/css?family=Exo+2:400,300,700,300italic,400italic,700italic,900,900italic' rel='stylesheet' type='text/css'>
+        <link rel="stylesheet" href="/theme/css/lamboz.css" media="all">
+        <title>Flask Web Development(4) - kairns`s Blog</title>
+        <meta charset="utf-8" />
+        <link href="/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="kairns`s Blog Full Atom Feed" />
+        <link href="/feeds/all.rss.xml" type="application/rss+xml" rel="alternate" title="kairns`s Blog Full RSS Feed" />
+        <link href="/feeds/pydev.atom.xml" type="application/atom+xml" rel="alternate" title="kairns`s Blog Categories Atom Feed" />
+        
+</head>
+<body onblur="leavePage()" onfocus="comebackPage()">
+    <div class="pages">
+        <ul>
+            <li class="home"><a href="/index.html">Home</a></li>
+            <li ><a href="/pages/about-me.html">About Me</a></li>
+            <li ><a href="/pages/Python_Packages_2012_11_05_12_18.html">Python Packages</a></li>
+        </ul>
+    </div>
+
+<div class="hp-header-inner">
+    <div class="page-header">
+        <div class="content-header">
+            <div id="title-block">
+            <h1>  <a href="/2015/Flask_Web_Development_2015_04_24_19_40.html" rel="bookmark"
+                    title="Permalink to Flask Web Development(4)">Flask Web Development(4)</a></h1>
+            </div>
+        </div>
+    </div>
+</div>
+    <div class="content">
+        <div class="data-holder">
+        <div class="row">
+           <div class="large-9 content-column column">
+<div class="content-article">
+    <header class="header-article">
+        <div class="read-more">Posted on Fri 24 April 2015</div>
+ 
+   </header>
+    <section class='article'>
+        
+        <div class="entry-summary">
+            <p>第4章 表单</p>
+        </div>
+    
+        <div class="entry-content">
+            <h2>《Flask Web Development》--第4章 表单</h2>
+<p>为了解决表单验证之类的重复和繁琐的问题，可以引入Flask-WTF来让表单使用变得简单（注：如果不使用Flask自带的模板，而是用Angular.js等前端技术本章可以略过，因为表单验证是跟Jinjia2模板紧密关联在一起的）。通过pip安装：</p>
+<div class="highlight"><pre>(venv) $ pip install flask-wtf
+</pre></div>
+
+
+<h3>CSRF</h3>
+<p>CSRF是Cross-Site Request Forgery Protection的缩写，通常发生在一个站点发送请求到另一个受害者登陆的站点时。</p>
+<h3>如何设置保护</h3>
+<p>Flask-WTF对所有表单请求提供保护，为了实现保护你需要像下面这样设置：</p>
+<div class="highlight"><pre>app = Flask(__name__)
+app.config[&#39;SECRET_KEY&#39;] = &#39;hard to guess string&#39;
+</pre></div>
+
+
+<p>关于上述代码的几点说明： app.config常备用来存储一些配置信息，甚至还能够从文件中导入配置；SECRET_KEY是常用来做加密的变量，它会被用来生成一个token，该token用于每次登陆时候的校验。</p>
+<h3>Form Classes</h3>
+<p>在Flask-WTF中每个表单是一个集成自Form的类，类里面定义了一些列的属性，每个属性又有一个或者多个的校验器。</p>
+<div class="highlight"><pre><span class="kn">from</span> <span class="nn">flask.ext.wtf</span> <span class="kn">import</span> <span class="n">Form</span>
+<span class="kn">from</span> <span class="nn">wtforms</span> <span class="kn">import</span> <span class="n">StringField</span><span class="p">,</span> <span class="n">SubmitField</span> 
+<span class="kn">from</span> <span class="nn">wtforms.validators</span> <span class="kn">import</span> <span class="n">Required</span>
+
+<span class="k">class</span> <span class="nc">NameForm</span><span class="p">(</span><span class="n">Form</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">StringField</span><span class="p">(</span><span class="s1">&#39;What is your name?&#39;</span><span class="p">,</span> <span class="n">validators</span><span class="o">=</span><span class="p">[</span><span class="n">Required</span><span class="p">()])</span> 
+    <span class="n">submit</span> <span class="o">=</span> <span class="n">SubmitField</span><span class="p">(</span><span class="s1">&#39;Submit&#39;</span><span class="p">)</span>
+</pre></div>
+
+
+<p>如上，有几点要说明的:</p>
+<p>（1）导入部分有点奇怪，可以参考原文帮助理解 “The Flask-WTF extension is a Flask integration wrapper around the framework-agnostic WTForms package” </p>
+<p>（2）属性部分，StringField会被转换为input[type="field",label="What is your name?"]，提交之前会执Require的validator，其他的属性类也类似对应到HTML的其他组件。</p>
+<p>更具体的组件类和校验器的使用，请参考书籍相应部分或文档。</p>
+<h3>HTML渲染表单</h3>
+<p>将构建的NameForm对象form传递给页面以后，就可以按照下面这种方式是用Form：</p>
+<div class="highlight"><pre><span class="nt">&lt;form</span> <span class="na">method=</span><span class="s">&quot;POST&quot;</span><span class="nt">&gt;</span>
+    <span class="cp">{{</span> <span class="nv">form.name.label</span> <span class="cp">}}</span> <span class="cp">{{</span> <span class="nv">form.name</span><span class="o">(</span><span class="nv">id</span><span class="o">=</span><span class="s1">&#39;my-text-field&#39;</span><span class="o">)</span> <span class="cp">}}</span> 
+    <span class="cp">{{</span> <span class="nv">form.submit</span><span class="o">()</span> <span class="cp">}}</span>
+<span class="nt">&lt;/form&gt;</span>
+</pre></div>
+
+
+<p>通过添加id或者class你就可以给这些组件添加样式了，但是要完全使用
+Bootstrap的样式，可以导入helper调用wtf.quick_form(form)来快速实现Form的布局：</p>
+<p><em>templates/index.html</em></p>
+<div class="highlight"><pre><span class="p">{</span><span class="o">%</span> <span class="n">extends</span> <span class="s2">&quot;commonBase.html&quot;</span> <span class="o">%</span><span class="p">}</span>
+<span class="p">{</span><span class="o">%</span> <span class="kn">import</span> <span class="s2">&quot;bootstrap/wtf.html&quot;</span> <span class="k">as</span> <span class="n">wtf</span> <span class="o">%</span><span class="p">}</span>
+
+<span class="p">{</span><span class="o">%</span> <span class="n">block</span> <span class="n">title</span> <span class="o">%</span><span class="p">}</span><span class="n">Flasky</span><span class="p">{</span><span class="o">%</span> <span class="n">endblock</span> <span class="o">%</span><span class="p">}</span>
+
+<span class="p">{</span><span class="o">%</span> <span class="n">block</span> <span class="n">page_content</span> <span class="o">%</span><span class="p">}</span>
+    <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;page-header&quot;</span><span class="o">&gt;</span>
+        <span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;</span><span class="n">Hello</span><span class="p">,</span> <span class="p">{</span><span class="o">%</span> <span class="k">if</span> <span class="n">name</span> <span class="o">%</span><span class="p">}{{</span> <span class="n">name</span> <span class="p">}}{</span><span class="o">%</span> <span class="k">else</span> <span class="o">%</span><span class="p">}</span><span class="n">Stranger</span><span class="p">{</span><span class="o">%</span> <span class="n">endif</span> <span class="o">%</span><span class="p">}</span><span class="err">!</span><span class="o">&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
+    <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+    <span class="p">{{</span> <span class="n">wtf</span><span class="o">.</span><span class="n">quick_form</span><span class="p">(</span><span class="n">form</span><span class="p">)</span> <span class="p">}}</span>
+<span class="p">{</span><span class="o">%</span> <span class="n">endblock</span> <span class="o">%</span><span class="p">}</span>
+</pre></div>
+
+
+<p><em>index.py</em></p>
+<div class="highlight"><pre><span class="kn">from</span> <span class="nn">flask.ext.wtf</span> <span class="kn">import</span> <span class="n">Form</span>
+<span class="kn">from</span> <span class="nn">wtforms</span> <span class="kn">import</span> <span class="n">StringField</span><span class="p">,</span> <span class="n">SubmitField</span>
+<span class="kn">from</span> <span class="nn">wtforms.validators</span> <span class="kn">import</span> <span class="n">Required</span>
+<span class="c1">#...</span>
+<span class="n">app</span> <span class="o">=</span> <span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+<span class="n">app</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;SECRET_KEY&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;hard to guess string&#39;</span>
+<span class="c1">#...</span>
+<span class="k">class</span> <span class="nc">NameForm</span><span class="p">(</span><span class="n">Form</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">StringField</span><span class="p">(</span><span class="s1">&#39;What is your name?&#39;</span><span class="p">,</span> <span class="n">validators</span><span class="o">=</span><span class="p">[</span><span class="n">Required</span><span class="p">()])</span>
+    <span class="n">submit</span> <span class="o">=</span> <span class="n">SubmitField</span><span class="p">(</span><span class="s1">&#39;Submit&#39;</span><span class="p">)</span>
+<span class="c1">#...</span>
+<span class="nd">@app.route</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">index</span><span class="p">():</span>
+    <span class="n">form</span> <span class="o">=</span> <span class="n">NameForm</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;index.html&#39;</span><span class="p">,</span> <span class="n">form</span><span class="o">=</span><span class="n">form</span><span class="p">)</span>
+</pre></div>
+
+
+<h3>表单响应</h3>
+<p>阅读如下这段代码，看看当第一进入页面时候；输入空值时候；输入部位空值的时候各是什么效果：</p>
+<div class="highlight"><pre>@app.route(&#39;/&#39;, methods=[&#39;GET&#39;, &#39;POST&#39;])
+def index():
+    name = None
+    form = NameForm()
+    if form.validate_on_submit():
+        name = form.name.data
+        form.name.data = &#39;&#39;
+    return render_template(&#39;index.html&#39;, form=form, name=name)
+</pre></div>
+
+
+<h3>重定向和Session</h3>
+<p>在之前的例子中用户进入页面时候发送的是get请求，填写name提交标案以后是post请求，提交完后刷新页面，页面会提示是否离开当前页面。这是因为之前的请求是post的，刷新会导致重新发送该请求（个人电脑上实验没有发生这样的情况）。</p>
+<p>由此引入重定向来解决这个问题，为了防止重定向以后的数据丢失，我们要讲数据存储在session中， index.py改写部分的代码如下所示：</p>
+<div class="highlight"><pre><span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">Flask</span><span class="p">,</span> <span class="n">render_template</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span> <span class="n">redirect</span><span class="p">,</span> <span class="n">url_for</span>
+<span class="c1">#...</span>
+<span class="nd">@app.route</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">,</span> <span class="s1">&#39;POST&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">index</span><span class="p">():</span>
+    <span class="n">form</span> <span class="o">=</span> <span class="n">NameForm</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">form</span><span class="o">.</span><span class="n">validate_on_submit</span><span class="p">():</span>
+        <span class="n">session</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">data</span>
+        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="n">url_for</span><span class="p">(</span><span class="s1">&#39;index&#39;</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;index.html&#39;</span><span class="p">,</span> <span class="n">form</span><span class="o">=</span><span class="n">form</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">))</span>
+</pre></div>
+
+
+<h3>消息提示</h3>
+<p>对于错误、确认、警告信息，Flask提供了<code>flash()</code>方法。使用分为python中调用<code>flask()</code>和在模板中呈现message两部分；</p>
+<p><em>index.py</em></p>
+<div class="highlight"><pre><span class="c1">#...</span>
+<span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">Flask</span><span class="p">,</span> <span class="n">render_template</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span> <span class="n">redirect</span><span class="p">,</span> <span class="n">url_for</span><span class="p">,</span> <span class="n">flash</span>
+
+<span class="nd">@app.route</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">,</span> <span class="s1">&#39;POST&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">index</span><span class="p">():</span>
+    <span class="n">form</span> <span class="o">=</span> <span class="n">NameForm</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">form</span><span class="o">.</span><span class="n">validate_on_submit</span><span class="p">():</span>
+        <span class="n">old_name</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">old_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">old_name</span> <span class="o">!=</span> <span class="n">form</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+            <span class="n">flash</span><span class="p">(</span><span class="s1">&#39;Looks like you have changed your name!&#39;</span><span class="p">)</span>
+        <span class="n">session</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">form</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="n">url_for</span><span class="p">(</span><span class="s1">&#39;index&#39;</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;index.html&#39;</span><span class="p">,</span><span class="n">form</span> <span class="o">=</span> <span class="n">form</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">))</span>
+</pre></div>
+
+
+<p>仅在名字发生了更新的时候调用<code>flash()</code>。</p>
+<p><em>templates/commonBase.html</em></p>
+<div class="highlight"><pre><span class="cp">{%</span> <span class="k">block</span> <span class="nv">content</span> <span class="cp">%}</span>
+    <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;container&quot;</span><span class="nt">&gt;</span>
+        <span class="cp">{%</span> <span class="k">for</span> <span class="nv">message</span> <span class="k">in</span> <span class="nv">get_flashed_messages</span><span class="o">()</span> <span class="cp">%}</span> <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;alert alert-warning&quot;</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;button</span> <span class="na">type=</span><span class="s">&quot;button&quot;</span> <span class="na">class=</span><span class="s">&quot;close&quot;</span> <span class="na">data-dismiss=</span><span class="s">&quot;alert&quot;</span><span class="nt">&gt;</span>×<span class="nt">&lt;/button&gt;</span>
+        <span class="cp">{{</span> <span class="nv">message</span> <span class="cp">}}</span>
+        <span class="nt">&lt;/div&gt;</span>
+        <span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span>
+            <span class="cp">{%</span> <span class="k">block</span> <span class="nv">page_content</span> <span class="cp">%}{%</span> <span class="k">endblock</span> <span class="cp">%}</span>
+    <span class="nt">&lt;/div&gt;</span>
+<span class="cp">{%</span> <span class="k">endblock</span> <span class="cp">%}</span>
+</pre></div>
+
+
+<p>之所以选择在commonBase.html是因为flash messages的普遍性，<code>get_flashed_messages()</code>遍历的是一个请求处理中可能的多个flash调用，新的请求会清除之前请求flash的message。</p>
+<p>在Flask中的表单提交的数据可以通过request.form获取到。</p>
+        </div>
+    </section>
+    <footer class="footer-article">
+        <div class="tags-and-categories">Filed under <a href="/category/pydev.html">pyDev</a>
+        | Tagged: <a href="/tag/flask.html">Flask </a><a href="/tag/python.html">Python </a><a href="/tag/web.html">Web </a>
+        | <a href="/2015/Flask_Web_Development_2015_04_24_19_40.html" rel="bookmark"
+         title="Permalink to Flask Web Development(4)">Permalink</a>            
+        </div>
+        <!-- metaldata 
+        -->
+    </footer>
+</div>
+<div id="disqus_thread"></div>
+<script type="text/javascript" src="/theme/js/disqus.js"></script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+            </div>
+            
+            
+			<div class="large-3 aside column">
+				<img class="headIcon-large avatar" src="/sys_img/head.jpg" alt="(┬＿┬)">
+                <h2>李凯</h2>
+                <h3>kairns leeky</h3>
+				<a href="mailto:kai_kai03@hotmail.com?subject=%20&body=from%20blog"><Email>kai_kai03@hotmail.com</Email></a>
+            </div>
+            
+            
+			
+			<div class="large-3 aside column">
+                <h3>Socials</h3>
+                <ul>
+                    <li><a href="http://weibo.com/mipamipami">新浪weibo</a></li>
+                    <li><a href="https://plus.google.com/105166364351021934050">g+</a></li>
+                </ul>
+            </div> 
+            
+            <div class="large-3 category-column column">
+                <h3>Categories</h3>
+                <ul>
+                    <li><a href="/category/db.html">DB</a> (3)</li>
+                    <li><a href="/category/idev.html">iDev</a> (14)</li>
+                    <li><a href="/category/machinelearning.html">MachineLearning</a> (18)</li>
+                    <li><a href="/category/musical.html">Musical</a> (1)</li>
+                    <li><a href="/category/other.html">other</a> (2)</li>
+                    <li class="active"><a href="/category/pydev.html">pyDev</a> (17)</li>
+                    <li><a href="/category/yin-shi-pin.html">音视频</a> (15)</li>
+                </ul>
+            </div> 
+            
+            <div class="large-3 category-column column">
+                <h3>Feeds</h3>
+                <ul>
+                    <li ><a href="/feeds/all.atom.xml" type="application/atom+xml">Atom Feed</a></li>
+                    <li ><a href="/feeds/all.rss.xml" type="application/rss+xml">RSS Feed</a></li>
+                </ul>
+            </div>
+            
+        
+        
+
+                <!--
+            <iframe width="100%" height="600" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=600&fansRow=1&ptype=1&speed=0&skin=1&isTitle=0&noborder=0&isWeibo=1&isFans=0&uid=1819436507&verifier=4060feb2&colors=fc1f12,ffffff,666666,0082cb,ecfbfd&dpc=1"></iframe>            </div>
+            -->
+         
+    </div>
+</div>
+    <div class="footer">
+        <div class="data-holder">
+        <div class="row">
+            <div class="large-3 column">
+<div class="Verse">
+    <h3>bo主偈语</h3>
+    <p>これも欲しい</p>
+    <p>あれも欲しい</p>
+    <p1>金がなくて悲しい</p1>
+    <p>これもセール</p>
+    <p>あれもセール</p>
+    <p1>全部買うと責められる</p1>
+    <p>これかっこい</p>
+    <p>あれも可愛い</p>
+    <p1>買えないので悔しい</p1>
+    <p>いつ金が入る？</p>
+    <p>いつ金が入る？</p>
+    <p1>あの時まだ間に合う？</p1>
+    <p>phaも買った</p>
+    <p>hmzも買った</p>
+    <p>嬉しいけど.....</p>
+    <p1>土しか食べられるものは無かった</p1>
+    <p1>嗯...2015年...vps不续费了...</p1>
+</div>           </div>
+           <div class="large-6 tag-cloud column">
+                <h3>Tags</h3>
+                <ul class="tagcloud">
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/nao-dong.html">脑洞
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/chord.html">Chord
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/websocket.html">WebSocket
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/mongo.html">mongo
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/classification.html">classification
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/shi-xu-tu.html">时序图
+                        </a></li>
+                    <li>
+											<span class="badge">5</span>
+                        <a href="/tag/chan-pin.html">产品
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/fuck.html">fuck
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/gc.html">GC
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/rtmp.html">RTMP
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/unicode.html">unicode
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/dylib.html">dylib
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/protocol.html">protocol
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/pycon.html">PyCon
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/cai-ji.html">采集
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/clustering.html">clustering
+                        </a></li>
+                    <li>
+											<span class="badge">6</span>
+                        <a href="/tag/web.html">Web
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/yi-zhi.html">移植
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/network.html">network
+                        </a></li>
+                    <li>
+											<span class="badge">6</span>
+                        <a href="/tag/flask.html">Flask
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/review.html">review
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/nodejs.html">Node.js
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/pep.html">PEP
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/features.html">Features
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/wu-tai.html">舞台
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/cnn.html">CNN
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/pca.html">PCA
+                        </a></li>
+                    <li>
+											<span class="badge">6</span>
+                        <a href="/tag/webrtc.html">webRtc
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/css.html">CSS
+                        </a></li>
+                    <li>
+											<span class="badge">8</span>
+                        <a href="/tag/object-c.html">Object-C
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/memory.html">Memory
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/life.html">life
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/flask-socketio.html">Flask-SocketIO
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/linear.html">Linear
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/dataprocessing.html">DataProcessing
+                        </a></li>
+                    <li>
+											<span class="badge">17</span>
+                        <a href="/tag/python.html">Python
+                        </a></li>
+                    <li>
+											<span class="badge">6</span>
+                        <a href="/tag/javascript.html">JavaScript
+                        </a></li>
+                    <li>
+											<span class="badge">16</span>
+                        <a href="/tag/ios.html">iOS
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/encode.html">encode
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/xcode.html">xCode
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/appstore.html">appstore
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/html5.html">html5
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/liu-cheng.html">流程
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/uiimage.html">UIImage
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/decorator.html">Decorator
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/ipad.html">iPad
+                        </a></li>
+                    <li>
+											<span class="badge">5</span>
+                        <a href="/tag/c.html">C++
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/audio.html">audio
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/ffmpeg.html">FFmpeg
+                        </a></li>
+                    <li>
+											<span class="badge">15</span>
+                        <a href="/tag/algorithm.html">algorithm
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/database.html">database
+                        </a></li>
+                    <li>
+											<span class="badge">11</span>
+                        <a href="/tag/ml.html">ML
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/yan-zou.html">演奏
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/framework.html">framework
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/gbk.html">GBK
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/rfc.html">rfc
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/cache.html">cache
+                        </a></li>
+                    <li>
+											<span class="badge">12</span>
+                        <a href="/tag/math.html">Math
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/jia-gou.html">架构
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/obs.html">OBS
+                        </a></li>
+                </ul>
+            </div>
+
+            <div class="large-3 aside column">
+                <h3>Links</h3>
+                <ul>
+                    <li><a href="http://getpelican.com/">Pelican</a></li><br/>
+                    <li><a href="http://python.org/">Python.org</a></li><br/>
+                    <li><a href="http://jinja.pocoo.org/">Jinja2</a></li><br/>
+                    <li><a href="#"> ฅ'ω'ฅ </a></li><br/>
+                </ul>
+                
+            </div>
+
+        </row>
+        </div>
+        <div class="row">
+            <div class="small-12 column">
+                <p style="font-size: 0.7em; text-align:center;">
+                ∠( ᐛ 」∠)＿不会有人拉到这么下边的呀就算拉下来也不会去看的呀这么小的字也看不清的口牙！ ©2015.
+                <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1257347159'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1257347159%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+                <script type="text/javascript" src="/theme/js/analytics.js"></script>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    
+</body>
+</html>

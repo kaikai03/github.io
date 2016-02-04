@@ -1,0 +1,44 @@
+#ukagaka_panel {
+    position: fixed;
+    right: 10px;
+    bottom: 10px;
+    width: 88.2px;
+    height: 230.3px;
+    z-index: 10;
+}
+#ukagaka_img {
+    
+    background: transparent url("/ukagaka/surface0001.png") no-repeat scroll 0% 0%;
+    width: 128px;
+    height: 329px;
+    transform: scale(0.7);
+    position: absolute;
+    top: -49px;
+    right: -19px;
+}
+.ukagaka_box {
+    font-size: 10pt;
+    right: 97px;
+    bottom: 150px;
+    position: absolute;
+}
+.ukagaka_msg {
+    width: 195px;
+    background: #FFF none repeat scroll 0% 0%;
+    padding: 10px;
+    word-wrap: break-word;
+    word-break: normal;
+    color: #000;
+    box-shadow: 0px 0px 8px rgba(15, 15, 15, 0.8);
+}
+.ukagaka_msg::after {
+    width: 10px;
+    height: 10px;
+    transform: rotate(45deg);
+    float: right;
+    margin-right: -14px;
+    margin-top: 7px;
+    background: #FFF none repeat scroll 0% 0%;
+    box-shadow: 3px -3px 8px -3px rgba(15, 15, 15, 0.8);
+    content: "";
+}
