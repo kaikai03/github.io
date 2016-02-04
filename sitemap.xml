@@ -5,28 +5,44 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
 <url>
 <loc>/</loc>
+<<<<<<< HEAD
 <lastmod>2016-02-04T14:25:43-00:00</lastmod>
+=======
+<lastmod>2016-01-29T16:02:56-00:00</lastmod>
+>>>>>>> c00f97807c7206bd43483d51b3defe2b6f09a545
 <changefreq>daily</changefreq>
 <priority>0.8</priority>
 </url>
 
 <url>
 <loc>/archives.html</loc>
+<<<<<<< HEAD
 <lastmod>2016-02-04T14:25:43-00:00</lastmod>
+=======
+<lastmod>2016-01-29T16:02:56-00:00</lastmod>
+>>>>>>> c00f97807c7206bd43483d51b3defe2b6f09a545
 <changefreq>daily</changefreq>
 <priority>0.8</priority>
 </url>
 
 <url>
 <loc>/tags.html</loc>
+<<<<<<< HEAD
 <lastmod>2016-02-04T14:25:43-00:00</lastmod>
+=======
+<lastmod>2016-01-29T16:02:56-00:00</lastmod>
+>>>>>>> c00f97807c7206bd43483d51b3defe2b6f09a545
 <changefreq>daily</changefreq>
 <priority>0.8</priority>
 </url>
 
 <url>
 <loc>/categories.html</loc>
+<<<<<<< HEAD
 <lastmod>2016-02-04T14:25:43-00:00</lastmod>
+=======
+<lastmod>2016-01-29T16:02:56-00:00</lastmod>
+>>>>>>> c00f97807c7206bd43483d51b3defe2b6f09a545
 <changefreq>daily</changefreq>
 <priority>0.8</priority>
 </url>
@@ -46,6 +62,7 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 </url>
 
 <url>
+<<<<<<< HEAD
 <loc>/2016/360CDN_2016_02_04_10_47.html</loc>
 <lastmod>2016-02-04T10:47:00+08:00</lastmod>
 <changefreq>daily</changefreq>
@@ -60,6 +77,8 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 </url>
 
 <url>
+=======
+>>>>>>> c00f97807c7206bd43483d51b3defe2b6f09a545
 <loc>/2016/CircleBadge_2016_01_08_17_48.html</loc>
 <lastmod>2016-01-08T17:48:00+08:00</lastmod>
 <changefreq>daily</changefreq>
@@ -572,7 +591,11 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
 <url>
 <loc>/category/pydev.html</loc>
+<<<<<<< HEAD
 <lastmod>2016-02-04T10:47:00+08:06</lastmod>
+=======
+<lastmod>2016-01-08T17:48:00+08:06</lastmod>
+>>>>>>> c00f97807c7206bd43483d51b3defe2b6f09a545
 <changefreq>daily</changefreq>
 <priority>0.8</priority>
 </url>
@@ -838,7 +861,11 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
 <url>
 <loc>/tag/javascript.html</loc>
+<<<<<<< HEAD
 <lastmod>2016-02-04T10:47:00+08:06</lastmod>
+=======
+<lastmod>2016-01-08T17:48:00+08:06</lastmod>
+>>>>>>> c00f97807c7206bd43483d51b3defe2b6f09a545
 <changefreq>daily</changefreq>
 <priority>0.8</priority>
 </url>
@@ -1006,7 +1033,11 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
 <url>
 <loc>/author/kai_kai03.html</loc>
+<<<<<<< HEAD
 <lastmod>2016-02-04T10:47:00+08:06</lastmod>
+=======
+<lastmod>2016-01-08T17:48:00+08:06</lastmod>
+>>>>>>> c00f97807c7206bd43483d51b3defe2b6f09a545
 <changefreq>daily</changefreq>
 <priority>0.8</priority>
 </url>
