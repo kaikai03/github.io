@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<<<<<<< HEAD
 <feed xmlns="http://www.w3.org/2005/Atom"><title>kairns`s Blog</title><link href="/" rel="alternate"></link><link href="/feeds/all.atom.xml" rel="self"></link><id>/</id><updated>2016-02-04T10:47:00+08:00</updated><entry><title>360公共前端CDN</title><link href="/2016/360CDN_2016_02_04_10_47.html" rel="alternate"></link><updated>2016-02-04T10:47:00+08:00</updated><author><name>kai_kai03</name></author><id>tag:,2016-02-04:2016/360CDN_2016_02_04_10_47.html</id><summary type="html">&lt;p&gt;今天更新blog发现卡在mathjax加载，开着https和ss都不行，还以为他们服务器挂了，准备去吐槽，打开官网，啊咧？不对啊，什么都正常啊，js也打得开啊。。。&lt;/p&gt;
 &lt;p&gt;进一步发现原来是google的字体库，等等。。。什么情况，一直全局VPN的啊，上海局这边的墙更新了？256-cfb的加密不够用了？&lt;/p&gt;
 &lt;p&gt;算了，换国内源吧。&lt;/p&gt;
@@ -16,9 +15,6 @@
 new Date(&amp;quot;Janurary 27 2016&amp;quot;)
 new Date(&amp;quot;Janurary 27,2016&amp;quot;)
 &lt;/pre&gt;&lt;/div&gt;</summary><category term="JavaScript"></category></entry><entry><title>圆形上标</title><link href="/2016/CircleBadge_2016_01_08_17_48.html" rel="alternate"></link><updated>2016-01-08T17:48:00+08:00</updated><author><name>kai_kai03</name></author><id>tag:,2016-01-08:2016/CircleBadge_2016_01_08_17_48.html</id><summary type="html">&lt;p&gt;就你们主页看到tag的数量（如果我还没把这块改掉的话），今天更新了下pelican，标签云出问题了，索性去掉tag_cloud插件，还原会最原始的tag读取方式，但样式看着太单调，于是把tag_cloud的badge改成圆形上标（第一反应就是这样，iOS用多了.....）&lt;/p&gt;
-=======
-<feed xmlns="http://www.w3.org/2005/Atom"><title>kairns`s Blog</title><link href="/" rel="alternate"></link><link href="/feeds/all.atom.xml" rel="self"></link><id>/</id><updated>2016-01-08T17:48:00+08:00</updated><entry><title>圆形上标</title><link href="/2016/CircleBadge_2016_01_08_17_48.html" rel="alternate"></link><updated>2016-01-08T17:48:00+08:00</updated><author><name>kai_kai03</name></author><id>tag:,2016-01-08:2016/CircleBadge_2016_01_08_17_48.html</id><summary type="html">&lt;p&gt;就你们主页看到tag的数量（如果我还没把这块改掉的话），今天更新了下pelican，标签云出问题了，索性去掉tag_cloud插件，还原会最原始的tag读取方式，但样式看着太单调，于是把tag_cloud的badge改成圆形上标（第一反应就是这样，iOS用多了.....）&lt;/p&gt;
->>>>>>> c00f97807c7206bd43483d51b3defe2b6f09a545
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nt"&gt;ul&lt;/span&gt;&lt;span class="nc"&gt;.tagcloud&lt;/span&gt; &lt;span class="nt"&gt;span&lt;/span&gt;&lt;span class="nc"&gt;.badge&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
     &lt;span class="nb"&gt;background-color&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="nb"&gt;red&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
     &lt;span class="nb"&gt;color&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="nb"&gt;white&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
