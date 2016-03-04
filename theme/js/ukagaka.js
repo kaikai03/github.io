@@ -5,7 +5,7 @@ $("ukagaka").append("<div id='ukagaka_panel'>" +
         
     "<div class='ukagaka_box'>" +
         "<div class='ukagaka_msg' id='ukagaka_msgbox'>" +
-            "测试版" +
+            " 珍爱生命，远离IE" +
         "</div>"+
     "</div>"+
 "</div>" )
