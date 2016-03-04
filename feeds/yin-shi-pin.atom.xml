@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>kairns`s Blog</title><link href="/" rel="alternate"></link><link href="/feeds/yin-shi-pin.atom.xml" rel="self"></link><id>/</id><updated>2015-09-15T21:01:00+08:00</updated><entry><title>音频相关零碎</title><link href="/2015/audio_2015_09_15_21_01.html" rel="alternate"></link><updated>2015-09-15T21:01:00+08:00</updated><author><name>kai_kai03</name></author><id>tag:,2015-09-15:2015/audio_2015_09_15_21_01.html</id><summary type="html">&lt;h2&gt;for OBS&lt;/h2&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>kairnsの记事簿</title><link href="/" rel="alternate"></link><link href="/feeds/yin-shi-pin.atom.xml" rel="self"></link><id>/</id><updated>2015-09-15T21:01:00+08:00</updated><entry><title>音频相关零碎</title><link href="/2015/audio_2015_09_15_21_01.html" rel="alternate"></link><updated>2015-09-15T21:01:00+08:00</updated><author><name>kai_kai03</name></author><id>tag:,2015-09-15:2015/audio_2015_09_15_21_01.html</id><summary type="html">&lt;h2&gt;for OBS&lt;/h2&gt;
 &lt;p&gt;因为咪啪这个项目需要，写了个音频类给开发同事。
 什么解码解析播放都是附带的，目的是那个绘制频谱。&lt;/p&gt;
 &lt;p&gt;大致逻辑是解码-&amp;gt;得到pcm-&amp;gt;采样-&amp;gt;归一化-&amp;gt;双声道混mono-&amp;gt;渲染电平&lt;/p&gt;

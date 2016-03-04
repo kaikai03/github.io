@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>kairns`s Blog</title><link>/</link><description></description><atom:link href="/feeds/all.rss.xml" rel="self"></atom:link><lastBuildDate>Thu, 04 Feb 2016 10:47:00 +0800</lastBuildDate><item><title>360公共前端CDN</title><link>/2016/360CDN_2016_02_04_10_47.html</link><description>&lt;p&gt;今天更新blog发现卡在mathjax加载，开着https和ss都不行，还以为他们服务器挂了，准备去吐槽，打开官网，啊咧？不对啊，什么都正常啊，js也打得开啊。。。&lt;/p&gt;
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>kairnsの记事簿</title><link>/</link><description></description><atom:link href="/feeds/all.rss.xml" rel="self"></atom:link><lastBuildDate>Thu, 04 Feb 2016 10:47:00 +0800</lastBuildDate><item><title>360公共前端CDN</title><link>/2016/360CDN_2016_02_04_10_47.html</link><description>&lt;p&gt;今天更新blog发现卡在mathjax加载，开着https和ss都不行，还以为他们服务器挂了，准备去吐槽，打开官网，啊咧？不对啊，什么都正常啊，js也打得开啊。。。&lt;/p&gt;
 &lt;p&gt;进一步发现原来是google的字体库，等等。。。什么情况，一直全局VPN的啊，上海局这边的墙更新了？256-cfb的加密不够用了？&lt;/p&gt;
 &lt;p&gt;算了，换国内源吧。&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;fonts.googleapis.com&lt;/code&gt; - &amp;gt; &lt;code&gt;fonts.useso.com&lt;/code&gt;&lt;/p&gt;

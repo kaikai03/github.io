@@ -29,7 +29,7 @@ function dududu(){
 }
 
 window.onload=function(){ 
-	damoo.emit({ text: '欢迎光临', color: "#FFF", shadow: { color: "#f49" }});
+	//damoo.emit({ text: '欢迎光临', color: "#FFF", shadow: { color: "#f49" }});
 	dududu()
 } 
 
