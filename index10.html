@@ -15,11 +15,10 @@
 
         <link href='https://fonts.lug.ustc.edu.cn/css?family=Exo+2:400,300,700,300italic,400italic,700italic,900,900italic' rel='stylesheet' type='text/css'>
         <link rel="stylesheet" href="/theme/css/lamboz.css" media="all">
-        <title>一个objc对象的bug - kairnsの记事簿</title>
+        <title>kairnsの记事簿</title>
         <meta charset="utf-8" />
         <link href="/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="kairnsの记事簿 Full Atom Feed" />
         <link href="/feeds/all.rss.xml" type="application/rss+xml" rel="alternate" title="kairnsの记事簿 Full RSS Feed" />
-        <link href="/feeds/idev.atom.xml" type="application/atom+xml" rel="alternate" title="kairnsの记事簿 Categories Atom Feed" />
         
 </head>
 <body onblur="leavePage()" onfocus="comebackPage()">
@@ -30,53 +29,63 @@
             <li ><a href="/pages/Python_Packages_2012_11_05_12_18.html">Python Packages</a></li>
         </ul>
     </div>
-
-<div class="hp-header-inner">
-    <div class="page-header">
-        <div class="content-header">
-            <div id="title-block">
-            <h1>  <a href="/2011/objc_bug_2011_04_21_22_13.html" rel="bookmark"
-                    title="Permalink to 一个objc对象的bug">一个objc对象的bug</a></h1>
-            </div>
-        </div>
+    <div class="hp-header">
+		<div class="page-header" id="particles-js" >
+			<div class="content-header">
+				<div id="title-block" class="title-block-c">
+				<h1><a href="/">kairnsの记事簿</a></h1>
+				<p class="blurb"></p>
+				</div>
+			</div>
+		</div>
     </div>
-</div>
     <div class="content">
         <div class="data-holder">
         <div class="row">
            <div class="large-9 content-column column">
-<div class="content-article">
-    <header class="header-article">
-        <div class="read-more">Posted on Thu 21 April 2011</div>
- 
-   </header>
-    <section class='article'>
-        
-        <div class="entry-summary">
-            <p>array中的dict泄漏</p>
-        </div>
+
+
+
+
+            <!-- pagine successive -->
+            <ul class="medium-block-grid-2">
+            <li>
+            <div class="sec-article">
+                 <div class="read-more">Fri 29 October 2010</div>
+                 <h3><a href="/2010/Memory_release_2010_10_29_23_05.html" rel=Bookmark title="Permalink to release">release</a></h3>
+                <p>
+                <p>不是发布的release，这是有关内存release的记录和吐槽。</p>            
+                </p>
+                
+            </div>
+            </li>
+
     
-        <div class="entry-content">
-            <h2>发现一只小虫子</h2>
-<p>&#160; &#160; &#160; &#160;这两天在视频软解的调试过程中发现，objc的array对象有bug，一个array对象快速的插入、弹出dict对象，会有一定几率导致dict对象的内存泄漏，dict弹出用完后未施放。专门写了个小程序通过长时间实验，确定了，bug！！！！<br></p>
-<p>&#160; &#160; &#160; &#160;去support页报bug时顺手搜了一下，有个外国友人也发现了这个问题。<br></p>
-<p>&#160; &#160; &#160; &#160;这个问题应该挺难发现因为在高速、频繁的插入，弹出，删除dict时才会出现。初次发现就是对积累视频包管理业务调试的时候，在大量视频包流动的情况下，持续一个小时，内存占用才达到系统的报警线。所以这个内存泄漏几率低，也很难发现。毕竟手机上的应用都比较轻量级，会这么干的机会不多。</p>
-<p>&#160; &#160; &#160; &#160;<strong>最后：大量数据流操作不要用objc对象！！！！</strong><em>（我承认这段话是从上一篇里复制过来的）</em></p>
-        </div>
-    </section>
-    <footer class="footer-article">
-        <div class="tags-and-categories">Filed under <a href="/category/idev.html">iDev</a>
-        | Tagged: <a href="/tag/object-c.html">Object-C </a><a href="/tag/ios.html">iOS </a>
-        | <a href="/2011/objc_bug_2011_04_21_22_13.html" rel="bookmark"
-         title="Permalink to 一个objc对象的bug">Permalink</a>            
-        </div>
-        <!-- metaldata 
-        -->
-    </footer>
+</ul>
+<div class="pagination-block">
+    <!--<p class="paginator">
+        <a href="/index9.html">&laquo;</a>
+    Page 10 / 10
+</p>
+-->
+<p class="paginator">
+        <li><a href="/index.html">go First</a></li>
+        <a href="/index9.html">&laquo; &laquo; &laquo;</a>
+    Page 10 / 10
+</p>
 </div>
-<div id="disqus_thread"></div>
-<script type="text/javascript" src="/theme/js/disqus.js"></script>
-<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<script type="text/javascript" charset="utf-8">
+		var damoo = Damoo(document.getElementById('particles-js'), 'dm-canvas', 10);
+		damoo.start();
+	</script>
+	<script type='text/javascript' src="/theme/js/particles.js"></script>
+	<script type='text/javascript' src='/theme/js/canv.js'></script>
+	<script type='text/javascript' src='/theme/js/ukagaka.js'></script>
+	<script type='text/javascript' src='/theme/js/damooctr.js'></script>
+
+
+
+    
             </div>
             
             
@@ -101,7 +110,7 @@
                 <h3>Categories</h3>
                 <ul>
                     <li><a href="/category/db.html">DB</a> (3)</li>
-                    <li class="active"><a href="/category/idev.html">iDev</a> (14)</li>
+                    <li><a href="/category/idev.html">iDev</a> (14)</li>
                     <li><a href="/category/machinelearning.html">MachineLearning</a> (18)</li>
                     <li><a href="/category/musical.html">Musical</a> (3)</li>
                     <li><a href="/category/other.html">other</a> (2)</li>
