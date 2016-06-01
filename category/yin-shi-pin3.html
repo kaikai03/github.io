@@ -15,11 +15,11 @@
 
         <link href='https://fonts.lug.ustc.edu.cn/css?family=Exo+2:400,300,700,300italic,400italic,700italic,900,900italic' rel='stylesheet' type='text/css'>
         <link rel="stylesheet" href="/theme/css/lamboz.css" media="all">
-        <title>一个objc对象的bug - kairnsの记事簿</title>
+        <title>kairnsの记事簿</title>
         <meta charset="utf-8" />
         <link href="/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="kairnsの记事簿 Full Atom Feed" />
         <link href="/feeds/all.rss.xml" type="application/rss+xml" rel="alternate" title="kairnsの记事簿 Full RSS Feed" />
-        <link href="/feeds/idev.atom.xml" type="application/atom+xml" rel="alternate" title="kairnsの记事簿 Categories Atom Feed" />
+        <link href="/feeds/yin-shi-pin.atom.xml" type="application/atom+xml" rel="alternate" title="kairnsの记事簿 Categories Atom Feed" />
         
 </head>
 <body onblur="leavePage()" onfocus="comebackPage()">
@@ -30,13 +30,11 @@
             <li ><a href="/pages/Python_Packages_2012_11_05_12_18.html">Python Packages</a></li>
         </ul>
     </div>
-
-<div class="hp-header-inner">
+<div class="hp-header" style="height:33%;">
     <div class="page-header">
         <div class="content-header">
             <div id="title-block">
-            <h1>  <a href="/2011/objc_bug_2011_04_21_22_13.html" rel="bookmark"
-                    title="Permalink to 一个objc对象的bug">一个objc对象的bug</a></h1>
+                <h1 style="font-size:3em; color:white;">Articles in the 音视频 category </h1>
             </div>
         </div>
     </div>
@@ -45,38 +43,30 @@
         <div class="data-holder">
         <div class="row">
            <div class="large-9 content-column column">
-<div class="content-article">
-    <header class="header-article">
-        <div class="read-more">Posted on Thu 21 April 2011</div>
- 
-   </header>
-    <section class='article'>
-        
-        <div class="entry-summary">
-            <p>array中的dict泄漏</p>
+
+
+
+
+
+
+<blocks cols="2">
+        <div class="sec-article">
+            <div class="read-more">Fri 11 March 2011</div>
+
+            <h3><a href="/2011/ffmpeg_for_iOS_2011_03_11_01_44.html" rel=Bookmark title="Permalink to ffmpeg 移植 iOS">ffmpeg 移植 iOS</a></h3>
+            <p>
+            <p>完成</p>            
+            </p>
         </div>
-    
-        <div class="entry-content">
-            <h2>发现一只小虫子</h2>
-<p>&#160; &#160; &#160; &#160;这两天在视频软解的调试过程中发现，objc的array对象有bug，一个array对象快速的插入、弹出dict对象，会有一定几率导致dict对象的内存泄漏，dict弹出用完后未施放。专门写了个小程序通过长时间实验，确定了，bug！！！！<br></p>
-<p>&#160; &#160; &#160; &#160;去support页报bug时顺手搜了一下，有个外国友人也发现了这个问题。<br></p>
-<p>&#160; &#160; &#160; &#160;这个问题应该挺难发现因为在高速、频繁的插入，弹出，删除dict时才会出现。初次发现就是对积累视频包管理业务调试的时候，在大量视频包流动的情况下，持续一个小时，内存占用才达到系统的报警线。所以这个内存泄漏几率低，也很难发现。毕竟手机上的应用都比较轻量级，会这么干的机会不多。</p>
-<p>&#160; &#160; &#160; &#160;<strong>最后：大量数据流操作不要用objc对象！！！！</strong><em>（我承认这段话是从上一篇里复制过来的）</em></p>
-        </div>
-    </section>
-    <footer class="footer-article">
-        <div class="tags-and-categories">Filed under <a href="/category/idev.html">iDev</a>
-        | Tagged: <a href="/tag/object-c.html">Object-C </a><a href="/tag/ios.html">iOS </a>
-        | <a href="/2011/objc_bug_2011_04_21_22_13.html" rel="bookmark"
-         title="Permalink to 一个objc对象的bug">Permalink</a>            
-        </div>
-        <!-- metaldata 
-        -->
-    </footer>
+
+</blocks>
+<div class="pagination-block">
+<p class="paginator">
+        <a href="/category/yin-shi-pin2.html">&laquo;</a>
+    Page 3 / 3
+</p>
 </div>
-<div id="disqus_thread"></div>
-<script type="text/javascript" src="/theme/js/disqus.js"></script>
-<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
             </div>
             
             
@@ -101,12 +91,12 @@
                 <h3>Categories</h3>
                 <ul>
                     <li><a href="/category/db.html">DB</a> (3)</li>
-                    <li class="active"><a href="/category/idev.html">iDev</a> (14)</li>
+                    <li><a href="/category/idev.html">iDev</a> (14)</li>
                     <li><a href="/category/machinelearning.html">MachineLearning</a> (18)</li>
                     <li><a href="/category/musical.html">Musical</a> (3)</li>
                     <li><a href="/category/other.html">other</a> (2)</li>
                     <li><a href="/category/pydev.html">pyDev</a> (17)</li>
-                    <li><a href="/category/yin-shi-pin.html">音视频</a> (17)</li>
+                    <li class="active"><a href="/category/yin-shi-pin.html">音视频</a> (17)</li>
                 </ul>
             </div> 
             

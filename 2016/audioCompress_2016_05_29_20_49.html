@@ -15,11 +15,11 @@
 
         <link href='https://fonts.lug.ustc.edu.cn/css?family=Exo+2:400,300,700,300italic,400italic,700italic,900,900italic' rel='stylesheet' type='text/css'>
         <link rel="stylesheet" href="/theme/css/lamboz.css" media="all">
-        <title>一个objc对象的bug - kairnsの记事簿</title>
+        <title>音频对比 - kairnsの记事簿</title>
         <meta charset="utf-8" />
         <link href="/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="kairnsの记事簿 Full Atom Feed" />
         <link href="/feeds/all.rss.xml" type="application/rss+xml" rel="alternate" title="kairnsの记事簿 Full RSS Feed" />
-        <link href="/feeds/idev.atom.xml" type="application/atom+xml" rel="alternate" title="kairnsの记事簿 Categories Atom Feed" />
+        <link href="/feeds/yin-shi-pin.atom.xml" type="application/atom+xml" rel="alternate" title="kairnsの记事簿 Categories Atom Feed" />
         
 </head>
 <body onblur="leavePage()" onfocus="comebackPage()">
@@ -35,8 +35,8 @@
     <div class="page-header">
         <div class="content-header">
             <div id="title-block">
-            <h1>  <a href="/2011/objc_bug_2011_04_21_22_13.html" rel="bookmark"
-                    title="Permalink to 一个objc对象的bug">一个objc对象的bug</a></h1>
+            <h1>  <a href="/2016/audioCompress_2016_05_29_20_49.html" rel="bookmark"
+                    title="Permalink to 音频对比">音频对比</a></h1>
             </div>
         </div>
     </div>
@@ -47,28 +47,57 @@
            <div class="large-9 content-column column">
 <div class="content-article">
     <header class="header-article">
-        <div class="read-more">Posted on Thu 21 April 2011</div>
+        <div class="read-more">Posted on Sun 29 May 2016</div>
  
    </header>
     <section class='article'>
         
         <div class="entry-summary">
-            <p>array中的dict泄漏</p>
+            <p>某免费TTS去除语音广告</p>
         </div>
     
         <div class="entry-content">
-            <h2>发现一只小虫子</h2>
-<p>&#160; &#160; &#160; &#160;这两天在视频软解的调试过程中发现，objc的array对象有bug，一个array对象快速的插入、弹出dict对象，会有一定几率导致dict对象的内存泄漏，dict弹出用完后未施放。专门写了个小程序通过长时间实验，确定了，bug！！！！<br></p>
-<p>&#160; &#160; &#160; &#160;去support页报bug时顺手搜了一下，有个外国友人也发现了这个问题。<br></p>
-<p>&#160; &#160; &#160; &#160;这个问题应该挺难发现因为在高速、频繁的插入，弹出，删除dict时才会出现。初次发现就是对积累视频包管理业务调试的时候，在大量视频包流动的情况下，持续一个小时，内存占用才达到系统的报警线。所以这个内存泄漏几率低，也很难发现。毕竟手机上的应用都比较轻量级，会这么干的机会不多。</p>
-<p>&#160; &#160; &#160; &#160;<strong>最后：大量数据流操作不要用objc对象！！！！</strong><em>（我承认这段话是从上一篇里复制过来的）</em></p>
+            <h4>前言</h4>
+<p>最近在玩一个新玩具--用火纹提取的live2d模型搞个直播向的聊天机器人，其中对话部分需要用到TTS转换语音。</p>
+<p>但那TTS嘛，总随机带上一段语音广告。比较头疼的还是它没有价目表，说是永久免费的，这么一来想去掉广告也就只能走商务合作一条路了。这玩法个人屌丝玩不起。</p>
+<p>但是呢，广告语音的内容前半部分基本上是相同的，SO.....那就想办法去掉。</p>
+<h4>过程</h4>
+<h3>最简单的方法</h3>
+<p>生成的语言再发给同厂的语音识别API，让它告诉我这段是不是广告。。。。简单是简单，问题是语音识别使用有数量限制，我的业务场景肯定不适合。再说了，不想整个过程有太多的网络交互（宏观上的效率问题）。</p>
+<h3>简单小学生路子的尝试</h3>
+<p>最开始的想法：我猜它合成语音的原理是文字查表得到发音，发音有固定音频，然后拼接起来。这么一来，其实我只要找到起始点对比固定点位就好了。</p>
+<p>试了下，果然想得太简单，把多次产生的广告音频截出来，放工具里看波形，结果是一模一样的内容，它的实际数据是有差别的，也就是说它语音合成并不是简单拼接，而是实时演算，而且是通过某种概率模型来生产语音的。</p>
+<p>（其实后来又发现个问题，TTS会根据网络状态切换网络合成和本地合成，而两种合成形式产生的声音其实是不一样的。）</p>
+<h3>比前面稍微高级点的尝试</h3>
+<p>简单的想法玩不通，那就玩高级点的。</p>
+<p>从频谱上看、它的波形，它虽然实际微观数据没有相同的，但是它的包络还是很相似的嘛。</p>
+<p>思维惯性：那就是扫描做多项式、然后拟合。</p>
+<p>但仔细想想，这玩法貌似挺麻烦的，一来数据量不算少、二来广告长度虽然差不多，再怎么截，偶尔会截到实际数据，拟合过程会变得不靠谱。</p>
+<p>所以必须得是一个笼统模糊的特征抽取。那么做统计好了，用概率来判断截出来的某一段是否是广告。</p>
+<p>先把时域数据转成频域看看
+<center><img alt="" src="/article_img/audioCompress_2016_05_29_20_49/1.jpg" /></center></p>
+<p><center><img alt="" src="/article_img/audioCompress_2016_05_29_20_49/2.jpg" /></center></p>
+<p>上图左右两边可以明显看出来广告语音内容在频域上的差异，这样一来特征就明显且统一了。</p>
+<h3>实际做法</h3>
+<p>当然嘛，越高效越好，所以决定对截取的音频部分做抽样，只做了2^10的傅立叶变换，其实上边的图就是1024个点的结果。</p>
+<p>拿到频谱计算振幅，利用振幅来算特征。</p>
+<p>1.peak位置特征。</p>
+<p>然后计算手动抽取样本的特征与动态计算的特征的距离，作为判断是否是广告的依据。</p>
+<p>最开始只用peak位置特征来识别广告，经过实验，确定为广告的音频有8%的可能被判为不含广告，全部音频有3%的误判率。</p>
+<p>2.为了降低误差，再加上频响特征。</p>
+<p>让peak特征距离与频响特征距离以某种形式混合计算出最后的值，以那个值作为判断依据。</p>
+<p>测试下来，误判率降到千分之几，误判出现在非广告判断为含广告，而真广告识别率100%。</p>
+<p>最后的处理办法：当判断为广告再运行一次语音合成，因为广告是不会连续出现两次的。也就是说，即使出现误判也无所谓了。</p>
+<h3>最后</h3>
+<p>其实呢，从上面的最后一句话可以看出来，有一个办法避开广告，就是所有的语音合成都合成两次，以第二次的结果作为输出。</p>
+<p>但我这还是算了，因为现在在弄的这个玩具，又有音视频采集、又有3d渲染、又有视频实时渲染、又有语音合成、又有多路混音、又有直播、又有......还是个手机上的玩具、而且我看性能监控，每次TTS合成十几个字的语音，cpu和fps都要抖一抖，所以这种捷径还是免了。</p>
         </div>
     </section>
     <footer class="footer-article">
-        <div class="tags-and-categories">Filed under <a href="/category/idev.html">iDev</a>
-        | Tagged: <a href="/tag/object-c.html">Object-C </a><a href="/tag/ios.html">iOS </a>
-        | <a href="/2011/objc_bug_2011_04_21_22_13.html" rel="bookmark"
-         title="Permalink to 一个objc对象的bug">Permalink</a>            
+        <div class="tags-and-categories">Filed under <a href="/category/yin-shi-pin.html">音视频</a>
+        | Tagged: <a href="/tag/algorithm.html">algorithm </a><a href="/tag/ios.html">iOS </a><a href="/tag/math.html">Math </a>
+        | <a href="/2016/audioCompress_2016_05_29_20_49.html" rel="bookmark"
+         title="Permalink to 音频对比">Permalink</a>            
         </div>
         <!-- metaldata 
         -->
@@ -101,12 +130,12 @@
                 <h3>Categories</h3>
                 <ul>
                     <li><a href="/category/db.html">DB</a> (3)</li>
-                    <li class="active"><a href="/category/idev.html">iDev</a> (14)</li>
+                    <li><a href="/category/idev.html">iDev</a> (14)</li>
                     <li><a href="/category/machinelearning.html">MachineLearning</a> (18)</li>
                     <li><a href="/category/musical.html">Musical</a> (3)</li>
                     <li><a href="/category/other.html">other</a> (2)</li>
                     <li><a href="/category/pydev.html">pyDev</a> (17)</li>
-                    <li><a href="/category/yin-shi-pin.html">音视频</a> (17)</li>
+                    <li class="active"><a href="/category/yin-shi-pin.html">音视频</a> (17)</li>
                 </ul>
             </div> 
             

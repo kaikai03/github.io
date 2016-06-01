@@ -5,28 +5,28 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
 <url>
 <loc>/</loc>
-<lastmod>2016-04-17T20:33:00-00:00</lastmod>
+<lastmod>2016-06-01T12:06:54-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.8</priority>
 </url>
 
 <url>
 <loc>/archives.html</loc>
-<lastmod>2016-04-17T20:33:00-00:00</lastmod>
+<lastmod>2016-06-01T12:06:54-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.8</priority>
 </url>
 
 <url>
 <loc>/tags.html</loc>
-<lastmod>2016-04-17T20:33:00-00:00</lastmod>
+<lastmod>2016-06-01T12:06:54-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.8</priority>
 </url>
 
 <url>
 <loc>/categories.html</loc>
-<lastmod>2016-04-17T20:33:00-00:00</lastmod>
+<lastmod>2016-06-01T12:06:54-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.8</priority>
 </url>
@@ -43,6 +43,13 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 <lastmod>2015-11-06T23:13:00+08:00</lastmod>
 <changefreq>weekly</changefreq>
 <priority>0.7</priority>
+</url>
+
+<url>
+<loc>/2016/audioCompress_2016_05_29_20_49.html</loc>
+<lastmod>2016-05-29T20:49:00+08:00</lastmod>
+<changefreq>daily</changefreq>
+<priority>1.0</priority>
 </url>
 
 <url>
@@ -600,7 +607,7 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
 <url>
 <loc>/category/yin-shi-pin.html</loc>
-<lastmod>2016-04-17T19:43:00+08:06</lastmod>
+<lastmod>2016-05-29T20:49:00+08:06</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.8</priority>
 </url>
@@ -866,7 +873,7 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
 <url>
 <loc>/tag/ios.html</loc>
-<lastmod>2016-04-17T19:43:00+08:06</lastmod>
+<lastmod>2016-05-29T20:49:00+08:06</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.8</priority>
 </url>
@@ -935,8 +942,8 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 </url>
 
 <url>
-<loc>/tag/audio.html</loc>
-<lastmod>2015-09-15T21:01:00+08:06</lastmod>
+<loc>/tag/jia-gou.html</loc>
+<lastmod>2015-07-20T16:22:00+08:06</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.8</priority>
 </url>
@@ -950,7 +957,7 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
 <url>
 <loc>/tag/algorithm.html</loc>
-<lastmod>2014-08-18T20:05:00+08:06</lastmod>
+<lastmod>2016-05-29T20:49:00+08:06</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.8</priority>
 </url>
@@ -1006,14 +1013,14 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
 <url>
 <loc>/tag/math.html</loc>
-<lastmod>2014-08-17T13:37:00+08:06</lastmod>
+<lastmod>2016-05-29T20:49:00+08:06</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.8</priority>
 </url>
 
 <url>
-<loc>/tag/jia-gou.html</loc>
-<lastmod>2015-07-20T16:22:00+08:06</lastmod>
+<loc>/tag/audio.html</loc>
+<lastmod>2015-09-15T21:01:00+08:06</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.8</priority>
 </url>
@@ -1027,7 +1034,7 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
 <url>
 <loc>/author/kai_kai03.html</loc>
-<lastmod>2016-04-17T19:43:00+08:06</lastmod>
+<lastmod>2016-05-29T20:49:00+08:06</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.8</priority>
 </url>
