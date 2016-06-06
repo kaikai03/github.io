@@ -1,5 +1,101 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>kairnsの记事簿</title><link href="/" rel="alternate"></link><link href="/feeds/all.atom.xml" rel="self"></link><id>/</id><updated>2016-05-29T20:49:00+08:00</updated><entry><title>音频对比</title><link href="/2016/audioCompress_2016_05_29_20_49.html" rel="alternate"></link><updated>2016-05-29T20:49:00+08:00</updated><author><name>kai_kai03</name></author><id>tag:,2016-05-29:2016/audioCompress_2016_05_29_20_49.html</id><summary type="html">&lt;h4&gt;前言&lt;/h4&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>kairnsの记事簿</title><link href="/" rel="alternate"></link><link href="/feeds/all.atom.xml" rel="self"></link><id>/</id><updated>2016-06-06T11:13:00+08:00</updated><entry><title>turnserver</title><link href="/2016/webRtc_2016_06_06_11_13.html" rel="alternate"></link><updated>2016-06-06T11:13:00+08:00</updated><author><name>kai_kai03</name></author><id>tag:,2016-06-06:2016/webRtc_2016_06_06_11_13.html</id><summary type="html">&lt;h2&gt;过程概要&lt;/h2&gt;
+&lt;p&gt;安装过程就不赘述了，反正都是 configure、make、install；&lt;/p&gt;
+&lt;h4&gt;1.数据库&lt;/h4&gt;
+&lt;p&gt;支持mysql，Redis，MongoDB；&lt;/p&gt;
+&lt;p&gt;以MongoDB为例：编译安装，然后，新建mongodb.conf并写入&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;dbpath=/usr/local/mongodb/db
+logpath=/usr/local/mongodb/logs/mongodb.log
+port=27017
+fork=true
+nohttpinterface=true
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;启动&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;/usr/local/mongodb/bin/mongod --bind_ip localhost -f /usr/local/mongodb/bin/mongodb.conf
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h4&gt;2.数据库驱动&lt;/h4&gt;
+&lt;p&gt;编译安装 MongoDB-C-Drive；&lt;/p&gt;
+&lt;h4&gt;3.coturn&lt;/h4&gt;
+&lt;p&gt;编译安装coturn；&lt;/p&gt;
+&lt;h4&gt;4.turnserver配置&lt;/h4&gt;
+&lt;p&gt;拷贝coturn里的演示配置覆盖工程配置，内含演示用的签名证书；&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;sudo cp coturn/example/* /usr/local/etc/
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;修改配置文件：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;vim /usr/local/etc/turnserver.conf
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;打开、修改以下选项：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;listening-port=3478
+listening-ip=140.112.xxx.xxx
+relay-ip=140.112.xxx.xxx
+relay-threads=5
+lt-cred-mech
+mongo-userdb=&amp;quot;mongodb://localhost:27017/coturn&amp;quot; 
+realm=junze.com
+max-bps=10000000
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;其中&lt;code&gt;lt-cred-mech&lt;/code&gt;，该加密方式为必须打开选项、因为webRtc要求的，否则不会产生reply的&lt;code&gt;candidate&lt;/code&gt;；&lt;/p&gt;
+&lt;h4&gt;5.启动turnserver&lt;/h4&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;turnserver
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;不带任何参数启动它会去加载那一堆etc里的默认文件；&lt;/p&gt;
+&lt;h4&gt;7.创建turn帐号&lt;/h4&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;turnadmin -a --mongo-userdb=&amp;quot;mongodb://localhost:27017/coturn&amp;quot; -u userid -r junze.com -p pwd
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h4&gt;8.完&lt;/h4&gt;
+&lt;p&gt;以上，基本就完成了，接着是在前端js里写入turn地址了。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="n"&gt;var&lt;/span&gt; &lt;span class="n"&gt;iceServer&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;                                                            
+        &lt;span class="s"&gt;&amp;quot;iceTransportPolicy&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;relay&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;                                       
+        &lt;span class="s"&gt;&amp;quot;iceServers&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;                                                      
+                &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;urls&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;stun:180.153.xxx.xxx&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;
+                &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;urls&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;turn:userid@180.153.xxx.xxx&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;credential&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;pwd&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;
+        &lt;span class="p"&gt;]&lt;/span&gt;                                                                    
+    &lt;span class="p"&gt;};&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;其他&lt;/h3&gt;
+&lt;p&gt;非关键的东西：&lt;/p&gt;
+&lt;p&gt;1.查看帐号密码信息：
+进入mongo shell&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;/usr/local/mongodb/bin/mongo coturn                                                                                                      
+db.turnusers_lt.find()db.turnusers_lt.find()
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;返回大概如下数据： &lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;{ &amp;quot;_id&amp;quot; : ObjectId(&amp;quot;57441b21c89507f577071401&amp;quot;), &amp;quot;name&amp;quot; : &amp;quot;userid&amp;quot;, &amp;quot;realm&amp;quot; : &amp;quot;junze.com&amp;quot;, &amp;quot;hmackey&amp;quot; : &amp;quot;6e1c2b0553be00ee9f09ca46f46xxxxxxx}
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;2.turnsrver自带的测试工具&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;turnutils_stunclient -p 3478 140.112.xxx.xx                
+turnutils_uclient -v -t -T -u userid -w pwpwd80.153.xxx.xxx
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;3.修改防火墙  &lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;vi /etc/sysconfig/iptables
+
+-A INPUT -p tcp -m state --state NEW -m tcp --dport 30000:65000 -j ACCEPT
+#随便写的端口范围
+
+service iptables restart
+&lt;/pre&gt;&lt;/div&gt;</summary><category term="webRtc"></category></entry><entry><title>音频对比</title><link href="/2016/audioCompress_2016_05_29_20_49.html" rel="alternate"></link><updated>2016-05-29T20:49:00+08:00</updated><author><name>kai_kai03</name></author><id>tag:,2016-05-29:2016/audioCompress_2016_05_29_20_49.html</id><summary type="html">&lt;h4&gt;前言&lt;/h4&gt;
 &lt;p&gt;最近在玩一个新玩具--用火纹提取的live2d模型搞个直播向的聊天机器人，其中对话部分需要用到TTS转换语音。&lt;/p&gt;
 &lt;p&gt;但那TTS嘛，总随机带上一段语音广告。比较头疼的还是它没有价目表，说是永久免费的，这么一来想去掉广告也就只能走商务合作一条路了。这玩法个人屌丝玩不起。&lt;/p&gt;
 &lt;p&gt;但是呢，广告语音的内容前半部分基本上是相同的，SO.....那就想办法去掉。&lt;/p&gt;
