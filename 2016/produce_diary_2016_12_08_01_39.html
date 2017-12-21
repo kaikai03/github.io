@@ -1,0 +1,462 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="/theme/css/foundation.min.css" media="all">
+		<link rel="stylesheet" href="/theme/css/pygments.css" /> 
+		<link rel="stylesheet" href="/theme/css/style.css" />
+		<link rel="stylesheet" href="/theme/css/ukagaka.css" /> 
+        <script type="text/javascript" src="/theme/js/modernizr.js"></script>
+		<script type='text/javascript' src='/theme/js/jquery-1.11.1.min.js'></script>
+	    <script type="text/javascript" src="/theme/js/damoo.min.js"></script>
+		<script type="text/x-mathjax-config">MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});</script>
+        <script type="text/javascript">var js=document.createElement('script');js.setAttribute('src',(('https:' == document.location.protocol) ? ' https://' : ' http://')+'cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML');document.head.appendChild(js);</script>
+
+        <link href='https://fonts.lug.ustc.edu.cn/css?family=Exo+2:400,300,700,300italic,400italic,700italic,900,900italic' rel='stylesheet' type='text/css'>
+        <link rel="stylesheet" href="/theme/css/lamboz.css" media="all">
+        <title>不靠谱产品日记（8） - kairnsの记事簿</title>
+        <meta charset="utf-8" />
+        <link href="/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="kairnsの记事簿 Full Atom Feed" />
+        <link href="/feeds/all.rss.xml" type="application/rss+xml" rel="alternate" title="kairnsの记事簿 Full RSS Feed" />
+        <link href="/feeds/bu-kao-pu-chan-pin-ri-ji.atom.xml" type="application/atom+xml" rel="alternate" title="kairnsの记事簿 Categories Atom Feed" />
+        
+</head>
+<body onblur="leavePage()" onfocus="comebackPage()">
+    <div class="pages">
+        <ul>
+            <li class="home"><a href="/index.html">Home</a></li>
+            <li ><a href="/pages/about-me.html">About Me</a></li>
+            <li ><a href="/pages/Python_Packages_2012_11_05_12_18.html">Python Packages</a></li>
+        </ul>
+    </div>
+
+<div class="hp-header-inner">
+    <div class="page-header">
+        <div class="content-header">
+            <div id="title-block">
+            <h1>  <a href="/2016/produce_diary_2016_12_08_01_39.html" rel="bookmark"
+                    title="Permalink to 不靠谱产品日记（8）">不靠谱产品日记（8）</a></h1>
+            </div>
+        </div>
+    </div>
+</div>
+    <div class="content">
+        <div class="data-holder">
+        <div class="row">
+           <div class="large-9 content-column column">
+<div class="content-article">
+    <header class="header-article">
+        <div class="read-more">Posted on Thu 08 December 2016</div>
+ 
+   </header>
+    <section class='article'>
+        
+        <div class="entry-summary">
+            <p>研发周期与市场（销售）之间既正相关又负相关的矛盾统一体的问题</p>
+        </div>
+    
+        <div class="entry-content">
+            <h1>2016-12-07</h1>
+<h2>会议简要</h2>
+<p>先贴个会议结论，既决策。</p>
+<div class="highlight"><pre>今后，所有计划由市场时间进行倒推，必须要保证市场的blablabla。
+研发发生延误，那么从测试阶段把时间抢回来。
+</pre></div>
+
+
+<p><em>ps：以上及以下”市场“等同于”销售“、”客户服务“和”运营“相关的行为。</em></p>
+<p>今天就来说说这个看起来就本末倒置问题。</p>
+<h2>时间问题</h2>
+<p>总的来说，一切可以归结成时间问题。</p>
+<h4>项目设计</h4>
+<p>即便没有”市场时间倒推计划“这事，所有计划本身从一开始，便是能赶则赶。</p>
+<p>当然项目设计这点不好量化，没有明确精细度，进一步来说就是没有统一评判标准。所以到底怎么样不好说，即便带着各种漏洞和错误，在开发过程中通过实时跟进、干涉及调整，依旧可以有挽回的余地。虽然这个不是key piont，但却会对下一阶段造成致命的影响。(这里还有一点设计人员的精力问题没说，因为who care～)</p>
+<h4>开发</h4>
+<p>接下来到开发计划，依旧能压则缩，开发周期基本上被压到girigiri能完成的程度，加上上一点提到的问题，需要花时间进行修正设计上的失误，开发正常按时完成几乎成了不可能的事情。几次下来，研发也形成逆来顺受的习惯，不在对计划有异议，反正都是mission impossible。</p>
+<p>结果就是认真规划的计划必然的延误。虽然现在还没有出现随意编编应付了事的情况。但是如此以往，估计快了。</p>
+<p>同时一直的“赶工”状态，对质量带来的负面影响，又会将问题传导到下一个阶段。</p>
+<h4>测试</h4>
+<p>准确的说来，是质管中心对产品质量的监管。但这里不想多谈，就片面的说“软件测试”这件事。</p>
+<p>研发不对自己的产出进行严格检查，把问题推给测试，最终导致测试经常遇到严重的系统级bug，“测不下去”而暂停测试，严重影响测试进度。</p>
+<p>这一系列连锁反应，最终所有压力都被甩到测试这端，看起来就像是测试不断在“延期”似的。</p>
+<p>这里再倒回头说说测试本身存在的问题。一个软件项目，资源富余足条件下的开发测试比1:1是最合理的情况。当然非大型企业很难有如此富裕宽松的条件，那么测试比例在一定条件下进行缩减也是情有可原的。从经验上看，3:1基本就接近极限了（不进行集成测试及白盒测试，仅作使用测试，撑死能到6:1）。</p>
+<p>而我司的情况是：无论研发周期多长，研发人数多少，常配备的测试资源就1人，并且计划测试周期为1周，含多轮回归测试。</p>
+<p>在测试资源严重匮乏的情况下，不是延长测试周期，反而是进行缩缩减，那么结果可想而之。根据“系统熵是常数”的定理 (自称<code>&gt;_,&lt;</code>)，那么问题必然继续传导下去，下一棒将是运维？市场？或是用户？</p>
+<p><em>ps:顺带说下，近期的测试预计被缩短为2～3天，1人，emmmmm</em></p>
+<h2>市场倒逼</h2>
+<p>在非紧急特殊情况下，由市场倒推生产这是一种愚蠢的行为。</p>
+<p>这个情况现在互联网行业倒是挺常见的。特别是手游。</p>
+<p>绝大部分手游由于运营研发高度分离，完全分成两个企业。运营根据市场制订计划，反过来为研发确立开发节点。这些时间点的确定与研发工作本身是毫无关系的，所以我们看到手游公司好像经常出现通宵工作的概率非常高。但是每次新的イベント(event)上线，各种error、停机维护、道歉、赔偿、<em><small>制作人滚出来土下座（开个玩笑，但kmr去死）；</small></em>几乎都成为日常定番。但手游完全是卖方市场，人家爱怎么玩怎么玩，无非面上不好听而已，不影响捞钱。</p>
+<p>企业级、应用型、专业领域作业用等，这些字眼综合起来，就是完全买方市场。手游卖方市场的那套钓着用户的玩法根本行不通，不仅仅是直观满意度的问题，作业用的系统会带来的损失可以量化。一辆常抛锚的货船肯定会被立马回炉，防止损失扩大。</p>
+<p>在正常情况下，过分的压缩必要的时间，无非就是kpi上看起来漂亮而已。在资源不足的情况下，还需分一部分精力去掩盖问题，想尽办法在让一个不合理的东西看起来合理，更近一步加剧产品质量下降。把所有问题都推向“事后修补”。企业应用这么玩，不说会被当垃圾扔掉，市场及服务人员的脸在现场也挂不住啊。</p>
+<p>作为市场人员，一般来说都必须在心理优势和信息不对称方面，有绝对优势，才开展销售、推广行为，否则也只是浪费机会。</p>
+<p>那么研发周期与市场本不应该是一对矛盾，而是共同协调（梯度上升Y(^_^)Y），求得当前实际局部最优解得过程。</p>
+<h2>最后</h2>
+<p>今天就不扯太远，计划着还有个模式识别算法需要调整，得赶紧开工，否则太阳公公出来前没法睡觉了。</p>
+<p>总之，最开始贴的那段对近期工作的决策，应该不会持续很长时间，几次现场出问题后，市场自己就会让流程回到正轨了。</p>
+        </div>
+    </section>
+    <footer class="footer-article">
+        <div class="tags-and-categories">Filed under <a href="/category/bu-kao-pu-chan-pin-ri-ji.html">不靠谱产品日记</a>
+        | Tagged: <a href="/tag/chan-pin.html">产品 </a>
+        | <a href="/2016/produce_diary_2016_12_08_01_39.html" rel="bookmark"
+         title="Permalink to 不靠谱产品日记（8）">Permalink</a>            
+        </div>
+        <!-- metaldata 
+        -->
+    </footer>
+</div>
+<div id="disqus_thread"></div>
+<script type="text/javascript" src="/theme/js/disqus.js"></script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+            </div>
+            
+            
+			<div class="large-3 aside column">
+				<img class="headIcon-large avatar" src="/sys_img/head.jpg" alt="(┬＿┬)">
+                <h2>魏凯</h2>
+                <h3>kairns leeky</h3>
+				<a href="mailto:kai_kai03@hotmail.com?subject=%20&body=from%20blog"><Email>kai_kai03@hotmail.com</Email></a>
+            </div>
+            
+            
+			
+			<div class="large-3 aside column">
+                <h3>Socials</h3>
+                <ul>
+                    <li><a href="http://weibo.com/mipamipami">新浪weibo</a></li>
+                    <li><a href="https://plus.google.com/105166364351021934050">g+</a></li>
+                </ul>
+            </div> 
+            
+            <div class="large-3 category-column column">
+                <h3>Categories</h3>
+                <ul>
+                    <li class="active"><a href="/category/bu-kao-pu-chan-pin-ri-ji.html">不靠谱产品日记</a> (12)</li>
+                    <li><a href="/category/db.html">DB</a> (3)</li>
+                    <li><a href="/category/idev.html">iDev</a> (14)</li>
+                    <li><a href="/category/machinelearning.html">MachineLearning</a> (18)</li>
+                    <li><a href="/category/musical.html">Musical</a> (3)</li>
+                    <li><a href="/category/other.html">other</a> (2)</li>
+                    <li><a href="/category/pydev.html">pyDev</a> (17)</li>
+                    <li><a href="/category/yin-shi-pin.html">音视频</a> (18)</li>
+                </ul>
+            </div> 
+            
+            <div class="large-3 category-column column">
+                <h3>Feeds</h3>
+                <ul>
+                    <li ><a href="/feeds/all.atom.xml" type="application/atom+xml">Atom Feed</a></li>
+                    <li ><a href="/feeds/all.rss.xml" type="application/rss+xml">RSS Feed</a></li>
+                </ul>
+            </div>
+            
+        
+        
+
+                <!--
+            <iframe width="100%" height="600" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=600&fansRow=1&ptype=1&speed=0&skin=1&isTitle=0&noborder=0&isWeibo=1&isFans=0&uid=1819436507&verifier=4060feb2&colors=fc1f12,ffffff,666666,0082cb,ecfbfd&dpc=1"></iframe>            </div>
+            -->
+         
+    </div>
+</div>
+    <div class="footer">
+        <div class="data-holder">
+        <div class="row">
+            <div class="large-3 column">
+<div class="Verse">
+    <h3>bo主偈语</h3>
+    <p>これも欲しい</p>
+    <p>あれも欲しい</p>
+    <p1>金がなくて悲しい</p1>
+    <p>これもセール</p>
+    <p>あれもセール</p>
+    <p1>全部買うと責められる</p1>
+    <p>これかっこい</p>
+    <p>あれも可愛い</p>
+    <p1>買えないので悔しい</p1>
+    <p>いつ金が入る？</p>
+    <p>いつ金が入る？</p>
+    <p1>あの時まだ間に合う？</p1>
+    <p>phaも買った</p>
+    <p>hmzも買った</p>
+    <p>嬉しいけど.....</p>
+    <p1>土しか食べられるものは無かった</p1>
+    <p1>嗯...2015年...vps不续费了...</p1>
+</div>           </div>
+           <div class="large-6 tag-cloud column">
+                <h3>Tags</h3>
+                <ul class="tagcloud">
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/nao-dong.html">脑洞
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/chord.html">Chord
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/websocket.html">WebSocket
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/mongo.html">mongo
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/classification.html">classification
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/shi-xu-tu.html">时序图
+                        </a></li>
+                    <li>
+											<span class="badge">17</span>
+                        <a href="/tag/chan-pin.html">产品
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/fuck.html">fuck
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/gc.html">GC
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/rtmp.html">RTMP
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/unicode.html">unicode
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/dylib.html">dylib
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/protocol.html">protocol
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/pycon.html">PyCon
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/cai-ji.html">采集
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/clustering.html">clustering
+                        </a></li>
+                    <li>
+											<span class="badge">6</span>
+                        <a href="/tag/web.html">Web
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/yi-zhi.html">移植
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/network.html">network
+                        </a></li>
+                    <li>
+											<span class="badge">6</span>
+                        <a href="/tag/flask.html">Flask
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/review.html">review
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/nodejs.html">Node.js
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/pep.html">PEP
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/features.html">Features
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/wu-tai.html">舞台
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/cnn.html">CNN
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/pca.html">PCA
+                        </a></li>
+                    <li>
+											<span class="badge">7</span>
+                        <a href="/tag/webrtc.html">webRtc
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/css.html">CSS
+                        </a></li>
+                    <li>
+											<span class="badge">8</span>
+                        <a href="/tag/object-c.html">Object-C
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/memory.html">Memory
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/life.html">life
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/flask-socketio.html">Flask-SocketIO
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/linear.html">Linear
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/dataprocessing.html">DataProcessing
+                        </a></li>
+                    <li>
+											<span class="badge">17</span>
+                        <a href="/tag/python.html">Python
+                        </a></li>
+                    <li>
+											<span class="badge">6</span>
+                        <a href="/tag/javascript.html">JavaScript
+                        </a></li>
+                    <li>
+											<span class="badge">18</span>
+                        <a href="/tag/ios.html">iOS
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/encode.html">encode
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/xcode.html">xCode
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/appstore.html">appstore
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/html5.html">html5
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/liu-cheng.html">流程
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/uiimage.html">UIImage
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/decorator.html">Decorator
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/ipad.html">iPad
+                        </a></li>
+                    <li>
+											<span class="badge">5</span>
+                        <a href="/tag/c.html">C++
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/jia-gou.html">架构
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/ffmpeg.html">FFmpeg
+                        </a></li>
+                    <li>
+											<span class="badge">16</span>
+                        <a href="/tag/algorithm.html">algorithm
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/database.html">database
+                        </a></li>
+                    <li>
+											<span class="badge">11</span>
+                        <a href="/tag/ml.html">ML
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/yan-zou.html">演奏
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/framework.html">framework
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/gbk.html">GBK
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/rfc.html">rfc
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/cache.html">cache
+                        </a></li>
+                    <li>
+											<span class="badge">13</span>
+                        <a href="/tag/math.html">Math
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/audio.html">audio
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/obs.html">OBS
+                        </a></li>
+                </ul>
+            </div>
+
+            <div class="large-3 aside column">
+                <h3>Links</h3>
+                <ul>
+                    <li><a href="http://mikanani.me/">蜜柑计划</a></li><br/>
+                    <li><a href="http://josh.agarrado.net/music/anime/index.php">ジョシュの楽譜集</a></li><br/>
+                    <li><a href="http://deeplearning.stanford.edu/">Deep Learning</a></li><br/>
+                    <li><a href="http://getpelican.com/">Pelican</a></li><br/>
+                    <li><a href="http://python.org/">Python</a></li><br/>
+                    <li><a href="http://jinja.pocoo.org/">Jinja2</a></li><br/>
+                </ul>
+                
+            </div>
+
+        </row>
+        </div>
+        <div class="row">
+            <div class="small-12 column">
+                <p style="font-size: 0.7em; text-align:center;">
+                ∠( ᐛ 」∠)＿不会有人拉到这么下边的呀就算拉下来也不会去看的呀这么小的字也看不清的口牙！ ©2015.
+                <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1257347159'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1257347159%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+                <script type="text/javascript" src="/theme/js/analytics.js"></script>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    
+</body>
+</html>
