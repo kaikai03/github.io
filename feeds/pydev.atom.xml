@@ -775,7 +775,7 @@ def loop():
 
 
 &lt;ul&gt;
-&lt;li&gt;Macro&lt;/li&gt;
+&lt;li&gt;Macro!!&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;&lt;em&gt;index.py&lt;/em&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;@app.route(&amp;#39;/macro&amp;#39;)
