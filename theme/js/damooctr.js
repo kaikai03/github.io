@@ -32,7 +32,7 @@ function dududu(){
 }
 
 window.onload=function(){ 
-            document.body.removeChild(document.getElementById('blabla')); 
+            /*document.body.removeChild(document.getElementById('blabla')); 
             var hjs=document.createElement('script');
             hjs.setAttribute('id','blabla');
             hjs.setAttribute('src',kotoba);
@@ -40,7 +40,7 @@ window.onload=function(){
             
             var hjs2=document.getElementById('blabla')
             console.log(hjs2);
-            console.log(hjs2.src);
+            console.log(hjs2.src);*/
             
 	damoo.emit({ text: '欢迎光临----右舷弹幕启动', color: "#FFF", shadow: { color: "#f49" }});
 	damoo.emit({ text: '由于资源问题弹幕话痨模式已关闭', color: "#FFF", shadow: { color: "#f49" }});
