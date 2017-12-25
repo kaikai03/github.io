@@ -5,28 +5,28 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
 <url>
 <loc>/</loc>
-<lastmod>2017-12-24T12:04:45-00:00</lastmod>
+<lastmod>2017-12-25T03:37:29-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.8</priority>
 </url>
 
 <url>
 <loc>/archives.html</loc>
-<lastmod>2017-12-24T12:04:45-00:00</lastmod>
+<lastmod>2017-12-25T03:37:29-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.8</priority>
 </url>
 
 <url>
 <loc>/tags.html</loc>
-<lastmod>2017-12-24T12:04:45-00:00</lastmod>
+<lastmod>2017-12-25T03:37:29-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.8</priority>
 </url>
 
 <url>
 <loc>/categories.html</loc>
-<lastmod>2017-12-24T12:04:45-00:00</lastmod>
+<lastmod>2017-12-25T03:37:29-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.8</priority>
 </url>
@@ -67,6 +67,20 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 </url>
 
 <url>
+<loc>/2017/COV_2017_08_23_20_30.html</loc>
+<lastmod>2017-08-23T20:30:00+08:00</lastmod>
+<changefreq>daily</changefreq>
+<priority>1.0</priority>
+</url>
+
+<url>
+<loc>/2017/Keep_Alive_2017_08_01_14_13.html</loc>
+<lastmod>2017-08-01T14:13:00+08:00</lastmod>
+<changefreq>daily</changefreq>
+<priority>1.0</priority>
+</url>
+
+<url>
 <loc>/2017/produce_diary_2017_07_18_23_17.html</loc>
 <lastmod>2017-07-18T23:17:00+08:00</lastmod>
 <changefreq>daily</changefreq>
@@ -74,8 +88,22 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 </url>
 
 <url>
+<loc>/2017/ROC_2017_07_03_19_46.html</loc>
+<lastmod>2017-07-03T19:46:00+08:00</lastmod>
+<changefreq>daily</changefreq>
+<priority>1.0</priority>
+</url>
+
+<url>
 <loc>/2017/produce_diary_2017_07_01_17_49.html</loc>
 <lastmod>2017-07-03T21:49:00+08:00</lastmod>
+<changefreq>daily</changefreq>
+<priority>1.0</priority>
+</url>
+
+<url>
+<loc>/2017/ChiSquare_2017_06_28_19_29.html</loc>
+<lastmod>2017-06-28T19:29:00+08:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>1.0</priority>
 </url>
@@ -733,7 +761,7 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
 <url>
 <loc>/category/machinelearning.html</loc>
-<lastmod>2015-10-22T23:18:00+08:06</lastmod>
+<lastmod>2017-08-23T20:30:00+08:06</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.8</priority>
 </url>
@@ -754,7 +782,7 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
 <url>
 <loc>/category/pydev.html</loc>
-<lastmod>2016-02-04T10:47:00+08:06</lastmod>
+<lastmod>2017-08-01T14:13:00+08:06</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.8</priority>
 </url>
@@ -880,7 +908,7 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
 <url>
 <loc>/tag/web.html</loc>
-<lastmod>2015-12-31T17:05:00+08:06</lastmod>
+<lastmod>2017-08-01T14:13:00+08:06</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.8</priority>
 </url>
@@ -1005,6 +1033,13 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 </url>
 
 <url>
+<loc>/tag/http.html</loc>
+<lastmod>2017-08-01T14:13:00+08:06</lastmod>
+<changefreq>daily</changefreq>
+<priority>0.8</priority>
+</url>
+
+<url>
 <loc>/tag/finance.html</loc>
 <lastmod>2017-11-15T23:48:00+08:06</lastmod>
 <changefreq>daily</changefreq>
@@ -1118,7 +1153,7 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
 <url>
 <loc>/tag/algorithm.html</loc>
-<lastmod>2016-05-29T20:49:00+08:06</lastmod>
+<lastmod>2017-08-23T20:30:00+08:06</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.8</priority>
 </url>
@@ -1132,7 +1167,7 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
 <url>
 <loc>/tag/ml.html</loc>
-<lastmod>2015-10-22T23:18:00+08:06</lastmod>
+<lastmod>2017-08-23T20:30:00+08:06</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.8</priority>
 </url>

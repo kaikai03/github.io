@@ -72,7 +72,42 @@
 &lt;h2&gt;书痴者文必工，艺痴者技必良。&lt;/h2&gt;
 &lt;p&gt;这里不说兴趣爱好。&lt;/p&gt;
 &lt;p&gt;不抹去乌云，何来新大路；麦克斯韦妖不会出现在没有准备的人面前现形；不把纠缠的空间拆解开来怎么救出薛定谔关在箱子里的猫；没有多到溢出的行业知识加身，在行业中永远是雾里看花。&lt;/p&gt;
-&lt;p&gt;大道理大家都懂，是知而行之，还是知而不知，就看个人了。&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">kai_kai03</dc:creator><pubDate>Thu, 14 Sep 2017 23:08:00 +0800</pubDate><guid>tag:,2017-09-14:2017/produce_diary_2017_09_14_23_08.html</guid><category>产品</category></item><item><title>不靠谱产品日记（18）</title><link>/2017/produce_diary_2017_07_18_23_17.html</link><description>&lt;h1&gt;2017-07-18&lt;/h1&gt;
+&lt;p&gt;大道理大家都懂，是知而行之，还是知而不知，就看个人了。&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">kai_kai03</dc:creator><pubDate>Thu, 14 Sep 2017 23:08:00 +0800</pubDate><guid>tag:,2017-09-14:2017/produce_diary_2017_09_14_23_08.html</guid><category>产品</category></item><item><title>np.Cov</title><link>/2017/COV_2017_08_23_20_30.html</link><description>&lt;h2&gt;numpy&lt;/h2&gt;
+&lt;h3&gt;发现&lt;/h3&gt;
+&lt;p&gt;起因是无聊，明明协方差矩阵已经拿到了，又对某变量计算了一次方差，发现和协方差矩阵对角上对应值不符。明明同一个工具，这就怪了。
+先是动手写了教科书说的方法做个测试，果然结果截然不同。&lt;/p&gt;
+&lt;p&gt;很久之前写了个小工具来实现，所以在自己电脑上干活时比较少用numpy提供的方法来算协方差矩阵，偶尔用一下也没注意它的结果。今天这的偶然试了一下，发现结果跟下意识里的操作方式有点不太一样。&lt;/p&gt;
+&lt;h3&gt;这个Cov不一样&lt;/h3&gt;
+&lt;ol&gt;
+&lt;li&gt;默认变量是以行作为排列的，这点与大多数教科书上的描述方法都不一样了，在计算上要么&lt;code&gt;matrix.T&lt;/code&gt;将向量转到行上,或者将参数&lt;code&gt;rowvar&lt;/code&gt;设置为False。&lt;/li&gt;
+&lt;li&gt;结果默认为无偏估计，既认为数据是样本数据，而不是总体，比较令人不舒服的地方是明明&lt;code&gt;np.var&lt;/code&gt;默认却是计算总体方差的。当然如果它连&lt;code&gt;np.var&lt;/code&gt;也是无偏的，那也就没今天这篇东西了。这里嘛，可以将参数&lt;code&gt;bias&lt;/code&gt;设置为False，使用&lt;code&gt;1/n&lt;/code&gt;进行计算。&lt;/li&gt;
+&lt;/ol&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">kai_kai03</dc:creator><pubDate>Wed, 23 Aug 2017 20:30:00 +0800</pubDate><guid>tag:,2017-08-23:2017/COV_2017_08_23_20_30.html</guid><category>algorithm</category><category>ML</category><category>Math</category></item><item><title>Keep-Alive</title><link>/2017/Keep_Alive_2017_08_01_14_13.html</link><description>&lt;h2&gt;Alive&lt;/h2&gt;
+&lt;h3&gt;前情&lt;/h3&gt;
+&lt;p&gt;前段时间时间写个测试脚本验证数据时，发现服务端在密集请求一段时间后会出现短时卡顿，极少量情况会出现链接过多tomcat主动切断请求的情况。&lt;/p&gt;
+&lt;p&gt;由于目前该服务运行尚无用户压力，并且向相关同事确认已经启用访问复用，就没有再深究。&lt;/p&gt;
+&lt;h3&gt;抓虫&lt;/h3&gt;
+&lt;p&gt;今天正好有空查查问题。&lt;/p&gt;
+&lt;p&gt;测试端添加Keep-Alive标签，将访问间隔去除，十分钟后又出现tomcat主动切断的情况，之后访问处于超时状态，几分钟后恢复。&lt;/p&gt;
+&lt;p&gt;将间隔设置70毫秒左右，可持续访问30分钟无异常。&lt;/p&gt;
+&lt;p&gt;这就基本可以判定是服务端并没有触发复用机制，导致连接池超上线了。&lt;/p&gt;
+&lt;p&gt;平台同事说过他们添加过这方面的配置，那么就从测试脚本这边找问题。&lt;/p&gt;
+&lt;p&gt;去搜了下&lt;code&gt;urllib2&lt;/code&gt;和&lt;code&gt;Keep-Alive&lt;/code&gt;，果然很快就找到问题，&lt;code&gt;urllib2&lt;/code&gt;默认不支持，需要换成&lt;code&gt;urllib3&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;正好今天的机器上装了&lt;code&gt;Anaconda&lt;/code&gt;，看了下里面带了&lt;code&gt;requests&lt;/code&gt;，索性就直接用第三方的lib好了。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;requests&lt;/span&gt;
+
+&lt;span class="n"&gt;headers&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;Content-Type&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;application/x-www-form-urlencoded;charset=UTF-8&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+         &lt;span class="s1"&gt;&amp;#39;User-Agent&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;Mozilla/4.0 (compatible; MSIE 5.0; Windows NT; DigExt)&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+         &lt;span class="s1"&gt;&amp;#39;Connection&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;Keep-Alive&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+         &lt;span class="s1"&gt;&amp;#39;Accept-Encoding&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;gzip,deflate&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;
+
+&lt;span class="n"&gt;session&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;requests&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;session&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;span class="n"&gt;r&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;session&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;post&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;address&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;requestData&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;param&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;],&lt;/span&gt;&lt;span class="n"&gt;headers&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;headers&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;timeout&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mf"&gt;1800.0&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;最后&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;requests&lt;/code&gt;挺方便的，连&lt;code&gt;urlencode&lt;/code&gt;都自动处理了。&lt;/p&gt;
+&lt;p&gt;虽然python随手写算法验证很便捷，但是便捷的极限还是有的，涉及上业务，哪怕一点，同样会有一堆堆未知的问题冒出来。&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">kai_kai03</dc:creator><pubDate>Tue, 01 Aug 2017 14:13:00 +0800</pubDate><guid>tag:,2017-08-01:2017/Keep_Alive_2017_08_01_14_13.html</guid><category>Web</category><category>HTTP</category></item><item><title>不靠谱产品日记（18）</title><link>/2017/produce_diary_2017_07_18_23_17.html</link><description>&lt;h1&gt;2017-07-18&lt;/h1&gt;
 &lt;h2&gt;最高安全性&lt;/h2&gt;
 &lt;p&gt;医院内部信息系统存在大量各种敏感的医疗数据，如患者的个人信息、诊断信息等。除此之外，还有许多医院的机密或核心业务数据内容，如诊断方法、用药方式等，因此保证医院信息系统数据的安全是极其重要的。&lt;/p&gt;
 &lt;p&gt;多年来，医院“移不动”的很大原因之一就在数据安全方面的问题。&lt;/p&gt;
@@ -96,7 +131,195 @@
 &lt;h2&gt;最后&lt;/h2&gt;
 &lt;p&gt;既然领导认可，我当然也举双手认同，毕竟有这么一个端口在，未来做什么调试都非常方便了。&lt;/p&gt;
 &lt;p&gt;另外，以后的设计某种程度上又轻松一些，可以少考虑很多安全保障方面的东西，毕竟实际并不需要那么高的安全性的嘛。&lt;/p&gt;
-&lt;p&gt;以前完全是被吓唬到了（笑）。&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">kai_kai03</dc:creator><pubDate>Tue, 18 Jul 2017 23:17:00 +0800</pubDate><guid>tag:,2017-07-18:2017/produce_diary_2017_07_18_23_17.html</guid><category>产品</category></item><item><title>不靠谱产品日记（16）</title><link>/2017/produce_diary_2017_07_01_17_49.html</link><description>&lt;h1&gt;2017-06-30&lt;/h1&gt;
+&lt;p&gt;以前完全是被吓唬到了（笑）。&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">kai_kai03</dc:creator><pubDate>Tue, 18 Jul 2017 23:17:00 +0800</pubDate><guid>tag:,2017-07-18:2017/produce_diary_2017_07_18_23_17.html</guid><category>产品</category></item><item><title>ROC Curve</title><link>/2017/ROC_2017_07_03_19_46.html</link><description>&lt;h2&gt;ROC&lt;/h2&gt;
+&lt;h3&gt;哔哔哔哔&lt;/h3&gt;
+&lt;p&gt;这次这个统计工具分析不管从原理还是步骤，都比之前的卡方简单好多，但是最麻烦的地方是绘图的结果，试了很多种方法，得到的结果都与SPSS不符。最后全靠蒙，把thershold均匀分1000份，啊！！！结果看起来一样了。。。。。&lt;/p&gt;
+&lt;p&gt;&lt;center&gt;&lt;img alt="1.png" src="/article_img/ROC_2017_07_03_19_46/1.png" /&gt;&lt;/center&gt;&lt;/p&gt;
+&lt;h3&gt;正文&lt;/h3&gt;
+&lt;p&gt;ROC的解释是反映敏感性和特异性连续变量的综合指标。简单来说就是显示&lt;code&gt;真阳性/(真阳性+真阴性)&lt;/code&gt; 与 &lt;code&gt;假阳性/(假阳性+真阴性)&lt;/code&gt;之间的关系，用别人文章里的话说就是预测命中率与错判率之间的关系。&lt;/p&gt;
+&lt;p&gt;如果曲线下面积为1，既填满整个矩形，意味着预测准确率能够达到100%！&lt;/p&gt;
+&lt;p&gt;具体过程比较简单，不分段解释了，直接贴完整的实验性质的代码吧。想知道详细过程的同学参看引用，特别是&lt;code&gt;第三篇&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;这里有一点需要提的是，关于ROC，在最常被引用的、最容易被搜出来的某篇论文中，把AUC的标准误差写成标准差，而这里上面提到的那个&lt;code&gt;第三篇&lt;/code&gt;则写的是标准误差，至于谁对谁错，又或是我理解错误，就没精力去深究了，至少在本文的前提下，这个&lt;code&gt;第三篇&lt;/code&gt;中所描述的，和SPSS的结果输出相符。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="c1"&gt;# coding=utf-8&lt;/span&gt;
+&lt;span class="n"&gt;__author__&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;kai_kai03&amp;#39;&lt;/span&gt;
+
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;numpy&lt;/span&gt; &lt;span class="kn"&gt;as&lt;/span&gt; &lt;span class="nn"&gt;np&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;math&lt;/span&gt;
+
+&lt;span class="c1"&gt;##这里我假装我的product是sex，sample为预测值。&lt;/span&gt;
+&lt;span class="kp"&gt;sample&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mf"&gt;0.65432&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mf"&gt;0.65484&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mf"&gt;0.65555&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mf"&gt;0.65835&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mf"&gt;0.65841&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mf"&gt;0.65847&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mf"&gt;0.65873&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mf"&gt;0.65879&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mf"&gt;0.65919&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mf"&gt;0.65951&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mf"&gt;0.66061&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mf"&gt;0.66067&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mf"&gt;0.66106&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mf"&gt;0.66120&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mf"&gt;0.66133&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mf"&gt;0.66145&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mf"&gt;0.66164&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mf"&gt;0.66164&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mf"&gt;0.66165&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mf"&gt;0.66167&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mf"&gt;0.66171&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mf"&gt;0.66177&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mf"&gt;0.66184&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mf"&gt;0.66184&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mf"&gt;0.66222&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mf"&gt;0.66261&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mf"&gt;0.66275&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mf"&gt;0.66287&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mf"&gt;0.66293&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mf"&gt;0.66294&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mf"&gt;0.66300&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mf"&gt;0.66301&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mf"&gt;0.66325&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mf"&gt;0.66332&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mf"&gt;0.66338&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mf"&gt;0.66365&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mf"&gt;0.66383&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mf"&gt;0.66383&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mf"&gt;0.66390&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mf"&gt;0.66390&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mf"&gt;0.66423&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mf"&gt;0.66428&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mf"&gt;0.66437&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mf"&gt;0.66441&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mf"&gt;0.66448&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mf"&gt;0.66448&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mf"&gt;0.66450&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mf"&gt;0.66473&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mf"&gt;0.66481&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mf"&gt;0.66493&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mf"&gt;0.66494&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mf"&gt;0.66506&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+&lt;span class="n"&gt;sex&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;matplotlib.pyplot&lt;/span&gt; &lt;span class="kn"&gt;as&lt;/span&gt; &lt;span class="nn"&gt;plt&lt;/span&gt;
+
+
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;poz&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;z&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="n"&gt;Z_MAX&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mf"&gt;6.0&lt;/span&gt;
+        &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;z&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="mf"&gt;0.0&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;:&lt;/span&gt;
+            &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mf"&gt;0.0&lt;/span&gt;
+        &lt;span class="k"&gt;else&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+            &lt;span class="n"&gt;y&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mf"&gt;0.5&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;math&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="kp"&gt;fabs&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;z&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+            &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt; &lt;span class="o"&gt;&amp;gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;Z_MAX&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="mf"&gt;0.5&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;:&lt;/span&gt;
+                &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mf"&gt;1.0&lt;/span&gt;
+            &lt;span class="k"&gt;elif&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;&lt;/span&gt; &lt;span class="mf"&gt;1.0&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+                &lt;span class="n"&gt;w&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;
+                &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;((((((((&lt;/span&gt;&lt;span class="mf"&gt;0.000124818987&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;w&lt;/span&gt;
+                        &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="mf"&gt;0.001075204047&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;w&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="mf"&gt;0.005198775019&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;w&lt;/span&gt;
+                        &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="mf"&gt;0.019198292004&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;w&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="mf"&gt;0.059054035642&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;w&lt;/span&gt;
+                        &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="mf"&gt;0.151968751364&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;w&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="mf"&gt;0.319152932694&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;w&lt;/span&gt;
+                        &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="mf"&gt;0.531923007300&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;w&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="mf"&gt;0.797884560593&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="mf"&gt;2.0&lt;/span&gt;
+            &lt;span class="k"&gt;else&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+                &lt;span class="n"&gt;y&lt;/span&gt; &lt;span class="o"&gt;-=&lt;/span&gt; &lt;span class="mf"&gt;2.0&lt;/span&gt;
+                &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(((((((((((((&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mf"&gt;0.000045255659&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;
+                        &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="mf"&gt;0.000152529290&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="mf"&gt;0.000019538132&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;
+                        &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="mf"&gt;0.000676904986&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="mf"&gt;0.001390604284&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;
+                        &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="mf"&gt;0.000794620820&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="mf"&gt;0.002034254874&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;
+                        &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="mf"&gt;0.006549791214&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="mf"&gt;0.010557625006&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;
+                        &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="mf"&gt;0.011630447319&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="mf"&gt;0.009279453341&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;
+                        &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="mf"&gt;0.005353579108&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="mf"&gt;0.002141268741&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;
+                        &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="mf"&gt;0.000535310849&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="mf"&gt;0.999936657524&lt;/span&gt;
+
+        &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;z&lt;/span&gt; &lt;span class="o"&gt;&amp;gt;&lt;/span&gt; &lt;span class="mf"&gt;0.0&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+            &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="mf"&gt;1.0&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="mf"&gt;0.5&lt;/span&gt;
+        &lt;span class="k"&gt;else&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+            &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mf"&gt;1.0&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="mf"&gt;0.5&lt;/span&gt;
+
+
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;getROCPiont&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;thershold&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="kp"&gt;product&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;predict&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;boundary&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="n"&gt;sumTp&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mf"&gt;0.0&lt;/span&gt;
+    &lt;span class="n"&gt;sumFn&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mf"&gt;0.0&lt;/span&gt;
+    &lt;span class="n"&gt;sumFp&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mf"&gt;0.0&lt;/span&gt;
+    &lt;span class="n"&gt;sumTn&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mf"&gt;0.0&lt;/span&gt;
+
+    &lt;span class="n"&gt;tpr&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mf"&gt;0.0&lt;/span&gt;
+    &lt;span class="n"&gt;fpr&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mf"&gt;0.0&lt;/span&gt;
+
+    &lt;span class="n"&gt;leng&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;len&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kp"&gt;product&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;i&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="nb"&gt;range&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;leng&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;predict&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;  &lt;span class="o"&gt;&amp;gt;=&lt;/span&gt; &lt;span class="n"&gt;thershold&lt;/span&gt; &lt;span class="ow"&gt;and&lt;/span&gt; &lt;span class="kp"&gt;product&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="n"&gt;boundary&lt;/span&gt; &lt;span class="p"&gt;:&lt;/span&gt;
+            &lt;span class="n"&gt;sumTp&lt;/span&gt; &lt;span class="o"&gt;+=&lt;/span&gt; &lt;span class="mf"&gt;1.0&lt;/span&gt;
+        &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;predict&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;  &lt;span class="o"&gt;&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;thershold&lt;/span&gt; &lt;span class="ow"&gt;and&lt;/span&gt; &lt;span class="kp"&gt;product&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;!=&lt;/span&gt; &lt;span class="n"&gt;boundary&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+            &lt;span class="n"&gt;sumFp&lt;/span&gt; &lt;span class="o"&gt;+=&lt;/span&gt; &lt;span class="mf"&gt;1.0&lt;/span&gt;
+        &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;predict&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;  &lt;span class="o"&gt;&amp;lt;=&lt;/span&gt; &lt;span class="n"&gt;thershold&lt;/span&gt; &lt;span class="ow"&gt;and&lt;/span&gt; &lt;span class="kp"&gt;product&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="n"&gt;boundary&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+            &lt;span class="n"&gt;sumFn&lt;/span&gt; &lt;span class="o"&gt;+=&lt;/span&gt; &lt;span class="mf"&gt;1.0&lt;/span&gt;
+        &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;predict&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;  &lt;span class="o"&gt;&amp;lt;&lt;/span&gt; &lt;span class="n"&gt;thershold&lt;/span&gt; &lt;span class="ow"&gt;and&lt;/span&gt; &lt;span class="kp"&gt;product&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;!=&lt;/span&gt; &lt;span class="n"&gt;boundary&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+            &lt;span class="n"&gt;sumTn&lt;/span&gt; &lt;span class="o"&gt;+=&lt;/span&gt; &lt;span class="mf"&gt;1.0&lt;/span&gt;
+
+    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;sumTp&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="mf"&gt;0.0&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="n"&gt;tpr&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mf"&gt;0.0&lt;/span&gt;
+    &lt;span class="k"&gt;else&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="n"&gt;tpr&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;sumTp&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;sumTp&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;sumFn&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;sumFp&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="mf"&gt;0.0&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="n"&gt;fpr&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mf"&gt;0.0&lt;/span&gt;
+    &lt;span class="k"&gt;else&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="n"&gt;fpr&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;sumFp&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;sumFp&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;sumTn&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;tpr&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;fpr&lt;/span&gt;
+
+
+&lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;__name__&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;__main__&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="n"&gt;min_score&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;min&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kp"&gt;sample&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;max_score&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;max&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kp"&gt;sample&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="c1"&gt;## 最大值最小值均匀分成1000份，得到一个阈值数组&lt;/span&gt;
+    &lt;span class="n"&gt;thr&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;np&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="kp"&gt;linspace&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;min_score&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;max_score&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;1000&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; 
+    &lt;span class="n"&gt;roc_x&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[]&lt;/span&gt;
+    &lt;span class="n"&gt;roc_y&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[]&lt;/span&gt;
+
+    &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;t&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="nb"&gt;enumerate&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;thr&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="c1"&gt;## 这里我认为性别为1的为真。&lt;/span&gt;
+        &lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;getROCPiont&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;t&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;sex&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="kp"&gt;sample&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="n"&gt;roc_x&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="kp"&gt;append&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="n"&gt;roc_y&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="kp"&gt;append&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+
+    &lt;span class="c1"&gt;## 获取输出表格的数据选取,均匀取出50个用于输出&lt;/span&gt;
+    &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;i&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="nb"&gt;range&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;1000&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="mi"&gt;20&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="k"&gt;print&lt;/span&gt; &lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;thr&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="mi"&gt;20&lt;/span&gt;&lt;span class="p"&gt;],&lt;/span&gt; &lt;span class="n"&gt;roc_y&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="mi"&gt;20&lt;/span&gt;&lt;span class="p"&gt;],&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;  &amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;roc_x&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="mi"&gt;20&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+
+    &lt;span class="c1"&gt;##计算曲面下的面积。&lt;/span&gt;
+    &lt;span class="n"&gt;AUC&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;
+    &lt;span class="n"&gt;AUCList&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[]&lt;/span&gt;
+    &lt;span class="n"&gt;last&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;
+    &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;i&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="nb"&gt;range&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;1000&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="o"&gt;==&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+            &lt;span class="k"&gt;continue&lt;/span&gt;
+        &lt;span class="c1"&gt;##对曲线进行积分&lt;/span&gt;
+        &lt;span class="n"&gt;area&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;roc_x&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;roc_x&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;roc_y&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+        &lt;span class="n"&gt;AUC&lt;/span&gt; &lt;span class="o"&gt;+=&lt;/span&gt; &lt;span class="n"&gt;area&lt;/span&gt;
+        &lt;span class="c1"&gt;##将面积分成10片分别进行记录，用于后续计算方差。&lt;/span&gt;
+        &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;%&lt;/span&gt; &lt;span class="mi"&gt;100&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+            &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;last&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+                &lt;span class="n"&gt;last&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;math&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="kp"&gt;fabs&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;AUC&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+                &lt;span class="n"&gt;AUCList&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="kp"&gt;append&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;last&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+            &lt;span class="k"&gt;else&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+                &lt;span class="n"&gt;AUCList&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="kp"&gt;append&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;math&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="kp"&gt;fabs&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;AUC&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;last&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+                &lt;span class="n"&gt;last&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;math&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="kp"&gt;fabs&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;AUC&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="c1"&gt;##因为跟计算方向有关系，有可能会算出负的来，所以要去掉符号。&lt;/span&gt;
+    &lt;span class="n"&gt;AUC&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;math&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="kp"&gt;fabs&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;AUC&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="k"&gt;print&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;auc:&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;AUC&lt;/span&gt;
+
+    &lt;span class="n"&gt;sump&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;
+    &lt;span class="n"&gt;sumn&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;
+
+    &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;ttt&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;sex&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;ttt&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="c1"&gt;##相当于上面getROCPiont的参数boundary，这里我假设性别为1的为真。&lt;/span&gt;
+            &lt;span class="n"&gt;sump&lt;/span&gt;&lt;span class="o"&gt;+=&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;
+        &lt;span class="k"&gt;else&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+            &lt;span class="n"&gt;sumn&lt;/span&gt;&lt;span class="o"&gt;+=&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;
+
+    &lt;span class="c1"&gt;##输出SPSS对应的观察值摘要表格&lt;/span&gt;
+    &lt;span class="k"&gt;print&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;觀察值處理摘要:&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;  &lt;span class="n"&gt;sump&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;sumn&lt;/span&gt;
+
+    &lt;span class="n"&gt;q1&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;AUC&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;AUC&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;AUCPow2&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;math&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;pow&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;AUC&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;q2&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;AUCPow2&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="n"&gt;AUC&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;error&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;AUC&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;AUC&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;  &lt;span class="o"&gt;+&lt;/span&gt;  &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;sumn&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;q1&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;AUCPow2&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;  &lt;span class="o"&gt;+&lt;/span&gt;  &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;sump&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;q2&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;AUCPow2&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;  &lt;span class="o"&gt;/&lt;/span&gt;  &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;sump&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;sumn&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="k"&gt;print&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;q:&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;  &lt;span class="n"&gt;q1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;q2&lt;/span&gt;
+    &lt;span class="k"&gt;print&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;Error(auc):&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;  &lt;span class="n"&gt;error&lt;/span&gt;
+
+    &lt;span class="c1"&gt;##标准误差&lt;/span&gt;
+    &lt;span class="n"&gt;SE&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;math&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="kp"&gt;sqrt&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;error&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="k"&gt;print&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;SE(auc):&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;SE&lt;/span&gt;
+
+    &lt;span class="n"&gt;z&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;AUC&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mf"&gt;0.5&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt; &lt;span class="n"&gt;SE&lt;/span&gt;
+    &lt;span class="k"&gt;print&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;z:&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;z&lt;/span&gt;
+    &lt;span class="k"&gt;print&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;p:&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;poz&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;z&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;
+
+    &lt;span class="n"&gt;meanAUC&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;AUC&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="mi"&gt;10&lt;/span&gt;
+
+    &lt;span class="c1"&gt;##标准差&lt;/span&gt;
+    &lt;span class="n"&gt;d&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;
+    &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;area&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;AUCList&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="n"&gt;d&lt;/span&gt;&lt;span class="o"&gt;+=&lt;/span&gt;&lt;span class="n"&gt;math&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;pow&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;area&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;meanAUC&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;sd&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;d&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="mi"&gt;10&lt;/span&gt;
+    &lt;span class="k"&gt;print&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;SD&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;math&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="kp"&gt;sqrt&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;sd&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="c1"&gt;##置信区间上下限&lt;/span&gt;
+    &lt;span class="n"&gt;Z_Alpha&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mf"&gt;1.96&lt;/span&gt;
+    &lt;span class="k"&gt;print&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;95% CI,下限:&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;AUC&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;SE&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;Z_Alpha&lt;/span&gt;
+    &lt;span class="k"&gt;print&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;95% CI,上限:&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;AUC&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="n"&gt;SE&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;Z_Alpha&lt;/span&gt;
+
+
+    &lt;span class="c1"&gt;##绘图&lt;/span&gt;
+    &lt;span class="n"&gt;plt&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;figure&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;duijiaoxian&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;np&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="kp"&gt;linspace&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mf"&gt;1.0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;10&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;plt&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;plot&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;duijiaoxian&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;duijiaoxian&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;color&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;coral&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;plt&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;plot&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;roc_x&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;roc_y&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;label&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;1000&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;color&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;blue&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;plt&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;show&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;References:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;a href="http://blog.csdn.net/abcjennifer/article/details/7359370"&gt;ROC曲线-阈值评价标准. &lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://en.wikipedia.org/wiki/Receiver_operating_characteristic"&gt;Receiver operating characteristic. &lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href="http://ncss.wpengine.netdna-cdn.com/wp-content/themes/ncss/pdf/Procedures/PASS/Confidence_Intervals_for_the_Area_Under_an_ROC_Curve.pdf"&gt;Confidence_Intervals_for_the_Area_Under_an_ROC_Curve. &lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">kai_kai03</dc:creator><pubDate>Mon, 03 Jul 2017 19:46:00 +0800</pubDate><guid>tag:,2017-07-03:2017/ROC_2017_07_03_19_46.html</guid><category>algorithm</category><category>ML</category><category>Math</category></item><item><title>不靠谱产品日记（16）</title><link>/2017/produce_diary_2017_07_01_17_49.html</link><description>&lt;h1&gt;2017-06-30&lt;/h1&gt;
 &lt;h2&gt;迈出第二步&lt;/h2&gt;
 &lt;p&gt;自第一个正式版本出厂至今，已过去半年，这半年里有推倒重造，也有新功能的加入。在数据抓取功能上线后，这周领导宣布由研发主导阶段进入市场为主的销售阶段。&lt;/p&gt;
 &lt;p&gt;本是めでたしめでたし的事，毕竟草台班子嘛，总会搞出点事。&lt;/p&gt;
@@ -151,7 +374,311 @@
 &lt;h1&gt;2017-07-03&lt;/h1&gt;
 &lt;p&gt;经过一番争论后，数据拉取时间改为在门诊与出院后7日拉取数据。&lt;/p&gt;
 &lt;p&gt;嘛～～反正区别的大，不就漏得少点而已嘛。&lt;/p&gt;
-&lt;p&gt;（这回是真@真@完）&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">kai_kai03</dc:creator><pubDate>Mon, 03 Jul 2017 21:49:00 +0800</pubDate><guid>tag:,2017-07-01:2017/produce_diary_2017_07_01_17_49.html</guid><category>产品</category></item><item><title>不靠谱产品日记（15）</title><link>/2017/produce_diary_2017_05_20_23_01.html</link><description>&lt;h1&gt;2017-05-20&lt;/h1&gt;
+&lt;p&gt;（这回是真@真@完）&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">kai_kai03</dc:creator><pubDate>Mon, 03 Jul 2017 21:49:00 +0800</pubDate><guid>tag:,2017-07-01:2017/produce_diary_2017_07_01_17_49.html</guid><category>产品</category></item><item><title>Chi-Square test</title><link>/2017/ChiSquare_2017_06_28_19_29.html</link><description>&lt;h2&gt;Chi-Square&lt;/h2&gt;
+&lt;h3&gt;惯例的事前唠叨&lt;/h3&gt;
+&lt;p&gt;最近医疗科研平台呢要开始制作数据数据分析部分，数据准备及数据操作设计好之后，利用空档期找找统计方法库，好安排后续的事。&lt;/p&gt;
+&lt;p&gt;结果一调研下来，事情可没事前那么简单，SPSS的行为核心并不是统计方法本身，而是围绕着一个统计方法的一系列检测方法。这就麻烦了，特别是不同方法的误差估计不一样，即使同一个估计方法，不同的参数（人择），也会有不同结果。&lt;/p&gt;
+&lt;p&gt;更要命的是，好多stat的库都是只提供统计方法本身，而不关注相关的分析部分。&lt;/p&gt;
+&lt;p&gt;另，java上好用的库更少，现在项目要求又是java。&lt;/p&gt;
+&lt;p&gt;由于我只是做设计验证，为了码代码的速度，主要过程用得还是python，中间会含一部分java，因为java中有现成的统计方法，顺便测试下方法计算结果对不对。&lt;/p&gt;
+&lt;h3&gt;正文&lt;/h3&gt;
+&lt;p&gt;本片主要是记录一下，以拟合SPSS输出结果为目的的卡方检验实现方法。&lt;/p&gt;
+&lt;p&gt;卡方检验属于非参数检验的范畴，它是计算样本的实际值与理论值之间的偏离程度，这个程度值就是卡方值，卡方值越小，偏差越小，若两个值完全相等时，卡方值就为0，表明理论值完全符合。&lt;/p&gt;
+&lt;p&gt;以下照着SPSS的输出，一步步处理数据。&lt;/p&gt;
+&lt;h3&gt;第一步&lt;/h3&gt;
+&lt;p&gt;统计有效值，计算缺失值，显示。这一步没什么好细说的，显示一下数据概况，然后把缺失值以及对应的数去掉。&lt;/p&gt;
+&lt;p&gt;&lt;center&gt;&lt;img alt="1.png" src="/article_img/ChiSquare_2017_06_28_19_29/1.png" /&gt;&lt;/center&gt;&lt;/p&gt;
+&lt;h3&gt;第二步&lt;/h3&gt;
+&lt;p&gt;绘制四格表，一般教学上是这样说的，但是SPSS支持N格表，并且支持非方阵形式的表格。&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;取得自变量的分类以及因变量的分类。这时就相当于确定了这个N格表的行与列的内容了。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;columeKeys = list(set(X)) ##相当于groupby，确定输出的交叉表有几列
+rowKeys = list(set(Y)) ##确定输出的交叉表有几行
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;计算自由度&lt;code&gt;df&lt;/code&gt;，&lt;code&gt;（row-1）*（column-1）&lt;/code&gt;,这玩意后面会作为各种方法的参数。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;df = (len(columeKeys)-1)*(len(rowKeys)-1)
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;根据统计出来列的种类按行去分拣数据，简单的理解就是按行列把表格画出来，统计每个格子对应的数据一共有几个。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;resualtMap = {}
+for columeKey in columeKeys:
+    indexsInX = [i for i,a in enumerate(X) if a==columeKey] ##查找每个columeKey在数据中的位置
+    counts = {}
+    for ix in indexsInX: ##统计每个columeKey在Y中有分别有几个rowKeys
+        if counts.has_key(Y[ix]):
+            counts[Y[ix]] += 1
+        else:
+            counts[Y[ix]] = 1
+    resualtMap[columeKey] = counts
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;计算每行的统计结果总数，每列的统计结果总数。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;rowSum = {}
+for rowKey in rowKeys:
+    rowSum[rowKey] = len([i for i,a in enumerate(Y) if a==rowKey])
+print &amp;#39;行统计的总数:&amp;#39;,rowSum
+
+columeSum = {}
+for columeKey in resualtMap.keys():
+    columeSum[columeKey] = 0
+    for rowkey in resualtMap[columeKey].keys():
+        columeSum[columeKey] += resualtMap[columeKey][rowkey]
+print &amp;#39;列统计的总数:&amp;#39;,columeSum
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;接下来就可以绘制这张交叉表了。这里没做前端界面，所以以&lt;code&gt;print&lt;/code&gt;来假装自己在绘图。在绘图过程中，可以顺便把观察值和理论值（既期望）计算出来为后续分析过程做准备，免得后面再循环一遍。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;N = len(X)
+observed = []
+expected = []
+for rowKey in rowKeys:
+    for columeKey in resualtMap.keys():
+        cell = resualtMap[columeKey].get(rowKey,0)##实际值
+        observed.append(cell) ##顺便把每个实际值记入列队，用于后续计算
+        rowRadio = float(cell)/rowSum[rowKey]##行占比
+        columeRadio = float(cell)/columeSum[columeKey]##列占比
+        expect = (float(columeSum[columeKey])/N)#该格对应的期望*rowSum[rowKey]
+        expected.append(expect)##把每个期望值记入列队，用于后续计算
+
+        print cell,&amp;quot;,&amp;quot;,&amp;quot;%.2f%%&amp;quot;%(rowRadio*100),&amp;quot;,&amp;quot;,&amp;quot;%.2f%%&amp;quot;%(columeRadio*100),&amp;quot;|&amp;quot;,
+    print rowSum[rowKey],&amp;quot;,&amp;quot;,&amp;quot;100%&amp;quot;,&amp;quot;,&amp;quot;,&amp;quot;%.2f%%&amp;quot;%(float(rowSum[rowKey])/N*100)
+
+for columeKey in resualtMap.keys():
+    print columeSum[columeKey],&amp;quot;,&amp;quot;, &amp;quot;%.2f%%&amp;quot;%(float(columeSum[columeKey])/N*100),&amp;quot;,&amp;quot;,&amp;quot;100%&amp;quot;,&amp;quot;|&amp;quot;,
+print N,&amp;quot;,&amp;quot;,&amp;quot;100%&amp;quot;,&amp;quot;,&amp;quot;,&amp;quot;100%&amp;quot;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;center&gt;&lt;img alt="2.png" src="/article_img/ChiSquare_2017_06_28_19_29/2.png" /&gt;&lt;/center&gt;&lt;/p&gt;
+&lt;h3&gt;第三步&lt;/h3&gt;
+&lt;p&gt;这步开始使用java方法，顺便验证第三方库&lt;a href="https://www.ee.ucl.ac.uk/~mflanaga/java/"&gt;flanagan&lt;/a&gt;，看看好不好使。&lt;/p&gt;
+&lt;p&gt;选这个库的原因仅仅只是因为之前用它来做过一次正态性检验。&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;拿着观察值和理论值去计算卡方值。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;org.apache.commons.math3.stat.inference.TestUtils&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;flanagan.analysis.Stat&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;java.lang.Math&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+&lt;span class="n"&gt;double&lt;/span&gt; &lt;span class="n"&gt;cs&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;Stat&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;chiSquareFreq&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;observed&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;expected&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;计算卡方p值。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;public static double getApproxGamma(double n) {
+    // RECIP_E = (E^-1) = (1.0 / E)
+    double RECIP_E = 0.36787944117144232159552377016147;
+    // TWOPI = 2.0 * PI
+    double TWOPI = 6.283185307179586476925286766559;
+    double d = 1.0 / (10.0 * n);
+    d = 1.0 / ((12* n) - d);
+    d = (d + n) *RECIP_E;
+    d = Math.pow(d,n);
+    d *= Math.sqrt(TWOPI/ n);
+    return d;
+}
+
+public static double log_igf(double s, double z) {
+    if (z &amp;lt; 0.0) {
+        return 0.0;
+    }
+    double sc = (Math.log(z) * s) - z - Math.log(s);
+    double k = KM(s, z);
+    return Math.log(k) + sc;
+}
+
+private static double KM(double s, double z) {
+    double sum = 1.0;
+    double nom = 1.0;
+    double denom = 1.0;
+    double log_nom = Math.log(nom);
+    double log_denom = Math.log(denom);
+    double log_s = Math.log(s);
+    double log_z = Math.log(z);
+    for (int i = 0; i &amp;lt; 1000; ++i) {
+       log_nom += log_z;
+       s++;
+       log_s = Math.log(s);
+       log_denom += log_s;
+        double log_sum = log_nom - log_denom;
+       sum += Math.exp(log_sum);
+    }
+    return sum;
+}
+
+private static double chisqr2pValue(int dof, double chi_squared) {
+    if (chi_squared &amp;lt; 0 || dof &amp;lt; 1) {
+        return 0.0;
+    }
+    double k = ((double) dof) * 0.5;
+    double v = chi_squared * 0.5;
+    if (dof == 2) {
+        return Math.exp(-1.0 * v);
+    }
+    double incompleteGamma = log_igf(k,v);
+    // 如果过小或者非数值或者无穷
+    if (Math.exp(incompleteGamma) &amp;lt;= 1e-8
+           || Double.isNaN(Math.exp(incompleteGamma))
+           || Double.isInfinite(Math.exp(incompleteGamma))) {
+        return 1e-14;
+    }
+    double gamma = Math.log(getApproxGamma(k));
+   incompleteGamma -= gamma;
+    if(Math.exp(incompleteGamma) &amp;gt; 1){
+        return 1e-14;
+    }
+    double pValue = 1.0 - Math.exp(incompleteGamma);
+    return (double) pValue;
+
+chisqr2pValue(df, cs));//卡方p值（Asymp 2-sided）
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;取代观察值中的0值，以及对应的理论值，计算释然比，以及相对应的p值。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;double likelihood = 0;
+for(int i =0 ;i&amp;lt;20;i++){
+    double tmp = observed2[i]*Math.log(observed2[i]/expected2[i]);
+    likelihood += tmp;
+
+}
+likelihood = likelihood*2;//似然比 Likelihood Ratio
+chisqr2pValue(df, likelihood);//似然比p值（Asymp 2-sided）
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;这里吐槽一下，用JDK自带&lt;code&gt;math3.stat&lt;/code&gt;的似然比计算方法算出来结果居然不对。但我按它文档中函数注释的算法来计算，却得到正确的结果，神奇。&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;使用自变量与因变量的原始值计算皮尔逊相关系数。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;double piersion= Stat.corrCoeff(X, Y);
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;利用皮尔逊相关系数计算线性关系LinearByLinearAssociation，以及对应的p值。此时自由度为1。(这理所当然嘛，是算自变量与因变量的关系，自由度自然是1。) &lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;double linearByLinearAssociation= (N-1)*Math.pow(piersion,2);
+//linear-By-Linear  Association 的p值（Asymp 2-sided）
+chisqr2pValue(1, linearByLinearAssociation);
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;center&gt;&lt;img alt="3.png" src="/article_img/ChiSquare_2017_06_28_19_29/3.png" /&gt;&lt;/center&gt;&lt;/p&gt;
+&lt;h3&gt;第四步（非必要）&lt;/h3&gt;
+&lt;p&gt;接下来咱回到python&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;如果当&lt;strong&gt;交叉表为方阵&lt;/strong&gt;的时候，进行kappa检验。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;columeCount = len(columeKeys) ##取得行数，这里行列一样嘛
+po = 0.0
+for i in range(columeCount):
+    po += float(observed[columeCount*i+i])  ##取得对角，相当于真阳性真阴性的observed的总和
+po  =  po/N
+pc = 0.0 ##真阳性的observed对应的  行总和 * 列总和
+for i in range(columeCount):
+    row = 0.0
+    colume = 0.0
+    for irow in range(columeCount):
+        row+=float(observed[columeCount*i+irow])
+    for icolume in range(columeCount):
+        colume+=float(observed[i+icolume*columeCount])
+    pc+=(row*colume)
+pc = pc/(N**2)
+k =  (po - pc)/(1-pc)
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;计算kappa值的标准误差。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;$$ \sqrt{\frac{1}{(1-pc)^{2}}(Pe^{2}+Pe-\sum R_{i}C_{i}(R_{i}+C_{i})/N^{3})} $$&lt;/p&gt;
+&lt;p&gt;pc 同1&lt;/p&gt;
+&lt;p&gt;Ri，Ci 对应的行总和与列总和&lt;/p&gt;
+&lt;p&gt;N 总样本数（去除无效值或缺失值）&lt;/p&gt;
+&lt;p&gt;这里选用的计算方法如上,还有另一种计算方法，参照文章后1987的那篇引用。那篇论文是先去估计整体标准差，然后根据表格的不同大小，再进一步估计标准误差。感觉精度会更高一些，但这个估计过程太麻烦了，或者说按照论文中的做法，人的决定因数太大，暂时先不用。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;    ppp = 0.0
+    for i in range(columeCount):
+        row = 0.0
+        colume = 0.0
+        for irow in range(columeCount):
+            row+=float(observed[columeCount*i+irow])
+        for icolume in range(columeCount):
+            colume+=float(observed[i+icolume*columeCount])
+        ppp+=(row*colume)*(row+colume)
+    E= 1/(N*(1-pc)**2)  * ( pc**2 + pc - ( ppp/math.pow(N,3) ) )
+    SE = math.sqrt(E)
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;ol&gt;
+&lt;li&gt;计算kappa的标准误差的p-value&lt;div class="highlight"&gt;&lt;pre&gt;def poSE(SE):
+    SE_MAX = 6.0
+    if (SE == 0.0) :
+        x = 0.0
+    else:
+        y = 0.5 * math.fabs(SE)
+        if y &amp;gt;= (SE_MAX * 0.5) :
+            x = 1.0
+        elif y &amp;lt; 1.0:
+            w = y * y
+            x = ((((((((0.000124818987 * w
+                    - 0.001075204047) * w + 0.005198775019) * w
+                    - 0.019198292004) * w + 0.059054035642) * w
+                    - 0.151968751364) * w + 0.319152932694) * w
+                    - 0.531923007300) * w + 0.797884560593) * y * 2.0
+        else:
+            y -= 2.0
+            x = (((((((((((((-0.000045255659 * y
+                    + 0.000152529290) * y - 0.000019538132) * y
+                    - 0.000676904986) * y + 0.001390604284) * y
+                    - 0.000794620820) * y - 0.002034254874) * y
+                    + 0.006549791214) * y - 0.010557625006) * y
+                    + 0.011630447319) * y - 0.009279453341) * y
+                    + 0.005353579108) * y - 0.002141268741) * y
+                    + 0.000535310849) * y + 0.999936657524
+    if SE &amp;gt; 0.0:
+        return (x + 1.0) * 0.5
+    else:
+        return (1.0 - x) * 0.5
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;center&gt;&lt;img alt="4.png" src="/article_img/ChiSquare_2017_06_28_19_29/4.png" /&gt;&lt;/center&gt;&lt;/p&gt;
+&lt;p&gt;这里的图截图的时候，交叉表并不是方阵，所以kappa为0。&lt;/p&gt;
+&lt;p&gt;不过这里的&lt;code&gt;gamma&lt;/code&gt; 和 &lt;code&gt;T&lt;/code&gt; 就没做，分析员说这些东西基本不看，所以就就没贴过来。&lt;/p&gt;
+&lt;p&gt;References:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;a href="https://www.ee.ucl.ac.uk/~mflanaga/java/"&gt;Michael Thomas Flanagan's Java Scientific Library.&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href="http://influentialpoints.com/Training/standard_error_of_kappa.htm"&gt;Standard Error of Kappa.&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href="http://www.med.mcgill.ca/epidemiology/Hanley/Reprints/Standard_Error_1987.pdf"&gt;Standard Error of The Kappa Statistic（1987）. A Singularly Valuable Decomposition: The SVD of a Matrix.&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">kai_kai03</dc:creator><pubDate>Wed, 28 Jun 2017 19:29:00 +0800</pubDate><guid>tag:,2017-06-28:2017/ChiSquare_2017_06_28_19_29.html</guid><category>algorithm</category><category>ML</category><category>Math</category></item><item><title>不靠谱产品日记（15）</title><link>/2017/produce_diary_2017_05_20_23_01.html</link><description>&lt;h1&gt;2017-05-20&lt;/h1&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;“为什么带帽子” 啪～；
 “为什么不带帽子” 啪～；
 &lt;/pre&gt;&lt;/div&gt;
