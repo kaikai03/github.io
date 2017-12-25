@@ -499,7 +499,7 @@ k =  (po - pc)/(1-pc)
 &lt;blockquote&gt;
 &lt;p&gt;&lt;a href="https://www.ee.ucl.ac.uk/~mflanaga/java/"&gt;Michael Thomas Flanagan's Java Scientific Library.&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;&lt;a href="http://influentialpoints.com/Training/standard_error_of_kappa.htm"&gt;Standard Error of Kappa.&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;&lt;a href="http://www.med.mcgill.ca/epidemiology/Hanley/Reprints/Standard_Error_1987.pdf"&gt;Standard Error of The Kappa Statistic（1987）. A Singularly Valuable Decomposition: The SVD of a Matrix.&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href="http://www.med.mcgill.ca/epidemiology/Hanley/Reprints/Standard_Error_1987.pdf"&gt;Standard Error of The Kappa Statistic（1987）.&lt;/a&gt;&lt;/p&gt;
 &lt;/blockquote&gt;</summary><category term="algorithm"></category><category term="ML"></category><category term="Math"></category></entry><entry><title>Convolutional neural network</title><link href="/2015/Convolutional_neural_network_2015_10_22_23_18.html" rel="alternate"></link><updated>2015-10-22T23:18:00+08:00</updated><author><name>moonshile</name></author><id>tag:,2015-10-22:2015/Convolutional_neural_network_2015_10_22_23_18.html</id><summary type="html">&lt;h2&gt;卷积神经网络全面解析&lt;/h2&gt;
 &lt;p&gt;最近仔细学习了一下卷积神经网络（CNN，Convolutional Neural Network），发现各处资料都不是很全面，经过艰苦努力终于弄清楚了。为了以后备查，以及传播知识，决定记录下来。本文将极力避免废话，重点聚焦在推导过程上，为打算从零开始的孩纸说清楚“为什么”。&lt;/p&gt;
 &lt;p&gt;另外，因本人才疏学浅（是真的才疏学浅，不是谦虚），肯定会有很多谬误，欢迎大家指出！&lt;/p&gt;
