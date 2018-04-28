@@ -19,7 +19,42 @@ $$Y_{zcawhite}= U * Y_{pcawhite}$$&lt;/p&gt;
     PCA_white = np.dot(U, 1.0/np.sqrt(np.diag(S) + 0.01)) 
     ZCAMat = np.dot(PCA_white, U.T)                    
     return np.dot(ZCAMat, df)
-&lt;/pre&gt;&lt;/div&gt;</summary><category term="algorithm"></category><category term="ML"></category><category term="Math"></category></entry><entry><title>不靠谱产品日记（23）</title><link href="/2018/produce_diary_2018_02_05_17_41.html" rel="alternate"></link><updated>2018-02-05T17:41:00+08:00</updated><author><name>kai_kai03</name></author><id>tag:,2018-02-05:2018/produce_diary_2018_02_05_17_41.html</id><summary type="html">&lt;h1&gt;2018-02-05&lt;/h1&gt;
+&lt;/pre&gt;&lt;/div&gt;</summary><category term="algorithm"></category><category term="ML"></category><category term="Math"></category></entry><entry><title>平滑</title><link href="/2018/Smoothness_2018_04_16_23_54.html" rel="alternate"></link><updated>2018-04-16T23:54:00+08:00</updated><author><name>kai_kai03</name></author><id>tag:,2018-04-16:2018/Smoothness_2018_04_16_23_54.html</id><summary type="html">&lt;h2&gt;Smoothness and Stability&lt;/h2&gt;
+&lt;h3&gt;前情&lt;/h3&gt;
+&lt;p&gt;事情大概是这样，现在的产品中有个对患者就诊数据筛选、预处理、汇集的功能。这个功能会处理大量数据，过程漫长。于是，进度显示模块必然是标配。&lt;/p&gt;
+&lt;p&gt;进度显示嘛，不外乎进度条与&lt;code&gt;剩余时间&lt;/code&gt;。进度条还好办，&lt;code&gt;剩余时间&lt;/code&gt;就出现大问题了。&lt;/p&gt;
+&lt;h3&gt;问题&lt;/h3&gt;
+&lt;p&gt;这些患者数据层级关系大概是（患者（就诊记录（各种检查系统（raw data）））），数据量随着层级深入，呈指数上升的关系。&lt;/p&gt;
+&lt;p&gt;我们产品功能以患者为单位来汇集数据。由于每一层级都包含着复杂的筛选过滤逻辑，在数据总量很大的前提下，并且每次任务要求又都不一样，所以去做事前“统计”信息总量是不可能的。&lt;/p&gt;
+&lt;p&gt;最多能够做到计算出符合条件的患者人数，相当于进度条就算搞定。&lt;/p&gt;
+&lt;p&gt;再进一步去统计符合条件的就诊记录从资源角度考虑已经不合算了。这样一来，患者下有多少个就诊记录，每个就诊记录下有多少检查项目，每个检查项目又包含多少容量，这些都是不可知的、随机的。也就是说任务完成时间无法预估。&lt;/p&gt;
+&lt;p&gt;之前的临时解决办法是，每任务开始前，先跑几个患者，把患者数据处理完所需时间平均一下，得到&lt;code&gt;平均时间&lt;/code&gt;，再乘以剩余患者数，就得到了一个估计时间。在任务进行过程中，实时更新这个&lt;code&gt;平均时间&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;但是实际情况是每个患者差别巨大。最小的，完全没有数据的：约10ms，有一次就诊，并有少量检查数据的：500-3000ms，大量数据的：目前见过一次就诊数据就处理过约200000ms的例子。由于这种差别，导致估计时间在开始初期大幅抖动。当你启动一项任务，看着估计时间在几百小时到几十小时之间反复横跳，这可以说用户体验是极差的。于是就有了要优化这块的需求。&lt;/p&gt;
+&lt;h3&gt;优化&lt;/h3&gt;
+&lt;p&gt;首先关注点就是解决反复大幅横跳的问题。&lt;/p&gt;
+&lt;p&gt;当时就想到信号卷积,通过低通滤波来平滑整个过程。写了个例子设置高&lt;code&gt;freq&lt;/code&gt;，用正态随机值尝试一下。我这里加了两个滤波器，一个用在&lt;code&gt;平均时间&lt;/code&gt;的积累上，一个用在&lt;code&gt;剩余时间&lt;/code&gt;上，相当通过双重的滞后来消散突变。&lt;/p&gt;
+&lt;p&gt;&lt;img alt="1.jpg" src="/article_img/Smoothness_2018_04_16_23_54/1.jpg" /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt="2.jpg" src="/article_img/Smoothness_2018_04_16_23_54/2.jpg" /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt="3.jpg" src="/article_img/Smoothness_2018_04_16_23_54/3.jpg" /&gt;&lt;/p&gt;
+&lt;p&gt;这个平滑趋势基本上应该能够满足需求了。&lt;/p&gt;
+&lt;p&gt;这里可以看出来个问题，如果当初期所能得到的&lt;code&gt;平均时间&lt;/code&gt;在整体中过小的话，将需要通过15%左右的数据来积累“均值”。意味着用户会在一个不短的时间内看着&lt;code&gt;剩余时间&lt;/code&gt;的上涨。而且这是在&lt;code&gt;正态分布&lt;/code&gt;的条件下。实际情况下有可能这个上涨时间有可能会更长。&lt;/p&gt;
+&lt;p&gt;先解决这个持续上涨的问题。通过初期让后台先处理十几个患者，取患者最大耗时作为&lt;code&gt;平均时间&lt;/code&gt;的起始值，再将滤波器的&lt;code&gt;freq&lt;/code&gt;加上（另一项当然是减去）一个线性衰减的&lt;code&gt;1-freq&lt;/code&gt;，让&lt;code&gt;freq&lt;/code&gt;再初期一段时间内达到接近100%的状态。这样，在用户注意力最集中的初期，所看到的&lt;code&gt;剩余时间&lt;/code&gt;便是不断的缓慢下降的了。&lt;/p&gt;
+&lt;p&gt;从实际的现网数据看，这个数据处理过程中，一个患者数据处理完成的耗时，经常会出现类似金融数据的方差聚集现象，大概是因为有些病，会在特定时期集体爆发或者恶化，那么就集中的“产出”医疗数据，而平时会有持续的日常检查或不严重的患者，产生的数据很少。&lt;/p&gt;
+&lt;p&gt;因为还要尽可能的保证&lt;code&gt;剩余时间&lt;/code&gt;的准确性（...尽量...），&lt;code&gt;1-freq&lt;/code&gt;当然不可能一直存在，目前做实验是以总进度的0.2倍的速度进行衰减，现象是大概约10%的进度前&lt;code&gt;剩余时间&lt;/code&gt;稳定下降，之后就出现肉眼可见波动，波动渐渐放大。&lt;/p&gt;
+&lt;p&gt;万一数据方差集中在中后部？或者尾部有突然的大方差？，又万一真有人一直盯着看呢，或者有人半道回来看着时间在跳舞也不好嘛。&lt;/p&gt;
+&lt;p&gt;为了减少跳动频率，首先，干脆把左右“上涨”的全部换成时间的“同趋势下降”，然后加入一个&lt;code&gt;剩余时间&lt;/code&gt;修正机制：对每次“真实”的时间变化向量求导，得到时间跳动的&lt;code&gt;能量&lt;/code&gt;，并且进行积累（正负对冲过程）。当&lt;code&gt;能量&lt;/code&gt;积累到一定，超过某阈值的时候，以当前最大似然的&lt;code&gt;平均时间&lt;/code&gt;，对&lt;code&gt;平均时间&lt;/code&gt;进行一次修正，并以此从新计算&lt;code&gt;剩余时间&lt;/code&gt;，清空&lt;code&gt;能量&lt;/code&gt;，又回到平稳下降的状态。&lt;/p&gt;
+&lt;p&gt;下图是用都是10ms-200ms，既都是小单位时间的真实数据跑出的结果，可以看得出时间是比较稳定的下降了。
+&lt;img alt="4.jpg" src="/article_img/Smoothness_2018_04_16_23_54/4.jpg" /&gt;&lt;/p&gt;
+&lt;p&gt;挑选都是80ms-200000+ms，并且异方差性很强的真实数据跑出来的结果，可以看得出时间绘制也很平稳，中间800左右位置上修了一次，由于总时间比较大，图上的上修效果不太明显。。&lt;/p&gt;
+&lt;p&gt;&lt;img alt="5.jpg" src="/article_img/Smoothness_2018_04_16_23_54/5.jpg" /&gt;&lt;/p&gt;
+&lt;p&gt;最后试一下，人为将超低&lt;code&gt;单位时间&lt;/code&gt;的数据放在数据集的两端，中间放大&lt;code&gt;单位时间&lt;/code&gt;的，并且设置0作为&lt;code&gt;平均时间&lt;/code&gt;的初始值，结果图：&lt;/p&gt;
+&lt;p&gt;&lt;img alt="6.jpg" src="/article_img/Smoothness_2018_04_16_23_54/6.jpg" /&gt;&lt;/p&gt;
+&lt;p&gt;可以看到时间在开始进行了两次大幅度修正接着达到平稳下降的状态，然后到后期又进行了几次大幅向下修正，符合预期。&lt;/p&gt;
+&lt;h3&gt;最后&lt;/h3&gt;
+&lt;p&gt;通过实际观察进度显示模块，视觉效果还是比较令人满意的。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;剩余时间&lt;/code&gt;准确度的问题......还是算了吧，没必要去浪费这个性能。&lt;/p&gt;
+&lt;p&gt;代码什么的，由于是商业代码，这次就不贴了。&lt;/p&gt;
+&lt;p&gt;至于&lt;code&gt;异方差&lt;/code&gt;，现在在另一个问题上正在“处理和利用”，如果能出成果的话，到时候再开另一篇日记专门讲这个。&lt;/p&gt;</summary><category term="Python"></category></entry><entry><title>不靠谱产品日记（23）</title><link href="/2018/produce_diary_2018_02_05_17_41.html" rel="alternate"></link><updated>2018-02-05T17:41:00+08:00</updated><author><name>kai_kai03</name></author><id>tag:,2018-02-05:2018/produce_diary_2018_02_05_17_41.html</id><summary type="html">&lt;h1&gt;2018-02-05&lt;/h1&gt;
 &lt;h3&gt;略微回顾&lt;/h3&gt;
 &lt;p&gt;隔了挺久没写东西了，忙是忙，更主要的原因是没啥值得记录的大事。&lt;/p&gt;
 &lt;p&gt;今天这篇能够算得上是上一篇“服务的边界”的“实例化”，“照单全收”产生实际负面效果了。&lt;/p&gt;
