@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>kairnsの记事簿</title><link>/</link><description></description><atom:link href="/feeds/all.rss.xml" rel="self"></atom:link><lastBuildDate>Thu, 05 Jul 2018 20:17:00 +0800</lastBuildDate><item><title>不靠谱产品日记（24）</title><link>/2018/produce_diary_2018_07_05_20_17.html</link><description>&lt;h1&gt;2018-07-05&lt;/h1&gt;
-&lt;p&gt;g&lt;/p&gt;
 &lt;h3&gt;前提&lt;/h3&gt;
 &lt;p&gt;医疗科研产品中，为了增加科研数据量，也为了“含金量”，对病厉文本进行“语义分析”，从文本中根据“医疗常识”，识别“可结构化内容”并进行结构化，形成可供科研分析使用的数据。为此也付出了高昂的成本。&lt;/p&gt;
 &lt;h3&gt;结构化&lt;/h3&gt;
