@@ -5,28 +5,28 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
 <url>
 <loc>/</loc>
-<lastmod>2018-04-28T03:07:26-00:00</lastmod>
+<lastmod>2018-07-11T03:19:48-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.8</priority>
 </url>
 
 <url>
 <loc>/archives.html</loc>
-<lastmod>2018-04-28T03:07:26-00:00</lastmod>
+<lastmod>2018-07-11T03:19:48-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.8</priority>
 </url>
 
 <url>
 <loc>/tags.html</loc>
-<lastmod>2018-04-28T03:07:26-00:00</lastmod>
+<lastmod>2018-07-11T03:19:48-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.8</priority>
 </url>
 
 <url>
 <loc>/categories.html</loc>
-<lastmod>2018-04-28T03:07:26-00:00</lastmod>
+<lastmod>2018-07-11T03:19:48-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.8</priority>
 </url>
@@ -43,6 +43,20 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 <lastmod>2015-11-06T23:13:00+08:00</lastmod>
 <changefreq>weekly</changefreq>
 <priority>0.7</priority>
+</url>
+
+<url>
+<loc>/2018/produce_diary_2018_07_05_20_17.html</loc>
+<lastmod>2018-07-05T20:17:00+08:00</lastmod>
+<changefreq>daily</changefreq>
+<priority>1.0</priority>
+</url>
+
+<url>
+<loc>/2018/produce_diary_2018_07_05_15_20.html</loc>
+<lastmod>2018-07-05T15:20:00+08:00</lastmod>
+<changefreq>daily</changefreq>
+<priority>1.0</priority>
 </url>
 
 <url>
@@ -782,7 +796,7 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
 <url>
 <loc>/category/bu-kao-pu-chan-pin-ri-ji.html</loc>
-<lastmod>2018-02-05T17:41:00+08:06</lastmod>
+<lastmod>2018-07-05T20:17:00+08:06</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.8</priority>
 </url>
@@ -880,7 +894,7 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
 <url>
 <loc>/tag/chan-pin.html</loc>
-<lastmod>2018-02-05T17:41:00+08:06</lastmod>
+<lastmod>2018-07-05T20:17:00+08:06</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.8</priority>
 </url>
@@ -1272,7 +1286,7 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
 <url>
 <loc>/author/kai_kai03.html</loc>
-<lastmod>2018-04-27T18:25:00+08:06</lastmod>
+<lastmod>2018-07-05T20:17:00+08:06</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.8</priority>
 </url>

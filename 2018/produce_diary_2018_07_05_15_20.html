@@ -1,0 +1,518 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="Access-Control-Allow-Origin" content="*">
+        <link rel="stylesheet" href="/theme/css/foundation.min.css" media="all">
+		<link rel="stylesheet" href="/theme/css/pygments.css" /> 
+		<link rel="stylesheet" href="/theme/css/style.css" />
+		<link rel="stylesheet" href="/theme/css/ukagaka.css" /> 
+        <script type="text/javascript" src="/theme/js/modernizr.js"></script>
+		<script type='text/javascript' src='/theme/js/jquery-1.11.1.min.js'></script>
+	    <script type="text/javascript" src="/theme/js/damoo.min.js"></script>
+		<script type="text/x-mathjax-config">MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});</script>
+        <script type="text/javascript">var js=document.createElement('script');js.setAttribute('src',(('https:' == document.location.protocol) ? ' https://' : ' http://')+'cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML');document.head.appendChild(js);</script>
+
+        <link href='https://fonts.lug.ustc.edu.cn/css?family=Exo+2:400,300,700,300italic,400italic,700italic,900,900italic' rel='stylesheet' type='text/css'>
+        <link rel="stylesheet" href="/theme/css/lamboz.css" media="all">
+        <title>MedDRA术语集 - kairnsの记事簿</title>
+        <meta charset="utf-8" />
+        <link href="/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="kairnsの记事簿 Full Atom Feed" />
+        <link href="/feeds/all.rss.xml" type="application/rss+xml" rel="alternate" title="kairnsの记事簿 Full RSS Feed" />
+        <link href="/feeds/bu-kao-pu-chan-pin-ri-ji.atom.xml" type="application/atom+xml" rel="alternate" title="kairnsの记事簿 Categories Atom Feed" />
+        
+</head>
+<body onblur="leavePage()" onfocus="comebackPage()">
+    <div class="pages">
+        <ul>
+            <li class="home"><a href="/index.html">Home</a></li>
+            <li ><a href="/pages/about-me.html">About Me</a></li>
+            <li ><a href="/pages/Python_Packages_2012_11_05_12_18.html">Python Packages</a></li>
+        </ul>
+    </div>
+
+<div class="hp-header-inner">
+    <div class="page-header">
+        <div class="content-header">
+            <div id="title-block">
+            <h1>  <a href="/2018/produce_diary_2018_07_05_15_20.html" rel="bookmark"
+                    title="Permalink to MedDRA术语集">MedDRA术语集</a></h1>
+            </div>
+        </div>
+    </div>
+</div>
+    <div class="content">
+        <div class="data-holder">
+        <div class="row">
+           <div class="large-9 content-column column">
+<div class="content-article">
+    <header class="header-article">
+        <div class="read-more">Posted on Thu 05 July 2018</div>
+ 
+   </header>
+    <section class='article'>
+        
+        <div class="entry-summary">
+            <p>不靠谱产品日记（24）的附录</p>
+        </div>
+    
+        <div class="entry-content">
+            <h3>ICH</h3>
+<p>为了便于药事管理交流，使国际医学术语集标准化，为此ICH编撰了《ICH国际医学用于词典》又名MedDRA术语集。</p>
+<p>(人用药物注册技术要求国际协调会议,International Conference on Harmonization of Technical Requirements for Registration of Pharmaceuticals for Human Use)</p>
+<h3>MedDRA术语</h3>
+<p>MedDRA术语集适用于除动物毒理外的针对人类适用的所有药品开发阶段。这是MedDRA对自己的定位，它里面包含了各种媒体、健康相关以及监管的概念、同时还覆盖健康影响和设备故障。</p>
+<p>其中也包含了医学及健康相关类的术语，包括：</p>
+<ul>
+<li>体征</li>
+<li>症状</li>
+<li>疾病</li>
+<li>诊断</li>
+<li>适应症——包括体征、症状、疾病、诊断、疾病诊断/预防以及生理功能改变</li>
+<li>各类检查的名称和定性结果，例如：增加、减少、正常、异常、存在、缺失、阳性和阴性等</li>
+<li>用药错误与产品质量术语</li>
+<li>外科及内科的各种操作与治疗</li>
+<li>病史/社会史/家族史</li>
+</ul>
+<h4>术语结构</h4>
+<p>术语定义了层级结果，其把层级结构分为五级上下级别。上级术语是范围较广的一组术语，适用于其他下级的每个术语。这种结构为各层级提供了各种纵向联系。</p>
+<h5>系统器官分类(SOC)</h5>
+<p>SOC是层级结构的最高层级，为数据检索提供最广泛的概念。按病因学、发病部位和目的进行分组。例如<code>感染及侵染类</code>、<code>肠胃系统疾病</code>、<code>外科及内科的各种操作与治疗</code>、<code>各类检查</code>。不过有例外情况，例如<code>社会环境</code>。</p>
+<p>在对SOC检索时，由于多轴性，PT出现在多个SOC中，为避免重复计数，每个PT对应的主SOC只有一个。</p>
+<p><em>主SOC设置略</em></p>
+<h5>高位组(HLGT)</h5>
+<p>HLGT通过解剖学、病理学、生理学、病因学或功能等特点与一个或者多个HLT对应。例如<code>血管性高压疾病</code>对应<code>急进型恶性高血压</code>、<code>高血压并发症</code>、<code>门静脉高压类</code>、<code>各种肺动脉高压</code>等。</p>
+<p>HLGT对HLT进行了分组归类，其概念更宽泛，利于数据检索和表达。</p>
+<h5>高位语(HLT)</h5>
+<p>高位语属于概括性术语，通过解剖学、病理学、生理学、病因学或功能等特点与下级PT关联。例如<code>各种纵膈肌病</code>、<code>支气管痉挛和阻塞</code>。</p>
+<p>本术语集并不是分类学，所以HLT的特异性并不统一。</p>
+<p>HLT是一个组合层级，并非编码层级。其隶属于上级的HLGT。一个HLT必须通过HLGT至少与一个SOC对应。</p>
+<p>与某个HLGT对应的所有HLT均会出现在与该HLGT对应的每个SOC中。</p>
+<h5>首选语(PT)</h5>
+<p>PT是对某种症状、体征、疾病、诊断、适应症、检查、外科和内科操作、疾病史和家族史等单一医学概念进行独特表达的专用术语。</p>
+<p>PT定义明确，无歧义，特异性和描述性强且符合国际标准。</p>
+<p>PT具有一定详细程度和特异性，包含病理或病因学限定。例如：<code>无菌性脑膜炎</code>、<code>隐球菌性脑膜炎</code>、<code>病毒性脑膜炎</code>。PT层的特异性保证术语集的多轴性被充分利用。</p>
+<p>一个PT至少与一个SOC相对应，可根据情况与多个SOC相对应。PT与每个SOC对应的途径只有一条(HLT-&gt;HLGT-&gt;SOL)。每个PT都对应一个主SOC。</p>
+<h5>低位语(LLT)</h5>
+<p>术语集的最低层，每个LLT仅对应一个PT，关系为以下关系的一种：</p>
+<ul>
+<li>同义词</li>
+<li>异体词</li>
+<li>
+<p>准同义词</p>
+<p>对于有偏差的描述，暂定为同义词的术语。</p>
+</li>
+<li>
+<p>子元素</p>
+<p>提供更多信息，例如如果PT是<code>淤伤</code>，对应的LLT可有<code>腿部淤伤</code>、<code>面部淤伤</code>。</p>
+</li>
+<li>
+<p>等同LLT</p>
+</li>
+</ul>
+<p>LLT除了方便口语化输入和解决输入主观性，还在历史数据转换中起作用。LLT中带有“现行”和“非现行”标签，可用于区别当前适用术语与已被废弃的术语，提供历史数据检索和分析可能。</p>
+<h4>术语部分表达格式</h4>
+<p>挑选一部分主要与自然语言处理有关的部分来记录。</p>
+<ul>
+<li>
+<p>缩略语</p>
+<p>LLT以上层级一般情况下没有缩略语，除了少量特殊过长的术语或已被大家熟知的缩略语。例如<code>CDC</code>疾病控制中心，<code>CNS</code>中枢神经系统，<code>ECG</code>心电图，</p>
+<p>特别的存在：HLT和HLGT层的<code>NEC</code>暂不分类，以及LLT层的<code>NOS</code>非另指。</p>
+</li>
+<li>
+<p>单个词术语和多个词术语</p>
+</li>
+</ul>
+<p>每个LLT和PT都表示一个概念，可以用单个词或多个词来表达。复合术语作为LLT与反映其主要概念或临床最相关的PT对应。例如PT<code>恶心</code>，相关联的LLT<code>恶心、呕吐和腹泻</code>。</p>
+<ul>
+<li>
+<p>词序</p>
+<p>术语词序一般都使用自然语序。有时意思相近的PT能按字排一起，会有意调整PT层级的词序，按字母序排在一起。</p>
+</li>
+<li>
+<p>数值</p>
+<p>部分LLT包含特定临床参数相关数值，例如LLT<code>胎儿发育迟缓(未指明)1,500-1,749克</code>。当数字是名称或固有概念时，这些数值可能会并入LLT和PT。</p>
+</li>
+</ul>
+<h4>命名规则</h4>
+<p>略</p>
+<h4>搜索策略</h4>
+<p>略</p>
+<h4>器官分类</h4>
+<p>略</p>
+<h3>其他</h3>
+<p>顺带一说，现在很多EDC系统都具备用MedDRA进行编码的功能。系统自动根据AE的描述及术语，与MedDRA中的LLT进行匹配，并转化成对应的代码。一般来说，自动编码工具可以完成约85%编码，剩余仍需手工进行。</p>
+        </div>
+    </section>
+    <footer class="footer-article">
+        <div class="tags-and-categories">Filed under <a href="/category/bu-kao-pu-chan-pin-ri-ji.html">不靠谱产品日记</a>
+        | Tagged: <a href="/tag/chan-pin.html">产品 </a>
+        | <a href="/2018/produce_diary_2018_07_05_15_20.html" rel="bookmark"
+         title="Permalink to MedDRA术语集">Permalink</a>            
+        </div>
+        <!-- metaldata 
+        -->
+    </footer>
+</div>
+<div id="disqus_thread"></div>
+<script type="text/javascript" src="/theme/js/disqus.js"></script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+            </div>
+            
+            
+			<div class="large-3 aside column">
+				<img class="headIcon-large avatar" src="/sys_img/head.jpg" alt="(┬＿┬)">
+                <h2>魏凯</h2>
+                <h3>kairns leeky</h3>
+				<a href="mailto:kai_kai03@hotmail.com?subject=%20&body=from%20blog"><Email>kai_kai03@hotmail.com</Email></a>
+            </div>
+            
+            
+			
+			<div class="large-3 aside column">
+                <h3>Socials</h3>
+                <ul>
+                    <li><a href="http://weibo.com/mipamipami">新浪weibo</a></li>
+                    <li><a href="https://plus.google.com/105166364351021934050">g+</a></li>
+                </ul>
+            </div> 
+            
+            <div class="large-3 category-column column">
+                <h3>Categories</h3>
+                <ul>
+                    <li class="active"><a href="/category/bu-kao-pu-chan-pin-ri-ji.html">不靠谱产品日记</a> (25)</li>
+                    <li><a href="/category/db.html">DB</a> (3)</li>
+                    <li><a href="/category/idev.html">iDev</a> (14)</li>
+                    <li><a href="/category/machinelearning.html">MachineLearning</a> (22)</li>
+                    <li><a href="/category/musical.html">Musical</a> (3)</li>
+                    <li><a href="/category/other.html">other</a> (3)</li>
+                    <li><a href="/category/pydev.html">pyDev</a> (19)</li>
+                    <li><a href="/category/yin-shi-pin.html">音视频</a> (18)</li>
+                </ul>
+            </div> 
+            
+            <div class="large-3 category-column column">
+                <h3>Feeds</h3>
+                <ul>
+                    <li ><a href="/feeds/all.atom.xml" type="application/atom+xml">Atom Feed</a></li>
+                    <li ><a href="/feeds/all.rss.xml" type="application/rss+xml">RSS Feed</a></li>
+                </ul>
+            </div>
+            
+        
+        
+
+                <!--
+            <iframe width="100%" height="600" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=600&fansRow=1&ptype=1&speed=0&skin=1&isTitle=0&noborder=0&isWeibo=1&isFans=0&uid=1819436507&verifier=4060feb2&colors=fc1f12,ffffff,666666,0082cb,ecfbfd&dpc=1"></iframe>            </div>
+            -->
+         
+    </div>
+</div>
+    <div class="footer">
+        <div class="data-holder">
+        <div class="row">
+            <div class="large-3 column">
+<div class="Verse">
+    <h3>bo主偈语</h3>
+    <p>これも欲しい</p>
+    <p>あれも欲しい</p>
+    <p1>金がなくて悲しい</p1>
+    <p>これもセール</p>
+    <p>あれもセール</p>
+    <p1>全部買うと責められる</p1>
+    <p>これかっこい</p>
+    <p>あれも可愛い</p>
+    <p1>買えないので悔しい</p1>
+    <p>いつ金が入る？</p>
+    <p>いつ金が入る？</p>
+    <p1>あの時まだ間に合う？</p1>
+    <p>phaも買った</p>
+    <p>hmzも買った</p>
+    <p>嬉しいけど.....</p>
+    <p1>土しか食べられるものは無かった</p1>
+    <p1>嗯...2015年...vps不续费了...</p1>
+</div>           </div>
+           <div class="large-6 tag-cloud column">
+                <h3>Tags</h3>
+                <ul class="tagcloud">
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/nao-dong.html">脑洞
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/chord.html">Chord
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/websocket.html">WebSocket
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/mongo.html">mongo
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/classification.html">classification
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/shi-xu-tu.html">时序图
+                        </a></li>
+                    <li>
+											<span class="badge">30</span>
+                        <a href="/tag/chan-pin.html">产品
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/fuck.html">fuck
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/gc.html">GC
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/rtmp.html">RTMP
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/unicode.html">unicode
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/dylib.html">dylib
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/protocol.html">protocol
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/pycon.html">PyCon
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/cai-ji.html">采集
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/clustering.html">clustering
+                        </a></li>
+                    <li>
+											<span class="badge">7</span>
+                        <a href="/tag/web.html">Web
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/yi-zhi.html">移植
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/network.html">network
+                        </a></li>
+                    <li>
+											<span class="badge">6</span>
+                        <a href="/tag/flask.html">Flask
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/review.html">review
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/nodejs.html">Node.js
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/pep.html">PEP
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/linear.html">Linear
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/features.html">Features
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/wu-tai.html">舞台
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/cnn.html">CNN
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/pca.html">PCA
+                        </a></li>
+                    <li>
+											<span class="badge">7</span>
+                        <a href="/tag/webrtc.html">webRtc
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/css.html">CSS
+                        </a></li>
+                    <li>
+											<span class="badge">8</span>
+                        <a href="/tag/object-c.html">Object-C
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/memory.html">Memory
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/life.html">life
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/flask-socketio.html">Flask-SocketIO
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/http.html">HTTP
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/finance.html">finance
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/dataprocessing.html">DataProcessing
+                        </a></li>
+                    <li>
+											<span class="badge">18</span>
+                        <a href="/tag/python.html">Python
+                        </a></li>
+                    <li>
+											<span class="badge">6</span>
+                        <a href="/tag/javascript.html">JavaScript
+                        </a></li>
+                    <li>
+											<span class="badge">18</span>
+                        <a href="/tag/ios.html">iOS
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/encode.html">encode
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/xcode.html">xCode
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/appstore.html">appstore
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/html5.html">html5
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/liu-cheng.html">流程
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/uiimage.html">UIImage
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/decorator.html">Decorator
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/ipad.html">iPad
+                        </a></li>
+                    <li>
+											<span class="badge">5</span>
+                        <a href="/tag/c.html">C++
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/jia-gou.html">架构
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/ffmpeg.html">FFmpeg
+                        </a></li>
+                    <li>
+											<span class="badge">20</span>
+                        <a href="/tag/algorithm.html">algorithm
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/database.html">database
+                        </a></li>
+                    <li>
+											<span class="badge">15</span>
+                        <a href="/tag/ml.html">ML
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/yan-zou.html">演奏
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/framework.html">framework
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/gbk.html">GBK
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/rfc.html">rfc
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/cache.html">cache
+                        </a></li>
+                    <li>
+											<span class="badge">18</span>
+                        <a href="/tag/math.html">Math
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/audio.html">audio
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/obs.html">OBS
+                        </a></li>
+                </ul>
+            </div>
+
+            <div class="large-3 aside column">
+                <h3>Links</h3>
+                <ul>
+                    <li><a href="http://mikanani.me/">蜜柑计划</a></li><br/>
+                    <li><a href="http://josh.agarrado.net/music/anime/index.php">ジョシュの楽譜集</a></li><br/>
+                    <li><a href="http://deeplearning.stanford.edu/">Deep Learning</a></li><br/>
+                    <li><a href="http://getpelican.com/">Pelican</a></li><br/>
+                    <li><a href="http://python.org/">Python</a></li><br/>
+                    <li><a href="http://jinja.pocoo.org/">Jinja2</a></li><br/>
+                </ul>
+                
+            </div>
+
+        </row>
+        </div>
+        <div class="row">
+            <div class="small-12 column">
+                <p style="font-size: 0.7em; text-align:center;">
+                ∠( ᐛ 」∠)＿不会有人拉到这么下边的呀就算拉下来也不会去看的呀这么小的字也看不清的口牙！ ©2015.
+                <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1257347159'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1257347159%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+                <script type="text/javascript" src="/theme/js/analytics.js"></script>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    
+</body>
+</html>
