@@ -5,28 +5,28 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
 <url>
 <loc>/</loc>
-<lastmod>2018-07-11T03:28:11-00:00</lastmod>
+<lastmod>2018-07-31T09:55:37-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.8</priority>
 </url>
 
 <url>
 <loc>/archives.html</loc>
-<lastmod>2018-07-11T03:28:11-00:00</lastmod>
+<lastmod>2018-07-31T09:55:37-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.8</priority>
 </url>
 
 <url>
 <loc>/tags.html</loc>
-<lastmod>2018-07-11T03:28:11-00:00</lastmod>
+<lastmod>2018-07-31T09:55:37-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.8</priority>
 </url>
 
 <url>
 <loc>/categories.html</loc>
-<lastmod>2018-07-11T03:28:11-00:00</lastmod>
+<lastmod>2018-07-31T09:55:37-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.8</priority>
 </url>
@@ -55,6 +55,13 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 <url>
 <loc>/2018/produce_diary_2018_07_05_15_20.html</loc>
 <lastmod>2018-07-05T15:20:00+08:00</lastmod>
+<changefreq>daily</changefreq>
+<priority>1.0</priority>
+</url>
+
+<url>
+<loc>/2018/MissingValues_2018_06_11_00_05.html</loc>
+<lastmod>2018-06-11T00:05:00+08:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>1.0</priority>
 </url>
@@ -817,7 +824,7 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
 <url>
 <loc>/category/machinelearning.html</loc>
-<lastmod>2018-04-27T18:25:00+08:06</lastmod>
+<lastmod>2018-06-11T00:05:00+08:06</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.8</priority>
 </url>
@@ -1209,7 +1216,7 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
 <url>
 <loc>/tag/algorithm.html</loc>
-<lastmod>2018-04-27T18:25:00+08:06</lastmod>
+<lastmod>2018-06-11T00:05:00+08:06</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.8</priority>
 </url>
@@ -1223,7 +1230,7 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
 <url>
 <loc>/tag/ml.html</loc>
-<lastmod>2018-04-27T18:25:00+08:06</lastmod>
+<lastmod>2018-06-11T00:05:00+08:06</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.8</priority>
 </url>
@@ -1265,7 +1272,7 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
 <url>
 <loc>/tag/math.html</loc>
-<lastmod>2018-04-27T18:25:00+08:06</lastmod>
+<lastmod>2018-06-11T00:05:00+08:06</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.8</priority>
 </url>

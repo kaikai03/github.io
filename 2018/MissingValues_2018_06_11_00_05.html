@@ -16,7 +16,7 @@
 
         <link href='https://fonts.lug.ustc.edu.cn/css?family=Exo+2:400,300,700,300italic,400italic,700italic,900,900italic' rel='stylesheet' type='text/css'>
         <link rel="stylesheet" href="/theme/css/lamboz.css" media="all">
-        <title>最小二乘法 - kairnsの记事簿</title>
+        <title>缺失数据插补 - kairnsの记事簿</title>
         <meta charset="utf-8" />
         <link href="/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="kairnsの记事簿 Full Atom Feed" />
         <link href="/feeds/all.rss.xml" type="application/rss+xml" rel="alternate" title="kairnsの记事簿 Full RSS Feed" />
@@ -36,8 +36,8 @@
     <div class="page-header">
         <div class="content-header">
             <div id="title-block">
-            <h1>  <a href="/2013/curve_fitting_2013_12_16_17_59.html" rel="bookmark"
-                    title="Permalink to 最小二乘法">最小二乘法</a></h1>
+            <h1>  <a href="/2018/MissingValues_2018_06_11_00_05.html" rel="bookmark"
+                    title="Permalink to 缺失数据插补">缺失数据插补</a></h1>
             </div>
         </div>
     </div>
@@ -48,38 +48,76 @@
            <div class="large-9 content-column column">
 <div class="content-article">
     <header class="header-article">
-        <div class="read-more">Posted on Mon 16 December 2013</div>
+        <div class="read-more">Posted on Mon 11 June 2018</div>
  
    </header>
     <section class='article'>
         
         <div class="entry-summary">
-            <p>读书笔记--曲线拟合</p>
+            <p>通过残存信号复原数据图像</p>
         </div>
     
         <div class="entry-content">
-            <h2>curve fitting</h2>
-<p>曲线拟合的最小二乘法：</p>
-<p>由已知离散点选择与测试点误差最小的曲线。</p>
-<p>$$ S(x) = a_{0}\varphi_{0}(x)+a_{1}\varphi_{1}(x)+...+a_{n}\varphi_{n}(x) $$ </p>
-<p>若</p>
-<p>$$ (\varphi_{j},\varphi_{k})=\sum_{i=0}^{m}\omega(x_{i})\varphi_{j}(x_{i})\varphi_{k}(x_{i}) $$ </p>
-<p>$$ (f,\varphi_{k})=\sum_{i=0}^{m}\omega(x_{i})f(x_{i})\varphi_{k}(x_{i})\equiv d_{k} $$ </p>
-<p>上式可写为：</p>
-<p>$$ \sum_{j=0}^{m}(\varphi_{k},\varphi_{j})a_{j}=d_{k};(k=0,1,...,n) $$ </p>
-<p>将该法方程改写为矩阵：</p>
-<p>$$ Ga=d $$ </p>
-<p>其中$ a=(a_{0},a_{1},...,a_{n})^{T},d=(d_{0},d_{1},...,d_{n})^{T} $ ，</p>
-<p>$$ \begin{aligned} &amp;G= \end{aligned}\begin{bmatrix}&amp;(\varphi_{0},\varphi_{0})  &amp;(\varphi_{0},\varphi_{1})  &amp;\cdot \cdot \cdot  &amp;(\varphi_{0},\varphi_{n}) \\ &amp;(\varphi_{1},\varphi_{0})  &amp;(\varphi_{1},\varphi_{1})  &amp;\cdot \cdot \cdot  &amp;(\varphi_{1},\varphi_{n}) \\ &amp;(\varphi_{n},\varphi_{0})  &amp;(\varphi_{n},\varphi_{1})  &amp;\cdot \cdot \cdot  &amp;(\varphi_{n},\varphi_{n}) \end{bmatrix} $$</p>
-<p>其平方误差为：</p>
-<p>$$ \left \| \delta  \right \|_{2}^{2} = \sum_{i=0}^{m}\omega(x_{i})[S(x_{i})-f(x_{i})]^2 $$ </p>
+            <h2>interpolation</h2>
+<h3>扯个蛋</h3>
+<p>日常工作繁重却只是在不断的重复着基本用不上啥脑子的活。最近产品发展放缓，让我这边终于有时间喘口气，减缓一下精神荒漠化进程。(扯....</p>
+<p>现在产品中，大多研发任务都集中在一般业务功能实现上。在这个漫天都是artificial intelligence除了<code>病历结构化</code>之外，也没什么纯科技上能拿得出手的亮点，吹逼力不足。</p>
+<p>于是拍拍脑袋，一个看起来很神奇，听起来好牛逼，说起来振奋人心，又人畜无害、没啥成本的功能的开发计划就这么诞生了。</p>
+<h3>溯源</h3>
+<p>“缺失值填补”、“缺失数据插补”、“丢失数据还原”。</p>
+<p>其实这在“数据科研者（狭义上的）”眼中属于徒劳的劳动付出。除了近年来数据不足无法满足机器学习需要做数据扩容之外，这类功能基本上处于毫无意义的状态，至少在科学研究中没有作用。</p>
+<p>不过这个计划的提出并不是空穴来风。最初的想法来自于跟科研医生接触的感觉。</p>
+<ol>
+<li>由于同一个病的治疗标准并不严格，各医生各习惯，导致整体数据“不整齐”。</li>
+<li>大部分医生对数据处理没有太多的技能与概念，基本不拥有维度变换或其他绕过缺失影响的技能。面对缺失数据大多情况下就是直接剔除case。</li>
+<li>往往数据收集整理导出由“小医生”负责，而最终数据由“大医生”使用。缺失会给“小医生”造成工作（精神上）的压力。“小医生”不知道如何数据插补概念的可能性更大。</li>
+<li>今年医疗科研项目申报也喜欢吹人工智能。</li>
+</ol>
+<p>最重要的一点，基本我接触到的科研参与人，都不知道他们（假装）常用的spss上就有这么个功能。（小声;^_^）</p>
+<h3>实现</h3>
+<p>先指明实验数据：不同分布的随机参数来产生多个自变量，非线性的随机模型生成因变量，以此来生成实验数据。实验过程中随机丢弃自变量。</p>
+<p>没用真实医疗数据来做尝试是为了保证数据本身信号的完整性，并且预先知道最“正确”的数据关系，有助于“调试”。</p>
+<p>实验过很多方法、方案，最终以spss中的最大期望输出作为参照，挑选出输出结果大约在7成的情况下，缺失填补项与真实值总差和远小于spss结果的方法。</p>
+<h3>具体的</h3>
+<p>尝试过无固定因变量，既循环所有变量，逐一地让其他变量回归于当前变量，效果并不太好，结局波动情况较大。故决定还是以确定因变量的方式来进行。</p>
+<p>尝试和推演过程不细表，直接说方法和结论吧。</p>
+<ol>
+<li>
+<p>首先去除掉所有数据缺失的case。以广义线性模型先对完整数据进行一次回归，通过最小二乘求解参数。$$X_i = log(x_i);Y_i = log(y_i)  \qquad \qquad $$ $$\theta = (X^{T}X)^{-1}X^{T}Y \qquad \qquad（1）$$ </p>
+</li>
+<li>
+<p>对$\theta$进行从大到小排序，既得到了自变量对因变量的效用顺序，相当于“信号”强弱的序列，接下来将根据这个顺序，依次地对自变量进行回归。</p>
+</li>
+<li>
+<p>选择信号最强的变量（剔除缺失后），用（1）回归于因变量。此时解得的参数只有两个，通过参数得到该变量的缺失数据。$$x_i = e^{\frac{ln(y_i)-c}{a}};\theta = {a,c}$$</p>
+</li>
+<li>
+<p>接下来加入次强的变量，剔除缺失case，回归，取得参数，加入有缺失的case，解出缺失的值，补上。</p>
+</li>
+<li>
+<p>不断重复上述步骤，至所有缺失项填补完成。</p>
+</li>
+<li>
+<p>接下来进入最大期望的迭代过程。对于一个case有多个缺失值的情况，每次迭代只更新其中一个变量，其他变量锁死，既沿用上一轮迭代结果。</p>
+</li>
+<li>
+<p>直至收敛，既整体期望变化小于设定阈值。 </p>
+</li>
+</ol>
+<h3>一些额外的问题</h3>
+<h4>关于“信号”强弱排序</h4>
+<p>为什么要从强信号至弱信号呢？理论上来说，无论什么顺序都将会得到同一个结果。但在实验过程中意识发现：如果先从弱信号开始，有可能会在一开始就得到一个很大的误差，而在后续的迭代过程中，会有比较大的概率走偏向一个极差的局部解或出现无法收敛的情况。所以以强信号变量做起点，将是一个只有好处没有坏处的选择。</p>
+<h4>关于加入有缺失的case</h4>
+<p>上边没有说，在求协方差$X^{T}X$的时候需要用相关的变量标准差做一次惩罚，否则在加入变量（第4步）或锁死变量（第6步）后更新数据，会过大地估计目标值。</p>
+<h3>写完收工</h3>
+<p>反正总结起来，这是“懂的人一脸冷漠，不懂的人一脸懵逼，半桶水的人一脸兴奋，市场管理的人吹暴”的一个没有价值却有意义的“水货”。本篇也是一篇纯粹的“灌水”文。</p>
         </div>
     </section>
     <footer class="footer-article">
         <div class="tags-and-categories">Filed under <a href="/category/machinelearning.html">MachineLearning</a>
-        | Tagged: <a href="/tag/ml.html">ML </a><a href="/tag/linear.html">Linear </a><a href="/tag/dataprocessing.html">DataProcessing </a><a href="/tag/math.html">Math </a>
-        | <a href="/2013/curve_fitting_2013_12_16_17_59.html" rel="bookmark"
-         title="Permalink to 最小二乘法">Permalink</a>            
+        | Tagged: <a href="/tag/algorithm.html">algorithm </a><a href="/tag/ml.html">ML </a><a href="/tag/math.html">Math </a>
+        | <a href="/2018/MissingValues_2018_06_11_00_05.html" rel="bookmark"
+         title="Permalink to 缺失数据插补">Permalink</a>            
         </div>
         <!-- metaldata 
         -->
