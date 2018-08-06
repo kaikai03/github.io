@@ -16,10 +16,11 @@
 
         <link href='https://fonts.lug.ustc.edu.cn/css?family=Exo+2:400,300,700,300italic,400italic,700italic,900,900italic' rel='stylesheet' type='text/css'>
         <link rel="stylesheet" href="/theme/css/lamboz.css" media="all">
-        <title>kairnsの记事簿</title>
+        <title>研究概述样板 - kairnsの记事簿</title>
         <meta charset="utf-8" />
         <link href="/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="kairnsの记事簿 Full Atom Feed" />
         <link href="/feeds/all.rss.xml" type="application/rss+xml" rel="alternate" title="kairnsの记事簿 Full RSS Feed" />
+        <link href="/feeds/machinelearning.atom.xml" type="application/atom+xml" rel="alternate" title="kairnsの记事簿 Categories Atom Feed" />
         
 </head>
 <body onblur="leavePage()" onfocus="comebackPage()">
@@ -30,11 +31,13 @@
             <li ><a href="/pages/Python_Packages_2012_11_05_12_18.html">Python Packages</a></li>
         </ul>
     </div>
+
 <div class="hp-header-inner">
     <div class="page-header">
         <div class="content-header">
             <div id="title-block">
-                <h1>Articles tagged with PCA </h1>
+            <h1>  <a href="/2018/sample_2018_06_27_23_11.html" rel="bookmark"
+                    title="Permalink to 研究概述样板">研究概述样板</a></h1>
             </div>
         </div>
     </div>
@@ -43,50 +46,80 @@
         <div class="data-holder">
         <div class="row">
            <div class="large-9 content-column column">
-
-
-
-
-
-<blocks cols="2">
-        <div class="sec-article">
-            <div class="read-more">Mon 18 August 2014</div>
-
-            <h3><a href="/2014/Data_Process_2014_08_18_20_05.html" rel=Bookmark title="Permalink to 数据预处理技巧">数据预处理技巧</a></h3>
-            <p>
-            <p>归一与白化</p>            
-            </p>
+<div class="content-article">
+    <header class="header-article">
+        <div class="read-more">Posted on Wed 27 June 2018</div>
+ 
+   </header>
+    <section class='article'>
+        
+        <div class="entry-summary">
+            <p>给某项目立项书，写了一套研究概述“样版”，欢迎篡改抄袭。</p>
         </div>
-
-        <div class="sec-article">
-            <div class="read-more">Mon 18 August 2014</div>
-
-            <h3><a href="/2014/PCA_in_ML_2014_08_18_19_50.html" rel=Bookmark title="Permalink to ML中的PCA及白化">ML中的PCA及白化</a></h3>
-            <p>
-            <p>总结下，顺便简单讲讲白化</p>            
-            </p>
+    
+        <div class="entry-content">
+            <h3>写在前面</h3>
+<p>就如summary所述，这是一篇为了给某大型“疾病+人工智能”的项目立项书写的智能算法方案部分的“参考文献”。完成于至少半年前，当你现在看到这篇东西的时候，它已经完成了它的使命--项目申报。当然正式使用的时候，文内的“医学名词”被替换成它需要申报的方向。</p>
+<p>炮制这篇文的的时候，为了让模版更具真实性，用的是真实的项目，真实的数据，真实的结果。然后再来引出算法。当然算法思路也是对的，引用的也是真实的，唯一缺的仅仅是没去做综合实证。</p>
+<p>想着这玩意可以重复使用，反正又不是出论文没查重问题（当然它的细节也不足以发论文就是了），非DS、CS专业的应该挺缺这种模版的，于是放出来当福利了。</p>
+<h3>XXX医学川崎病系列研究及阶段性概述</h3>
+<p>2017年，上海XXX医学与上海儿童医院合作开展川崎病系列研究，现已完成《小儿川崎病诊断模型的建立与研究》，《川崎病丙球无反应评分模型的建立与研究》，并在此基础上利用大数据及人工智能深度学习方法，建立了“川崎病临床辅助决策系统”，用于帮助医生提高 “是否为川崎病患者”以及“是否将会出现丙球无反应”这两个临床问题的判别准确率。 </p>
+<p>目前研究中，直接研究对象为2013-2016年入院的710例川崎病患儿。由于目的是为了建立精准川崎病预测模型和临床辅助决策系统，从各种相似患者中精准识别该疾病，所以项目实际从儿童医院历史数据中随机提取了40,000例具有发热、杨梅舌、四肢红肿等川崎病相似表现特征的患者诊疗记录作为补充数据，涉及指标项178个，其中71项检查检验指标，107项通过XXX医疗的病历文本结构化模块从患者病历文本中获得。经清洗后建立基于hadoop框架的高维矩阵大数据分析模型。</p>
+<p>传统的聚类方法有C-均值聚类和FCM软聚类算法[1]。在大量数据的场景下，用传统的方法直接聚类效率很低[2]，王宝文(2007)[3]等人提出基于分治方法的聚类算法，克服聚类有效性对样本空间分布的依赖，将高维样本的差异性转化为二维样本的差异性，实现高维样本向二维样本的映射，再利用传统算法进行聚类，得到7个分类。经过各分类对比观察，最终选定样本空间上与川崎病最相似的集合，其中患者诊疗记录6213例，包含已明确的595例川崎病病例。形成进一步研究样本集<code>set_A</code>。</p>
+<p>传统主成份分析PCA[4]需要计算协方差矩阵，其空间复杂度为O(m2)，进行特征分解的时间复杂度为O(m3)。Qi etal.(2004)[5] 和 Kargupta et al.(2001) [6] 建议将数据分块，使用分布式来解决效率问题，但由于仍然需要重建中心化的协方差矩阵，所以依旧难解决在高纬度或多样本情况下的主成份分析的效率问题。对此李晨, 郭跃飞[7] 提出协方差无关的迭代主成分分析CIPCA算法，在效率改进方面表现优异。我们通过CIPCA算法对<code>set_A</code>进行分析，得到23项，包含方差70%贡献率的指标项：</p>
+<p><code>发热天数</code>、<code>年龄</code>、<code>中性粒细胞与淋巴细胞比值（NLR）</code>、<code>白蛋白（ALB）</code>、<code>C反应蛋白（CRP）</code>、<code>红细胞沉降速率（ESR）</code>、<code>热退天数</code>、<code>丙球使用剂量</code>、<code>激素使用标记</code>、<code>钾（K+）</code>、<code>D-D二聚体</code>、<code>血红蛋白（Hb）</code>、<code>性别</code>、<code>白细胞计数（WBC）</code>、<code>肌酸激酶（CK）</code>、<code>肌酐水平（Cr）FDP</code>、<code>乳酸脱氢酶（LDH）</code>、<code>血钠（Na+）</code>、<code>肌酸激酶MB同工酶（CK-MB）</code>、<code>血小板总数（PLT）</code>、<code>中心粒细胞计数（NE#）</code>、<code>淋巴细胞计数（LY#）</code>、<code>谷丙转氨酶（ALT）</code>、<code>肌酸激酶MB同工酶（CK-MB）</code>。</p>
+<p>根据我们的预定目的，将会对数据做如下预测： </p>
+<ol>
+<li>是否川崎病</li>
+<li>是否发生丙球反应。</li>
+</ol>
+<p>所以同样的对研究数据建立相对应的4分类标签:
+<code>｛label A | 川崎病丙球有反应，川崎病丙球无反应，非川崎病丙球有反应，非川崎病丙球无反应｝</code>。</p>
+<p>传统的统计学方法对资料有一定的限制，医学现象错综复杂，自变量与因变量间可能存在着复杂的非线性关系以及变量之间可能存在交互作用等，在变量之间关系未正确处理的情况下将会很难估计出最优回归参数[8]。我们当前研究变量过多，回归前预处理极为复杂。谭英(2012)[8]，温变珍(2010)[9]等在过去的研究中，均发现神经网络对资料限制少，泛化能力强，且具有良好的非线性和对未知数据的处理能力等优点。进一步资料搜索，我们发现多层感知器神经网络(MLP)[11]正适合处理本研究中变量之间隐含高维特征的情况。</p>
+<p>我们对<code>set_A</code>进行人工标记:</p>
+<ol>
+<li>根据最终诊断确定是否为川崎病。</li>
+<li>根据丙球使用时间与激素使用时间确定是否发生丙球反应。</li>
+</ol>
+<p>并挑选主要方差提供指标，形成一个四分类的训练集<code>train_A</code>，对MLP模型进行训练。</p>
+<p>预测标准误差在13轮训练后收敛至0.0093并保持平稳。使用40,000例全部病例进行回测，准确率为0.81，结果并不理想。经研究发现误差积累的速度与所使用的预测数据与<code>set_A</code>的距离呈正比，意味着<code>MLP</code>对本次使用数据集的个局部特征泛化存在缺陷。</p>
+<p>随后根据<code>马艳东(2015)[12]</code>改进局部泛化误差模型的方法对原<code>MLP</code>模型进行优化，创新<code>AG-MLP</code>(Artifical Generalization-Multi-layer perceptron)。</p>
+<ol>
+<li>以batch形式替代原逐个样本训练。每次训练挑选固定数量的同label样本作为一个batch。</li>
+<li>当训练到负样本时，随机挑选一些<code>set_B</code>中，与<code>train_A</code>距离较大的未知样本加入batch中。</li>
+<li>对每个batch进行L2范数正则。</li>
+</ol>
+<p>我们设定每batch取8个样本重新进行训练，预测标准误差在20轮训练后收敛至0.002一杯，并保持平稳。使用40,000例全部病例进行回测，准确率为0.9236，我们认为达到可用状态。</p>
+<p>References:</p>
+<blockquote>
+<p>[1] Zhang Yuanquan, Rueda L. A Geometric Framework to Visualize Fuzzy-clustered Data[C]//Proceedings of IEEE 25th International Conference of the Chilean Computer Science Society. Valdivia, Chile: [s. n.], 2005: 8-13. </p>
+<p>[2] Davidson I, Satyanarayana A. Speeding Up K-means Clustering by Bootstrap Averaging[C]//Proc. of IEEE Data Mining Workshop on Clustering Large Data Sets. Brighton, UK: [s. n.], 2004: 98-102.</p>
+<p>[3] 王宝文, 阎俊梅, 刘文远等.基于分治法的高维大数据集模糊聚类算法[J]. 计算机工程, 2007, 33(24):60-62.</p>
+<p>[4] Joliffe IT. Principal component analysis[M]. New York, USA: Springer-Verlag, 1986.</p>
+<p>[5] Qi H, Wang T W, Birdwell J D. Global principal component analysis for dimensionality reduction in distributed data mining[J]. Statistical Data Mining and Knowledge Discovery, 2004: 327-342.</p>
+<p>[6] Kargupta H, Huang W Y, Sivakumar K, et al. Distributed clustering using collective principal component analysis[J]. Knowledge and Information System, 2001 3(4): 422-448.</p>
+<p>[7] 李晨, 郭跃飞. 一种用于高维大数据的协方差无关的主成分分析迭代算法(英文)[J]. 复旦学报(自然科学版), 2013, 52(2):207-214. </p>
+<p>[8] 王梅生. 线性回归分析中自变量间的相关性问题[J]. 东北大学学报(自然科学版), 1985, 6(1):93-104.</p>
+<p>[9] 谭英. 用人工神经网络建立缺血性脑卒中患者复发的预测模型[D]. 徐州医学院, 2012.</p>
+<p>[10] 温变珍. BP神经网络在大肠癌预后分析中的应用[D]. 山西医科大学, 2010.</p>
+<p>[11] EthemAlpaydin, 阿培丁, Alpaydin,等. 机器学习导论[M]. 机械工业出版社, 2014.</p>
+<p>[12] 马艳东. 改进的局部泛化误差模型及其在特征选择中的应用[J]. 中国科技信息, 2015(10):41-42.</p>
+</blockquote>
         </div>
-
-        <div class="sec-article">
-            <div class="read-more">Fri 15 August 2014</div>
-
-            <h3><a href="/2014/PCA_2014_08_15_22_49.html" rel=Bookmark title="Permalink to PCA">PCA</a></h3>
-            <p>
-            <p>读书笔记--主成份分析！</p>            
-            </p>
+    </section>
+    <footer class="footer-article">
+        <div class="tags-and-categories">Filed under <a href="/category/machinelearning.html">MachineLearning</a>
+        | Tagged: <a href="/tag/algorithm.html">algorithm </a><a href="/tag/ml.html">ML </a>
+        | <a href="/2018/sample_2018_06_27_23_11.html" rel="bookmark"
+         title="Permalink to 研究概述样板">Permalink</a>            
         </div>
-
-        <div class="sec-article">
-            <div class="read-more">Fri 15 August 2014</div>
-
-            <h3><a href="/2014/SVD_2014_08_15_21_28.html" rel=Bookmark title="Permalink to 奇异值">奇异值</a></h3>
-            <p>
-            <p>读书笔记--奇异值分解！</p>            
-            </p>
-        </div>
-
-</blocks>
-
+        <!-- metaldata 
+        -->
+    </footer>
+</div>
+<div id="disqus_thread"></div>
+<script type="text/javascript" src="/theme/js/disqus.js"></script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
             </div>
             
             
@@ -113,7 +146,7 @@
                     <li><a href="/category/bu-kao-pu-chan-pin-ri-ji.html">不靠谱产品日记</a> (25)</li>
                     <li><a href="/category/db.html">DB</a> (3)</li>
                     <li><a href="/category/idev.html">iDev</a> (14)</li>
-                    <li><a href="/category/machinelearning.html">MachineLearning</a> (24)</li>
+                    <li class="active"><a href="/category/machinelearning.html">MachineLearning</a> (24)</li>
                     <li><a href="/category/musical.html">Musical</a> (3)</li>
                     <li><a href="/category/other.html">other</a> (3)</li>
                     <li><a href="/category/pydev.html">pyDev</a> (19)</li>
@@ -273,7 +306,7 @@
 											<span class="badge">2</span>
                         <a href="/tag/cnn.html">CNN
                         </a></li>
-                    <li class="active">
+                    <li>
 											<span class="badge">4</span>
                         <a href="/tag/pca.html">PCA
                         </a></li>
