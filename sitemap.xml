@@ -5,28 +5,28 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
 <url>
 <loc>/</loc>
-<lastmod>2018-12-13T15:25:36-00:00</lastmod>
+<lastmod>2018-12-13T16:40:15-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.8</priority>
 </url>
 
 <url>
 <loc>/archives.html</loc>
-<lastmod>2018-12-13T15:25:36-00:00</lastmod>
+<lastmod>2018-12-13T16:40:15-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.8</priority>
 </url>
 
 <url>
 <loc>/tags.html</loc>
-<lastmod>2018-12-13T15:25:36-00:00</lastmod>
+<lastmod>2018-12-13T16:40:15-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.8</priority>
 </url>
 
 <url>
 <loc>/categories.html</loc>
-<lastmod>2018-12-13T15:25:36-00:00</lastmod>
+<lastmod>2018-12-13T16:40:15-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.8</priority>
 </url>
@@ -34,13 +34,6 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 <url>
 <loc>/pages/about-me.html</loc>
 <lastmod>2016-02-21T00:00:00+08:00</lastmod>
-<changefreq>weekly</changefreq>
-<priority>0.7</priority>
-</url>
-
-<url>
-<loc>/pages/Python_Packages_2012_11_05_12_18.html</loc>
-<lastmod>2015-11-06T23:13:00+08:00</lastmod>
 <changefreq>weekly</changefreq>
 <priority>0.7</priority>
 </url>
