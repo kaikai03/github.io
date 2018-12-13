@@ -1,0 +1,828 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="Access-Control-Allow-Origin" content="*">
+        <link rel="stylesheet" href="/theme/css/foundation.min.css" media="all">
+		<link rel="stylesheet" href="/theme/css/pygments.css" /> 
+		<link rel="stylesheet" href="/theme/css/style.css" />
+		<link rel="stylesheet" href="/theme/css/ukagaka.css" /> 
+        <script type="text/javascript" src="/theme/js/modernizr.js"></script>
+		<script type='text/javascript' src='/theme/js/jquery-1.11.1.min.js'></script>
+	    <script type="text/javascript" src="/theme/js/damoo.min.js"></script>
+		<script type="text/x-mathjax-config">MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});</script>
+        <script type="text/javascript">var js=document.createElement('script');js.setAttribute('src',(('https:' == document.location.protocol) ? ' https://' : ' http://')+'cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML');document.head.appendChild(js);</script>
+
+        <link href='https://fonts.lug.ustc.edu.cn/css?family=Exo+2:400,300,700,300italic,400italic,700italic,900,900italic' rel='stylesheet' type='text/css'>
+        <link rel="stylesheet" href="/theme/css/lamboz.css" media="all">
+        <title>Flask Web Development(3) - kairnsの记事簿</title>
+        <meta charset="utf-8" />
+        <link href="/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="kairnsの记事簿 Full Atom Feed" />
+        <link href="/feeds/all.rss.xml" type="application/rss+xml" rel="alternate" title="kairnsの记事簿 Full RSS Feed" />
+        <!-- |format(category.slug) -->
+        <link href="/feeds/{slug}.atom.xml" type="application/atom+xml" rel="alternate" title="kairnsの记事簿 Categories Atom Feed" />
+ 
+ 
+        
+        
+</head>
+<body onblur="leavePage()" onfocus="comebackPage()">
+    <div class="pages">
+        <ul>
+            <li class="home"><a href="/index.html">Home</a></li>
+            <li ><a href="/pages/about-me.html">About Me</a></li>
+            <li ><a href="/pages/Python_Packages_2012_11_05_12_18.html">Python Packages</a></li>
+        </ul>
+    </div>
+
+<div class="hp-header-inner">
+    <div class="page-header">
+        <div class="content-header">
+            <div id="title-block">
+            <h1>  <a href="/2015/Flask_Web_Development_2015_04_24_17_01.html" rel="bookmark"
+                    title="Permalink to Flask Web Development(3)">Flask Web Development(3)</a></h1>
+            </div>
+        </div>
+    </div>
+</div>
+    <div class="content">
+        <div class="data-holder">
+        <div class="row">
+           <div class="large-9 content-column column">
+<div class="content-article">
+    <header class="header-article">
+        <div class="read-more">Posted on Fri 24 April 2015</div>
+ 
+   </header>
+    <section class='article'>
+        
+        <div class="entry-summary">
+            <p>第3章 模板</p>
+        </div>
+    
+        <div class="entry-content">
+            <h2>《Flask Web Development》--第3章 模板</h2>
+<p>View Function有两个任务：（1）处理业务逻辑 （2）返回响应内容。将两者分开管理能够使代码更好容易维护，模板起的就是这么一个作用。本章介绍的模板引擎Jinjia2。</p>
+<h3>Jinjia模板引擎</h3>
+<p>模板只是一些包含文本的字符串，设置的变量标记位最终会被模板引擎用数据替换。要使用Jinjia模板，第一步是定义模板，Jinjia2默然会到templates子目录中寻找模板，所以在该目录下定义两个模板文件：</p>
+<p><em>templates/index.html:</em></p>
+<div class="highlight"><pre><span></span>&amp;lt;h1&amp;gt;Hello World!&amp;lt;/h1&amp;gt;
+</pre></div>
+
+
+<p><em>templates/user.html：</em></p>
+<div class="highlight"><pre><span></span><span class="x">&amp;lt;h1&amp;gt;Hello </span><span class="cp">{{</span><span class="nv">name</span><span class="cp">}}</span><span class="x">!&amp;lt;/h1&amp;gt;</span>
+</pre></div>
+
+
+<h3>渲染模板</h3>
+<p>如下例子导入渲染模板的方法，然后调用模板方法去注入模板：</p>
+<p><em>index.py</em></p>
+<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">Flask</span><span class="p">,</span> <span class="n">render_template</span>
+
+<span class="nd">@app.route</span><span class="p">(</span><span class="s1">&#39;/index&#39;</span><span class="p">)</span> 
+<span class="k">def</span> <span class="nf">index</span><span class="p">():</span>
+<span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;index.html&#39;</span><span class="p">)</span>
+
+<span class="nd">@app.route</span><span class="p">(</span><span class="s1">&#39;/&amp;lt;name&amp;gt;&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">user</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;user.html&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+</pre></div>
+
+
+<p>启动server以后可以分别访问相对路径<code>/index</code>和<code>/&lt;name&gt;</code>索引来查看页面内容结果。</p>
+<h3>变量类型</h3>
+<p>模板中除了接受普通变量，还能接收复杂的数据结构，比如dict、list、obj，修改后的模板如下：</p>
+<p><em>templates/user.html:</em></p>
+<div class="highlight"><pre><span></span><span class="x">&amp;lt;p&amp;gt;A value from a dictionary: </span><span class="cp">{{</span> <span class="nv">mydict</span><span class="o">[</span><span class="s1">&#39;key&#39;</span><span class="o">]</span> <span class="cp">}}</span><span class="x">.&amp;lt;/p&amp;gt;</span>
+<span class="x">&amp;lt;p&amp;gt;A value from a list: </span><span class="cp">{{</span> <span class="nv">mylist</span><span class="o">[</span><span class="m">3</span><span class="o">]</span> <span class="cp">}}</span><span class="x">.&amp;lt;/p&amp;gt;</span>
+<span class="x">&amp;lt;p&amp;gt;A value from a list, with a variable index: </span><span class="cp">{{</span> <span class="nv">mylist</span><span class="o">[</span><span class="nv">myintvar</span><span class="o">]</span> <span class="cp">}}</span><span class="x">.&amp;lt;/p&amp;gt;</span>
+<span class="x">&amp;lt;p&amp;gt;A value from an object&#39;s method: </span><span class="cp">{{</span> <span class="nv">myobj.somemethod</span><span class="o">()</span> <span class="cp">}}</span><span class="x">.&amp;lt;/p&amp;gt;</span>
+</pre></div>
+
+
+<p>那么对应的在python就要定义一些数据结构：</p>
+<p><em>index.py</em></p>
+<div class="highlight"><pre><span></span><span class="kr">class</span> <span class="nx">Human</span><span class="p">()</span><span class="o">:</span>
+    <span class="nx">def</span> <span class="nx">somemethod</span><span class="p">(</span><span class="nx">self</span><span class="p">)</span><span class="o">:</span>
+        <span class="k">return</span> <span class="s1">&#39;what the fucking world!&#39;</span>
+
+<span class="kd">@app</span><span class="p">.</span><span class="nx">route</span><span class="p">(</span><span class="s1">&#39;/&amp;lt;name&amp;gt;&#39;</span><span class="p">)</span>
+<span class="nx">def</span> <span class="nx">user</span><span class="p">(</span><span class="nx">name</span><span class="p">)</span><span class="o">:</span>
+    <span class="nx">mydict</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;key&quot;</span><span class="o">:</span> <span class="s2">&quot;To Be or Not To Be&quot;</span><span class="p">}</span>
+    <span class="nx">mylist</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;it&#39;</span><span class="p">,</span> <span class="s1">&#39;is&#39;</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;problem&#39;</span><span class="p">]</span>
+    <span class="nx">myintvar</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="nx">myobj</span> <span class="o">=</span> <span class="nx">Human</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="nx">render_template</span><span class="p">(</span><span class="s1">&#39;user.html&#39;</span><span class="p">,</span> <span class="nx">name</span><span class="o">=</span><span class="nx">name</span><span class="p">,</span> <span class="nx">mydict</span><span class="o">=</span><span class="nx">mydict</span><span class="p">,</span> <span class="nx">mylist</span><span class="o">=</span><span class="nx">mylist</span><span class="p">,</span> <span class="nx">myintvar</span><span class="o">=</span><span class="nx">myintvar</span><span class="p">,</span> <span class="nx">myobj</span><span class="o">=</span><span class="nx">myobj</span><span class="p">)</span>
+</pre></div>
+
+
+<p>可以执行index.py来查看运行结果。</p>
+<p>除了使用复杂的数据结构以外，模板中还能使用<a href="http://jinja.pocoo.org/docs/dev/templates/#builtin-filters">过滤器</a>对内容进行过滤，下面是一个将字符内容变为大写的例子：</p>
+<div class="highlight"><pre><span></span><span class="x">Hello, </span><span class="cp">{{</span> <span class="nv">name</span><span class="o">|</span><span class="nf">capitalize</span> <span class="cp">}}</span><span class="x"></span>
+</pre></div>
+
+
+<h3>控制结构</h3>
+<p>Jinjia2能够使用常见的控制流，如下是常用的集中控制流的简要介绍：</p>
+<ul>
+<li>If控制流</li>
+</ul>
+<p><em>index.py</em></p>
+<div class="highlight"><pre><span></span>@app.route(&#39;/flow&#39;)
+def flow():
+    user = &#39;tangyefei&#39;
+
+    return render_template(&#39;flow.html&#39;, user=user)
+</pre></div>
+
+
+<p><em>templates/flow.html</em></p>
+<div class="highlight"><pre><span></span><span class="cp">{%</span> <span class="k">if</span> <span class="nv">user</span> <span class="cp">%}</span><span class="x"></span>
+<span class="x">    Hello, </span><span class="cp">{{</span><span class="nv">user</span><span class="cp">}}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">else</span> <span class="cp">%}</span><span class="x"></span>
+<span class="x">    Hello, stranger</span>
+<span class="cp">{%</span> <span class="k">endif</span> <span class="cp">%}</span><span class="x"></span>
+</pre></div>
+
+
+<ul>
+<li>Loop控制流</li>
+</ul>
+<p><em>index.py</em></p>
+<div class="highlight"><pre><span></span>@app.route(&#39;/loop&#39;)
+def loop():
+    comments = [&quot;To Be&quot;, &quot;Or&quot;, &quot;Not To Be&quot;]
+
+    return render_template(&#39;loop.html&#39;, comments=comments)
+</pre></div>
+
+
+<p><em>templates/loop.html</em></p>
+<div class="highlight"><pre><span></span><span class="x">&amp;lt;ul&amp;gt;</span>
+<span class="x">    </span><span class="cp">{%</span> <span class="k">for</span> <span class="nv">comment</span> <span class="k">in</span> <span class="nv">comments</span><span class="cp">%}</span><span class="x"></span>
+<span class="x">        &amp;lt;li&amp;gt;</span><span class="cp">{{</span><span class="nv">comment</span><span class="cp">}}</span><span class="x">&amp;lt;/li&amp;gt;</span>
+<span class="x">    </span><span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span><span class="x"></span>
+<span class="x">&amp;lt;/ul&amp;gt;</span>
+</pre></div>
+
+
+<ul>
+<li>Macro!!</li>
+</ul>
+<p><em>index.py</em></p>
+<div class="highlight"><pre><span></span>@app.route(&#39;/macro&#39;)
+def macro():
+    comments = [&quot;To Be&quot;, &quot;Or&quot;, &quot;Not To Be&quot;]
+
+    return render_template(&#39;macro.html&#39;, comments=comments)
+</pre></div>
+
+
+<p><em>templates/macro.html</em></p>
+<div class="highlight"><pre><span></span><span class="cp">{%</span> <span class="k">macro</span> <span class="nv">render_comment</span><span class="o">(</span><span class="nv">comment</span><span class="o">)</span> <span class="cp">%}</span><span class="x"></span>
+<span class="x">    &amp;lt;li&amp;gt;</span><span class="cp">{{</span><span class="nv">comment</span><span class="cp">}}</span><span class="x">&amp;lt;/li&amp;gt;</span>
+<span class="cp">{%</span> <span class="k">endmacro</span> <span class="cp">%}</span><span class="x"></span>
+
+<span class="x">&amp;lt;ul&amp;gt;</span>
+<span class="x">     </span><span class="cp">{%</span> <span class="k">for</span> <span class="nv">comment</span> <span class="k">in</span> <span class="nv">comments</span><span class="cp">%}</span><span class="x"></span>
+<span class="x">        </span><span class="cp">{{</span> <span class="nv">macro.render_comment</span><span class="o">(</span><span class="nv">comment</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
+<span class="x">    </span><span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span><span class="x"></span>
+<span class="x">&amp;lt;/ul&amp;gt;</span>
+</pre></div>
+
+
+<ul>
+<li>外部导入Macro</li>
+</ul>
+<p><em>index.py</em></p>
+<div class="highlight"><pre><span></span>@app.route(&#39;/comments&#39;)
+def comments():
+    comments = [&quot;To Be&quot;, &quot;Or&quot;, &quot;Not To Be&quot;]
+
+    return render_template(&#39;comments.html&#39;, comments=comments)
+</pre></div>
+
+
+<p><em>templates/macro.html</em></p>
+<div class="highlight"><pre><span></span><span class="p">{</span><span class="o">%</span> <span class="n">macro</span> <span class="n">render_comment</span><span class="p">(</span><span class="n">comment</span><span class="p">)</span> <span class="o">%</span><span class="p">}</span>
+    <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="n">li</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;{{</span><span class="n">comment</span><span class="p">}}</span><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">/</span><span class="n">li</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span>
+<span class="p">{</span><span class="o">%</span> <span class="n">endmacro</span> <span class="o">%</span><span class="p">}</span>
+
+<span class="n">templates</span><span class="o">/</span><span class="n">comments</span><span class="o">.</span><span class="n">html</span>
+
+<span class="p">{</span><span class="o">%</span> <span class="kn">import</span> <span class="s1">&#39;macro.html&#39;</span> <span class="k">as</span> <span class="n">macro</span> <span class="o">%</span><span class="p">}</span>
+<span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="n">ul</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span>
+     <span class="p">{</span><span class="o">%</span> <span class="k">for</span> <span class="n">comment</span> <span class="ow">in</span> <span class="n">comments</span><span class="o">%</span><span class="p">}</span>
+        <span class="p">{{</span> <span class="n">macro</span><span class="o">.</span><span class="n">render_comment</span><span class="p">(</span><span class="n">comment</span><span class="p">)</span> <span class="p">}}</span>
+    <span class="p">{</span><span class="o">%</span> <span class="n">endfor</span> <span class="o">%</span><span class="p">}</span>
+<span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">/</span><span class="n">ul</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span>
+</pre></div>
+
+
+<ul>
+<li>模板继承</li>
+</ul>
+<p><em>index.py</em></p>
+<div class="highlight"><pre><span></span><span class="x">@app.route(&#39;/extends&#39;)</span>
+<span class="x">def extends():</span>
+<span class="x">    return render_template(&#39;child.html&#39;)</span>
+
+<span class="x">/templates/base.html</span>
+
+<span class="x">&amp;lt;!DOCTYPE html&amp;gt;</span>
+<span class="x">&amp;lt;html lang=&quot;en&quot;&amp;gt;</span>
+<span class="x">&amp;lt;head&amp;gt;</span>
+<span class="x">    &amp;lt;meta charset=&quot;UTF-8&quot;&amp;gt;</span>
+<span class="x">    </span><span class="cp">{%</span> <span class="k">block</span> <span class="nv">head</span><span class="cp">%}</span><span class="x"></span>
+<span class="x">        &amp;lt;title&amp;gt;</span>
+<span class="x">            </span><span class="cp">{%</span> <span class="k">block</span> <span class="nv">title</span><span class="cp">%}{%</span> <span class="k">endblock</span><span class="cp">%}</span><span class="x">- My Application</span>
+<span class="x">        &amp;lt;/title&amp;gt;</span>
+<span class="x">    </span><span class="cp">{%</span> <span class="k">endblock</span> <span class="cp">%}</span><span class="x"></span>
+<span class="x">&amp;lt;/head&amp;gt;</span>
+<span class="x">&amp;lt;body&amp;gt;</span>
+<span class="x">    </span><span class="cp">{%</span> <span class="k">block</span> <span class="nv">body</span><span class="cp">%}</span><span class="x"></span>
+<span class="x">    </span><span class="cp">{%</span> <span class="k">endblock</span><span class="cp">%}</span><span class="x"></span>
+<span class="x">&amp;lt;/body&amp;gt;</span>
+<span class="x">&amp;lt;/html&amp;gt;</span>
+</pre></div>
+
+
+<p><em>/templates/child.html</em></p>
+<div class="highlight"><pre><span></span><span class="cp">{%</span> <span class="k">extends</span> <span class="s1">&#39;base.html&#39;</span><span class="cp">%}</span><span class="x"></span>
+
+<span class="cp">{%</span> <span class="k">block</span> <span class="nv">title</span><span class="cp">%}</span><span class="x"></span>
+<span class="x">    Index</span>
+<span class="cp">{%</span> <span class="k">endblock</span> <span class="cp">%}</span><span class="x"></span>
+
+<span class="cp">{%</span> <span class="k">block</span> <span class="nv">head</span><span class="cp">%}</span><span class="x"></span>
+<span class="x">    </span><span class="cp">{{</span> <span class="nb">super</span><span class="o">()</span> <span class="cp">}}</span><span class="x"></span>
+<span class="x">    &amp;lt;style&amp;gt;</span>
+<span class="x">    &amp;lt;/style&amp;gt;</span>
+<span class="cp">{%</span> <span class="k">endblock</span><span class="cp">%}</span><span class="x"></span>
+
+<span class="cp">{%</span> <span class="k">block</span> <span class="nv">body</span><span class="cp">%}</span><span class="x"></span>
+<span class="x">    &amp;lt;h1&amp;gt;Helll, World!&amp;lt;/h1&amp;gt;</span>
+<span class="cp">{%</span> <span class="k">endblock</span><span class="cp">%}</span><span class="x"></span>
+</pre></div>
+
+
+<h3>集成Bootstrap</h3>
+<p>要使用Bootstrap，最直观的办法是引入对应的css和js文件，在Flask中只需要安装Flask-Bootstrap，然后在模板中继承<em>base.html</em>就可以使用Bootstrap。如下为安装和使用的一个详细的例子：</p>
+<p>第一步，安装flask-bootstrap</p>
+<div class="highlight"><pre><span></span>(venv) $ pip install flask-bootstrap
+</pre></div>
+
+
+<p>第二步，Python文件中使用Bootstrap</p>
+<div class="highlight"><pre><span></span><span class="c1"># 引入flask-bootstrap</span>
+<span class="kn">from</span> <span class="nn">flask.ext.bootstrap</span> <span class="kn">import</span> <span class="n">Bootstrap</span>
+
+<span class="c1"># 包裹app</span>
+<span class="n">bootstrap</span> <span class="o">=</span> <span class="n">Bootstrap</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>
+
+<span class="c1"># 定义View Function</span>
+<span class="nd">@app.route</span><span class="p">(</span><span class="s1">&#39;/bootstrap/&amp;lt;name&amp;gt;&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">bootstrap</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;bootstrap.html&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+</pre></div>
+
+
+<p>第三步，构建模板覆写提供的三个block</p>
+<div class="highlight"><pre><span></span><span class="cp">{%</span> <span class="k">extends</span> <span class="s1">&#39;bootstrap/base.html&#39;</span><span class="cp">%}</span><span class="x"></span>
+
+<span class="cp">{%</span> <span class="k">block</span> <span class="nv">title</span><span class="cp">%}</span><span class="x"> Flasky </span><span class="cp">{%</span> <span class="k">endblock</span> <span class="cp">%}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">block</span> <span class="nv">navbar</span><span class="cp">%}</span><span class="x"></span>
+
+<span class="x">    &amp;lt;div class=&quot;navbar navbar-inverse&quot; role=&quot;navigation&quot;&amp;gt;</span>
+<span class="x">        &amp;lt;div class=&quot;container&quot;&amp;gt;</span>
+<span class="x">            &amp;lt;div class=&quot;navbar-header&quot;&amp;gt;</span>
+<span class="x">            &amp;lt;button type=&quot;button&quot; class=&quot;navbar-toggle&quot;</span>
+<span class="x">            data-toggle=&quot;collapse&quot; data-target=&quot;.navbar-collapse&quot;&amp;gt;</span>
+<span class="x">                &amp;lt;span class=&quot;sr-only&quot;&amp;gt;Toggle navigation&amp;lt;/span&amp;gt;</span>
+<span class="x">                &amp;lt;span class=&quot;icon-bar&quot;&amp;gt;&amp;lt;/span&amp;gt;</span>
+<span class="x">                &amp;lt;span class=&quot;icon-bar&quot;&amp;gt;&amp;lt;/span&amp;gt;</span>
+<span class="x">                &amp;lt;span class=&quot;icon-bar&quot;&amp;gt;&amp;lt;/span&amp;gt;</span>
+<span class="x">           &amp;lt;/button&amp;gt;</span>
+<span class="x">            &amp;lt;a class=&quot;navbar-brand&quot; href=&quot;/&quot;&amp;gt;Flasky&amp;lt;/a&amp;gt; &amp;lt;/div&amp;gt;</span>
+<span class="x">            &amp;lt;div class=&quot;navbar-collapse collapse&quot;&amp;gt;</span>
+<span class="x">                &amp;lt;ul class=&quot;nav navbar-nav&quot;&amp;gt;</span>
+<span class="x">                    &amp;lt;li&amp;gt;&amp;lt;a href=&quot;/&quot;&amp;gt;Home&amp;lt;/a&amp;gt;&amp;lt;/li&amp;gt;</span>
+<span class="x">                &amp;lt;/ul&amp;gt;</span>
+<span class="x">            &amp;lt;/div&amp;gt;</span>
+<span class="x">        &amp;lt;/div&amp;gt;</span>
+<span class="x">    &amp;lt;/div&amp;gt;</span>
+<span class="cp">{%</span> <span class="k">endblock</span> <span class="cp">%}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">block</span> <span class="nv">content</span><span class="cp">%}</span><span class="x"></span>
+<span class="x">    &amp;lt;div class=&quot;container&quot;&amp;gt;</span>
+<span class="x">        &amp;lt;div class=&quot;page-header&quot;&amp;gt;</span>
+<span class="x">        &amp;lt;h1&amp;gt;Hello, </span><span class="cp">{{</span> <span class="nv">name</span> <span class="cp">}}</span><span class="x">!&amp;lt;/h1&amp;gt; &amp;lt;/div&amp;gt;</span>
+<span class="x">    &amp;lt;/div&amp;gt;</span>
+<span class="cp">{%</span> <span class="k">endblock</span> <span class="cp">%}</span><span class="x"></span>
+</pre></div>
+
+
+<p>Bootstrap还定义了一些其他的Block能够被覆写的，比如下面的例子是一个覆写block script的例子：</p>
+<div class="highlight"><pre><span></span><span class="cp">{%</span> <span class="k">block</span> <span class="nv">scripts</span> <span class="cp">%}</span><span class="x"></span>
+<span class="x">    </span><span class="cp">{{</span> <span class="nb">super</span><span class="o">()</span> <span class="cp">}}</span><span class="x"></span>
+<span class="x">    &amp;lt;script type=&quot;text/javascript&quot; src=&quot;my-script.js&quot;&amp;gt;&amp;lt;/script&amp;gt;</span>
+<span class="cp">{%</span> <span class="k">endblock</span> <span class="cp">%}</span><span class="x"></span>
+</pre></div>
+
+
+<h3>定制错误页面</h3>
+<p>Flask允许我们基于template来定制错误页面：</p>
+<div class="highlight"><pre><span></span>@app.errorhandler(404)
+def page_not_found(e):
+    return render_template(&#39;404.html&#39;), 404
+
+@app.errorhandler(500)
+def internal_server_error(e):
+    return render_template(&#39;500.html&#39;), 500
+</pre></div>
+
+
+<p>因为我们引入了Bootstrap，为了保证界面一致性你可能会想直接拷贝Bootstrap的base.html页面来修改一个 404.html。但是更简单的做法是，基于Bootstrap的base.html定制一个tempates/base.html，将一些项目通用的内容放在里面，然后项目页面比如 404.html基础都以此为基础：</p>
+<p><em>templates/base.html</em></p>
+<div class="highlight"><pre><span></span><span class="cp">{%</span> <span class="k">extends</span> <span class="s2">&quot;bootstrap/base.html&quot;</span> <span class="cp">%}</span><span class="x"></span>
+
+<span class="cp">{%</span> <span class="k">block</span> <span class="nv">title</span> <span class="cp">%}</span><span class="x">Flasky</span><span class="cp">{%</span> <span class="k">endblock</span> <span class="cp">%}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">block</span> <span class="nv">navbar</span> <span class="cp">%}</span><span class="x"></span>
+<span class="x">&amp;lt;div class=&quot;navbar navbar-inverse&quot; role=&quot;navigation&quot;&amp;gt;</span>
+<span class="x">    &amp;lt;div class=&quot;container&quot;&amp;gt;</span>
+<span class="x">        &amp;lt;div class=&quot;navbar-header&quot;&amp;gt;</span>
+<span class="x">            &amp;lt;button type=&quot;button&quot; class=&quot;navbar-toggle&quot; data-toggle=&quot;collapse&quot; data-target=&quot;.navbar-collapse&quot;&amp;gt;</span>
+<span class="x">                &amp;lt;span class=&quot;sr-only&quot;&amp;gt;Toggle navigation&amp;lt;/span&amp;gt;</span>
+<span class="x">                &amp;lt;span class=&quot;icon-bar&quot;&amp;gt;&amp;lt;/span&amp;gt;</span>
+<span class="x">                &amp;lt;span class=&quot;icon-bar&quot;&amp;gt;&amp;lt;/span&amp;gt;</span>
+<span class="x">                &amp;lt;span class=&quot;icon-bar&quot;&amp;gt;&amp;lt;/span&amp;gt;</span>
+<span class="x">            &amp;lt;/button&amp;gt;</span>
+<span class="x">            &amp;lt;a class=&quot;navbar-brand&quot; href=&quot;/&quot;&amp;gt;Flasky&amp;lt;/a&amp;gt;</span>
+<span class="x">        &amp;lt;/div&amp;gt;</span>
+<span class="x">        &amp;lt;div class=&quot;navbar-collapse collapse&quot;&amp;gt;</span>
+<span class="x">            &amp;lt;ul class=&quot;nav navbar-nav&quot;&amp;gt;</span>
+<span class="x">                &amp;lt;li&amp;gt;&amp;lt;a href=&quot;/&quot;&amp;gt;Home&amp;lt;/a&amp;gt;&amp;lt;/li&amp;gt;</span>
+<span class="x">            &amp;lt;/ul&amp;gt;</span>
+<span class="x">        &amp;lt;/div&amp;gt;</span>
+<span class="x">    &amp;lt;/div&amp;gt;</span>
+<span class="x">&amp;lt;/div&amp;gt;</span>
+<span class="cp">{%</span> <span class="k">endblock</span> <span class="cp">%}</span><span class="x"></span>
+
+<span class="cp">{%</span> <span class="k">block</span> <span class="nv">content</span> <span class="cp">%}</span><span class="x"></span>
+<span class="x">    &amp;lt;div class=&quot;container&quot;&amp;gt;</span>
+<span class="x">        </span><span class="cp">{%</span> <span class="k">block</span> <span class="nv">page_content</span> <span class="cp">%}{%</span> <span class="k">endblock</span> <span class="cp">%}</span><span class="x"></span>
+<span class="x">    &amp;lt;/div&amp;gt;</span>
+<span class="cp">{%</span> <span class="k">endblock</span> <span class="cp">%}</span><span class="x"></span>
+</pre></div>
+
+
+<p><em>templates/404.html</em></p>
+<div class="highlight"><pre><span></span><span class="cp">{%</span> <span class="k">extends</span> <span class="s1">&#39;commonBase.html&#39;</span><span class="cp">%}</span><span class="x"></span>
+
+<span class="cp">{%</span> <span class="k">block</span> <span class="nv">title</span><span class="cp">%}</span><span class="x"> Page Not Found</span><span class="cp">{%</span> <span class="k">endblock</span><span class="cp">%}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">block</span> <span class="nv">content</span> <span class="cp">%}</span><span class="x"></span>
+<span class="x">    &amp;lt;div class=&quot;page-header&quot;&amp;gt;</span>
+<span class="x">        &amp;lt;h1&amp;gt;Not Found&amp;lt;/h1&amp;gt;</span>
+<span class="x">    &amp;lt;/div&amp;gt;</span>
+<span class="cp">{%</span> <span class="k">endblock</span><span class="cp">%}</span><span class="x"></span>
+</pre></div>
+
+
+<p>可以尝试访问一个不存在的地址，看页面是否定位到了我们定制的404页面。
+请求跳转</p>
+<p>在代码中我们可能会想获取某个路由，因为很多路由都有参数，一旦路由参数发生变化，直接获取路由的代码就需要更新来保证仍能正常工作。</p>
+<p>为此Flask提供了一个工具方法 <code>url_for</code> 用来做获取View Function所对应的路由，注意该方法只是用来获取url而不是做跳转的方法:</p>
+<div class="highlight"><pre><span></span>url_for(&#39;user&#39;, name=&#39;john&#39;, _external=True)
+</pre></div>
+
+
+<p>该方法会将多余参数凭借到url后面：</p>
+<div class="highlight"><pre><span></span># would return /?page=2.
+url_for(&#39;index&#39;, page=2)
+</pre></div>
+
+
+<h3>静态文件</h3>
+<p>在Flask中，静态文件会从根目录中的static下去寻找。如下是一个使用图片作为浏览器Tab的Icon的例子，图片可以在Flasky项目中找：</p>
+<p><em>templates/base.html</em> 添加代码片段</p>
+<div class="highlight"><pre><span></span><span class="cp">{%</span> <span class="k">block</span> <span class="nv">head</span> <span class="cp">%}</span><span class="x"></span>
+<span class="x">    </span><span class="cp">{{</span> <span class="nb">super</span><span class="o">()</span> <span class="cp">}}</span><span class="x"></span>
+<span class="x">    &amp;lt;link rel=&quot;shortcut icon&quot; href=&quot;</span><span class="cp">{{</span> <span class="nv">url_for</span><span class="o">(</span><span class="s1">&#39;static&#39;</span><span class="o">,</span> <span class="nv">filename</span> <span class="o">=</span> <span class="s1">&#39;favicon.ico&#39;</span><span class="o">)</span> <span class="cp">}}</span><span class="x">&quot; type=&quot;image/x-icon&quot;&amp;gt;</span>
+<span class="x">    &amp;lt;link rel=&quot;icon&quot; href=&quot;</span><span class="cp">{{</span> <span class="nv">url_for</span><span class="o">(</span><span class="s1">&#39;static&#39;</span><span class="o">,</span> <span class="nv">filename</span> <span class="o">=</span> <span class="s1">&#39;favicon.ico&#39;</span><span class="o">)</span> <span class="cp">}}</span><span class="x">&quot; type=&quot;image/x-icon&quot;&amp;gt;</span>
+<span class="cp">{%</span> <span class="k">endblock</span> <span class="cp">%}</span><span class="x"></span>
+</pre></div>
+
+
+<p>本地化时间和日期</p>
+<p>用户遍及在世界各地，因此统一用UTC来表示时间日期。但是在每个客户端，用户所看到的时间格式应该有所不同。这个工作最适合交给客户端-浏览器来做，因为浏览器能获取到用户的地区和语言设置。</p>
+<p>有这么一个客户端的js库叫moment.js实现了很多时间日期处理相关的方法，在Flask中可以通过安装flask-moment来使用它。如下是使用的例子：</p>
+<p>第一步，安装</p>
+<div class="highlight"><pre><span></span>(venv)$ pip install flask-moment
+</pre></div>
+
+
+<p>第二步，在Python中导入</p>
+<p><em>index.py</em></p>
+<div class="highlight"><pre><span></span><span class="c1"># 导入moment和local的datetime</span>
+<span class="kn">from</span> <span class="nn">flask.ext.moment</span> <span class="kn">import</span> <span class="n">Moment</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="c1">#...</span>
+<span class="n">moment</span> <span class="o">=</span> <span class="n">Moment</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>
+<span class="c1">#...</span>
+<span class="nd">@app.route</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">index</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;index.html&#39;</span><span class="p">,</span> <span class="n">current_time</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">())</span>
+</pre></div>
+
+
+<p>第三步，在页面中引入和使用</p>
+<p><em>templates/base.html</em></p>
+<div class="highlight"><pre><span></span><span class="cp">{%</span> <span class="k">block</span> <span class="nv">scripts</span> <span class="cp">%}</span><span class="x"></span>
+<span class="cp">{{</span> <span class="nb">super</span><span class="o">()</span> <span class="cp">}}</span><span class="x"></span>
+<span class="cp">{{</span> <span class="nv">moment.include_moment</span><span class="o">()</span> <span class="cp">}}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">endblock</span> <span class="cp">%}</span><span class="x"></span>
+</pre></div>
+
+
+<p><em>templates/index.html</em></p>
+<div class="highlight"><pre><span></span><span class="x">&amp;lt;p&amp;gt;The local date and time is </span><span class="cp">{{</span> <span class="nv">moment</span><span class="o">(</span><span class="nv">current_time</span><span class="o">)</span><span class="nv">.format</span><span class="o">(</span><span class="s1">&#39;LLL&#39;</span><span class="o">)</span> <span class="cp">}}</span><span class="x">.&amp;lt;/p&amp;gt;</span>
+<span class="x">&amp;lt;p&amp;gt;That was </span><span class="cp">{{</span> <span class="nv">moment</span><span class="o">(</span><span class="nv">current_time</span><span class="o">)</span><span class="nv">.fromNow</span><span class="o">(</span><span class="nv">refresh</span><span class="o">=</span><span class="kp">True</span><span class="o">)</span> <span class="cp">}}</span><span class="x">&amp;lt;/p&amp;gt;</span>
+</pre></div>
+
+
+<p><a href="http://momentjs.com/docs/#/displaying/">moment.js</a>实现了format()、fromNow()、 fromTime()等方法，使用这些方法基本能够构建出友好的客户端代码了。</p>
+        </div>
+    </section>
+    <footer class="footer-article">
+        <div class="tags-and-categories">Filed under <a href="/category/pydev.html">pyDev</a>
+        | Tagged: <a href="/tag/flask.html">Flask </a><a href="/tag/python.html">Python </a><a href="/tag/web.html">Web </a>
+        | <a href="/2015/Flask_Web_Development_2015_04_24_17_01.html" rel="bookmark"
+         title="Permalink to Flask Web Development(3)">Permalink</a>            
+        </div>
+        <!-- metaldata 
+        -->
+    </footer>
+</div>
+<div id="disqus_thread"></div>
+<script type="text/javascript" src="/theme/js/disqus.js"></script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+            </div>
+            
+            
+			<div class="large-3 aside column">
+				<img class="headIcon-large avatar" src="/sys_img/head.jpg" alt="(┬＿┬)">
+                <h2>魏凯</h2>
+                <h3>kairns leeky</h3>
+				<a href="mailto:kai_kai03@hotmail.com?subject=%20&body=from%20blog"><Email>kai_kai03@hotmail.com</Email></a>
+            </div>
+            
+            
+			
+			<div class="large-3 aside column">
+                <h3>Socials</h3>
+                <ul>
+                    <li><a href="http://weibo.com/mipamipami">新浪weibo</a></li>
+                    <li><a href="https://plus.google.com/105166364351021934050">g+</a></li>
+                </ul>
+            </div> 
+            
+            <div class="large-3 category-column column">
+                <h3>Categories</h3>
+                <ul>
+                    <li><a href="/category/bu-kao-pu-chan-pin-ri-ji.html">不靠谱产品日记</a> (28)</li>
+                    <li><a href="/category/db.html">DB</a> (3)</li>
+                    <li><a href="/category/idev.html">iDev</a> (14)</li>
+                    <li><a href="/category/machinelearning.html">MachineLearning</a> (24)</li>
+                    <li><a href="/category/musical.html">Musical</a> (3)</li>
+                    <li><a href="/category/other.html">other</a> (3)</li>
+                    <li class="active"><a href="/category/pydev.html">pyDev</a> (19)</li>
+                    <li><a href="/category/yin-shi-pin.html">音视频</a> (18)</li>
+                </ul>
+            </div> 
+            
+            <div class="large-3 category-column column">
+                <h3>Feeds</h3>
+                <ul>
+                    <li ><a href="/feeds/all.atom.xml" type="application/atom+xml">Atom Feed</a></li>
+                    <li ><a href="/feeds/all.rss.xml" type="application/rss+xml">RSS Feed</a></li>
+                </ul>
+            </div>
+            
+        
+        
+
+                <!--
+            <iframe width="100%" height="600" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=600&fansRow=1&ptype=1&speed=0&skin=1&isTitle=0&noborder=0&isWeibo=1&isFans=0&uid=1819436507&verifier=4060feb2&colors=fc1f12,ffffff,666666,0082cb,ecfbfd&dpc=1"></iframe>            </div>
+            -->
+         
+    </div>
+</div>
+    <div class="footer">
+        <div class="data-holder">
+        <div class="row">
+            <div class="large-3 column">
+<div class="Verse">
+    <h3>bo主偈语</h3>
+    <p>これも欲しい</p>
+    <p>あれも欲しい</p>
+    <p1>金がなくて悲しい</p1>
+    <p>これもセール</p>
+    <p>あれもセール</p>
+    <p1>全部買うと責められる</p1>
+    <p>これかっこい</p>
+    <p>あれも可愛い</p>
+    <p1>買えないので悔しい</p1>
+    <p>いつ金が入る？</p>
+    <p>いつ金が入る？</p>
+    <p1>あの時まだ間に合う？</p1>
+    <p>phaも買った</p>
+    <p>hmzも買った</p>
+    <p>嬉しいけど.....</p>
+    <p1>土しか食べられるものは無かった</p1>
+    <p1>嗯...2015年...vps不续费了...</p1>
+</div>           </div>
+           <div class="large-6 tag-cloud column">
+                <h3>Tags</h3>
+                <ul class="tagcloud">
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/nao-dong.html">脑洞
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/chord.html">Chord
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/websocket.html">WebSocket
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/mongo.html">mongo
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/classification.html">classification
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/shi-xu-tu.html">时序图
+                        </a></li>
+                    <li>
+											<span class="badge">33</span>
+                        <a href="/tag/chan-pin.html">产品
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/fuck.html">fuck
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/gc.html">GC
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/rtmp.html">RTMP
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/unicode.html">unicode
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/dylib.html">dylib
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/protocol.html">protocol
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/pycon.html">PyCon
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/cai-ji.html">采集
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/clustering.html">clustering
+                        </a></li>
+                    <li>
+											<span class="badge">7</span>
+                        <a href="/tag/web.html">Web
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/yi-zhi.html">移植
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/network.html">network
+                        </a></li>
+                    <li>
+											<span class="badge">6</span>
+                        <a href="/tag/flask.html">Flask
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/review.html">review
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/nodejs.html">Node.js
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/pep.html">PEP
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/linear.html">Linear
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/features.html">Features
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/wu-tai.html">舞台
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/cnn.html">CNN
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/pca.html">PCA
+                        </a></li>
+                    <li>
+											<span class="badge">7</span>
+                        <a href="/tag/webrtc.html">webRtc
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/css.html">CSS
+                        </a></li>
+                    <li>
+											<span class="badge">8</span>
+                        <a href="/tag/object-c.html">Object-C
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/memory.html">Memory
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/life.html">life
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/flask-socketio.html">Flask-SocketIO
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/http.html">HTTP
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/finance.html">finance
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/dataprocessing.html">DataProcessing
+                        </a></li>
+                    <li>
+											<span class="badge">18</span>
+                        <a href="/tag/python.html">Python
+                        </a></li>
+                    <li>
+											<span class="badge">6</span>
+                        <a href="/tag/javascript.html">JavaScript
+                        </a></li>
+                    <li>
+											<span class="badge">18</span>
+                        <a href="/tag/ios.html">iOS
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/encode.html">encode
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/xcode.html">xCode
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/appstore.html">appstore
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/html5.html">html5
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/liu-cheng.html">流程
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/uiimage.html">UIImage
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/decorator.html">Decorator
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/ipad.html">iPad
+                        </a></li>
+                    <li>
+											<span class="badge">5</span>
+                        <a href="/tag/c.html">C++
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/jia-gou.html">架构
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/ffmpeg.html">FFmpeg
+                        </a></li>
+                    <li>
+											<span class="badge">22</span>
+                        <a href="/tag/algorithm.html">algorithm
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/database.html">database
+                        </a></li>
+                    <li>
+											<span class="badge">17</span>
+                        <a href="/tag/ml.html">ML
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/yan-zou.html">演奏
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/framework.html">framework
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/gbk.html">GBK
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/rfc.html">rfc
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/cache.html">cache
+                        </a></li>
+                    <li>
+											<span class="badge">19</span>
+                        <a href="/tag/math.html">Math
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/audio.html">audio
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/obs.html">OBS
+                        </a></li>
+                </ul>
+            </div>
+
+            <div class="large-3 aside column">
+                <h3>Links</h3>
+                <ul>
+                    <li><a href="http://mikanani.me/">蜜柑计划</a></li><br/>
+                    <li><a href="http://josh.agarrado.net/music/anime/index.php">ジョシュの楽譜集</a></li><br/>
+                    <li><a href="http://deeplearning.stanford.edu/">Deep Learning</a></li><br/>
+                    <li><a href="http://getpelican.com/">Pelican</a></li><br/>
+                    <li><a href="http://python.org/">Python</a></li><br/>
+                    <li><a href="http://jinja.pocoo.org/">Jinja2</a></li><br/>
+                </ul>
+                
+            </div>
+
+        </row>
+        </div>
+        <div class="row">
+            <div class="small-12 column">
+                <p style="font-size: 0.7em; text-align:center;">
+                ∠( ᐛ 」∠)＿不会有人拉到这么下边的呀就算拉下来也不会去看的呀这么小的字也看不清的口牙！ ©2015.
+                <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1257347159'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1257347159%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+                <!--<script type="text/javascript" src="/theme/js/analytics.js"></script> -->
+                </p>
+            </div>
+        </div>
+    </div>
+
+    
+</body>
+</html>

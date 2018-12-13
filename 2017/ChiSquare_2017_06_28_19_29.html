@@ -1,0 +1,742 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="Access-Control-Allow-Origin" content="*">
+        <link rel="stylesheet" href="/theme/css/foundation.min.css" media="all">
+		<link rel="stylesheet" href="/theme/css/pygments.css" /> 
+		<link rel="stylesheet" href="/theme/css/style.css" />
+		<link rel="stylesheet" href="/theme/css/ukagaka.css" /> 
+        <script type="text/javascript" src="/theme/js/modernizr.js"></script>
+		<script type='text/javascript' src='/theme/js/jquery-1.11.1.min.js'></script>
+	    <script type="text/javascript" src="/theme/js/damoo.min.js"></script>
+		<script type="text/x-mathjax-config">MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});</script>
+        <script type="text/javascript">var js=document.createElement('script');js.setAttribute('src',(('https:' == document.location.protocol) ? ' https://' : ' http://')+'cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML');document.head.appendChild(js);</script>
+
+        <link href='https://fonts.lug.ustc.edu.cn/css?family=Exo+2:400,300,700,300italic,400italic,700italic,900,900italic' rel='stylesheet' type='text/css'>
+        <link rel="stylesheet" href="/theme/css/lamboz.css" media="all">
+        <title>Chi-Square test - kairnsの记事簿</title>
+        <meta charset="utf-8" />
+        <link href="/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="kairnsの记事簿 Full Atom Feed" />
+        <link href="/feeds/all.rss.xml" type="application/rss+xml" rel="alternate" title="kairnsの记事簿 Full RSS Feed" />
+        <!-- |format(category.slug) -->
+        <link href="/feeds/{slug}.atom.xml" type="application/atom+xml" rel="alternate" title="kairnsの记事簿 Categories Atom Feed" />
+ 
+ 
+        
+        
+</head>
+<body onblur="leavePage()" onfocus="comebackPage()">
+    <div class="pages">
+        <ul>
+            <li class="home"><a href="/index.html">Home</a></li>
+            <li ><a href="/pages/about-me.html">About Me</a></li>
+            <li ><a href="/pages/Python_Packages_2012_11_05_12_18.html">Python Packages</a></li>
+        </ul>
+    </div>
+
+<div class="hp-header-inner">
+    <div class="page-header">
+        <div class="content-header">
+            <div id="title-block">
+            <h1>  <a href="/2017/ChiSquare_2017_06_28_19_29.html" rel="bookmark"
+                    title="Permalink to Chi-Square test">Chi-Square test</a></h1>
+            </div>
+        </div>
+    </div>
+</div>
+    <div class="content">
+        <div class="data-holder">
+        <div class="row">
+           <div class="large-9 content-column column">
+<div class="content-article">
+    <header class="header-article">
+        <div class="read-more">Posted on Wed 28 June 2017</div>
+ 
+   </header>
+    <section class='article'>
+        
+        <div class="entry-summary">
+            <p>抄袭SPSS！</p>
+        </div>
+    
+        <div class="entry-content">
+            <h2>Chi-Square</h2>
+<h3>惯例的事前唠叨</h3>
+<p>最近医疗科研平台呢要开始制作数据数据分析部分，数据准备及数据操作设计好之后，利用空档期找找统计方法库，好安排后续的事。</p>
+<p>结果一调研下来，事情可没事前那么简单，SPSS的行为核心并不是统计方法本身，而是围绕着一个统计方法的一系列检测方法。这就麻烦了，特别是不同方法的误差估计不一样，即使同一个估计方法，不同的参数（人择），也会有不同结果。</p>
+<p>更要命的是，好多stat的库都是只提供统计方法本身，而不关注相关的分析部分。</p>
+<p>另，java上好用的库更少，现在项目要求又是java。</p>
+<p>由于我只是做设计验证，为了码代码的速度，主要过程用得还是python，中间会含一部分java，因为java中有现成的统计方法，顺便测试下方法计算结果对不对。</p>
+<h3>正文</h3>
+<p>本片主要是记录一下，以拟合SPSS输出结果为目的的卡方检验实现方法。</p>
+<p>卡方检验属于非参数检验的范畴，它是计算样本的实际值与理论值之间的偏离程度，这个程度值就是卡方值，卡方值越小，偏差越小，若两个值完全相等时，卡方值就为0，表明理论值完全符合。</p>
+<p>以下照着SPSS的输出，一步步处理数据。</p>
+<h3>第一步</h3>
+<p>统计有效值，计算缺失值，显示。这一步没什么好细说的，显示一下数据概况，然后把缺失值以及对应的数去掉。</p>
+<p><center><img alt="1.png" src="/article_img/ChiSquare_2017_06_28_19_29/1.png"></center></p>
+<h3>第二步</h3>
+<p>绘制四格表，一般教学上是这样说的，但是SPSS支持N格表，并且支持非方阵形式的表格。</p>
+<ol>
+<li>
+<p>取得自变量的分类以及因变量的分类。这时就相当于确定了这个N格表的行与列的内容了。</p>
+<div class="highlight"><pre><span></span>columeKeys = list(set(X)) ##相当于groupby，确定输出的交叉表有几列
+rowKeys = list(set(Y)) ##确定输出的交叉表有几行
+</pre></div>
+
+
+</li>
+<li>
+<p>计算自由度<code>df</code>，<code>（row-1）*（column-1）</code>,这玩意后面会作为各种方法的参数。</p>
+<div class="highlight"><pre><span></span>df = (len(columeKeys)-1)*(len(rowKeys)-1)
+</pre></div>
+
+
+</li>
+<li>
+<p>根据统计出来列的种类按行去分拣数据，简单的理解就是按行列把表格画出来，统计每个格子对应的数据一共有几个。</p>
+<div class="highlight"><pre><span></span>resualtMap = {}
+for columeKey in columeKeys:
+    indexsInX = [i for i,a in enumerate(X) if a==columeKey] ##查找每个columeKey在数据中的位置
+    counts = {}
+    for ix in indexsInX: ##统计每个columeKey在Y中有分别有几个rowKeys
+        if counts.has_key(Y[ix]):
+            counts[Y[ix]] += 1
+        else:
+            counts[Y[ix]] = 1
+    resualtMap[columeKey] = counts
+</pre></div>
+
+
+</li>
+<li>
+<p>计算每行的统计结果总数，每列的统计结果总数。</p>
+<div class="highlight"><pre><span></span>rowSum = {}
+for rowKey in rowKeys:
+    rowSum[rowKey] = len([i for i,a in enumerate(Y) if a==rowKey])
+print &#39;行统计的总数:&#39;,rowSum
+
+columeSum = {}
+for columeKey in resualtMap.keys():
+    columeSum[columeKey] = 0
+    for rowkey in resualtMap[columeKey].keys():
+        columeSum[columeKey] += resualtMap[columeKey][rowkey]
+print &#39;列统计的总数:&#39;,columeSum
+</pre></div>
+
+
+</li>
+<li>
+<p>接下来就可以绘制这张交叉表了。这里没做前端界面，所以以<code>print</code>来假装自己在绘图。在绘图过程中，可以顺便把观察值和理论值（既期望）计算出来为后续分析过程做准备，免得后面再循环一遍。</p>
+<div class="highlight"><pre><span></span>N = len(X)
+observed = []
+expected = []
+for rowKey in rowKeys:
+    for columeKey in resualtMap.keys():
+        cell = resualtMap[columeKey].get(rowKey,0)##实际值
+        observed.append(cell) ##顺便把每个实际值记入列队，用于后续计算
+        rowRadio = float(cell)/rowSum[rowKey]##行占比
+        columeRadio = float(cell)/columeSum[columeKey]##列占比
+        expect = (float(columeSum[columeKey])/N)#该格对应的期望*rowSum[rowKey]
+        expected.append(expect)##把每个期望值记入列队，用于后续计算
+
+        print cell,&quot;,&quot;,&quot;%.2f%%&quot;%(rowRadio*100),&quot;,&quot;,&quot;%.2f%%&quot;%(columeRadio*100),&quot;|&quot;,
+    print rowSum[rowKey],&quot;,&quot;,&quot;100%&quot;,&quot;,&quot;,&quot;%.2f%%&quot;%(float(rowSum[rowKey])/N*100)
+
+for columeKey in resualtMap.keys():
+    print columeSum[columeKey],&quot;,&quot;, &quot;%.2f%%&quot;%(float(columeSum[columeKey])/N*100),&quot;,&quot;,&quot;100%&quot;,&quot;|&quot;,
+print N,&quot;,&quot;,&quot;100%&quot;,&quot;,&quot;,&quot;100%&quot;
+</pre></div>
+
+
+</li>
+</ol>
+<p><center><img alt="2.png" src="/article_img/ChiSquare_2017_06_28_19_29/2.png"></center></p>
+<h3>第三步</h3>
+<p>这步开始使用java方法，顺便验证第三方库<a href="https://www.ee.ucl.ac.uk/~mflanaga/java/">flanagan</a>，看看好不好使。</p>
+<p>选这个库的原因仅仅只是因为之前用它来做过一次正态性检验。</p>
+<ol>
+<li>
+<p>拿着观察值和理论值去计算卡方值。</p>
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">org.apache.commons.math3.stat.inference.TestUtils</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">flanagan.analysis.Stat</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">java.lang.Math</span><span class="p">;</span>
+
+<span class="n">double</span> <span class="n">cs</span> <span class="o">=</span> <span class="n">Stat</span><span class="o">.</span><span class="n">chiSquareFreq</span><span class="p">(</span><span class="n">observed</span><span class="p">,</span> <span class="n">expected</span><span class="p">);</span>
+</pre></div>
+
+
+</li>
+<li>
+<p>计算卡方p值。</p>
+<div class="highlight"><pre><span></span>public static double getApproxGamma(double n) {
+    // RECIP_E = (E^-1) = (1.0 / E)
+    double RECIP_E = 0.36787944117144232159552377016147;
+    // TWOPI = 2.0 * PI
+    double TWOPI = 6.283185307179586476925286766559;
+    double d = 1.0 / (10.0 * n);
+    d = 1.0 / ((12* n) - d);
+    d = (d + n) *RECIP_E;
+    d = Math.pow(d,n);
+    d *= Math.sqrt(TWOPI/ n);
+    return d;
+}
+
+public static double log_igf(double s, double z) {
+    if (z &amp;lt; 0.0) {
+        return 0.0;
+    }
+    double sc = (Math.log(z) * s) - z - Math.log(s);
+    double k = KM(s, z);
+    return Math.log(k) + sc;
+}
+
+private static double KM(double s, double z) {
+    double sum = 1.0;
+    double nom = 1.0;
+    double denom = 1.0;
+    double log_nom = Math.log(nom);
+    double log_denom = Math.log(denom);
+    double log_s = Math.log(s);
+    double log_z = Math.log(z);
+    for (int i = 0; i &amp;lt; 1000; ++i) {
+       log_nom += log_z;
+       s++;
+       log_s = Math.log(s);
+       log_denom += log_s;
+        double log_sum = log_nom - log_denom;
+       sum += Math.exp(log_sum);
+    }
+    return sum;
+}
+
+private static double chisqr2pValue(int dof, double chi_squared) {
+    if (chi_squared &amp;lt; 0 || dof &amp;lt; 1) {
+        return 0.0;
+    }
+    double k = ((double) dof) * 0.5;
+    double v = chi_squared * 0.5;
+    if (dof == 2) {
+        return Math.exp(-1.0 * v);
+    }
+    double incompleteGamma = log_igf(k,v);
+    // 如果过小或者非数值或者无穷
+    if (Math.exp(incompleteGamma) &amp;lt;= 1e-8
+           || Double.isNaN(Math.exp(incompleteGamma))
+           || Double.isInfinite(Math.exp(incompleteGamma))) {
+        return 1e-14;
+    }
+    double gamma = Math.log(getApproxGamma(k));
+   incompleteGamma -= gamma;
+    if(Math.exp(incompleteGamma) &amp;gt; 1){
+        return 1e-14;
+    }
+    double pValue = 1.0 - Math.exp(incompleteGamma);
+    return (double) pValue;
+
+chisqr2pValue(df, cs));//卡方p值（Asymp 2-sided）
+</pre></div>
+
+
+</li>
+<li>
+<p>取代观察值中的0值，以及对应的理论值，计算释然比，以及相对应的p值。</p>
+<div class="highlight"><pre><span></span>double likelihood = 0;
+for(int i =0 ;i&amp;lt;20;i++){
+    double tmp = observed2[i]*Math.log(observed2[i]/expected2[i]);
+    likelihood += tmp;
+
+}
+likelihood = likelihood*2;//似然比 Likelihood Ratio
+chisqr2pValue(df, likelihood);//似然比p值（Asymp 2-sided）
+</pre></div>
+
+
+</li>
+</ol>
+<p>这里吐槽一下，用JDK自带<code>math3.stat</code>的似然比计算方法算出来结果居然不对。但我按它文档中函数注释的算法来计算，却得到正确的结果，神奇。</p>
+<ol>
+<li>
+<p>使用自变量与因变量的原始值计算皮尔逊相关系数。</p>
+<div class="highlight"><pre><span></span>double piersion= Stat.corrCoeff(X, Y);
+</pre></div>
+
+
+</li>
+<li>
+<p>利用皮尔逊相关系数计算线性关系LinearByLinearAssociation，以及对应的p值。此时自由度为1。(这理所当然嘛，是算自变量与因变量的关系，自由度自然是1。) </p>
+<div class="highlight"><pre><span></span>double linearByLinearAssociation= (N-1)*Math.pow(piersion,2);
+//linear-By-Linear  Association 的p值（Asymp 2-sided）
+chisqr2pValue(1, linearByLinearAssociation);
+</pre></div>
+
+
+</li>
+</ol>
+<p><center><img alt="3.png" src="/article_img/ChiSquare_2017_06_28_19_29/3.png"></center></p>
+<h3>第四步（非必要）</h3>
+<p>接下来咱回到python</p>
+<ol>
+<li>
+<p>如果当<strong>交叉表为方阵</strong>的时候，进行kappa检验。</p>
+<div class="highlight"><pre><span></span>columeCount = len(columeKeys) ##取得行数，这里行列一样嘛
+po = 0.0
+for i in range(columeCount):
+    po += float(observed[columeCount*i+i])  ##取得对角，相当于真阳性真阴性的observed的总和
+po  =  po/N
+pc = 0.0 ##真阳性的observed对应的  行总和 * 列总和
+for i in range(columeCount):
+    row = 0.0
+    colume = 0.0
+    for irow in range(columeCount):
+        row+=float(observed[columeCount*i+irow])
+    for icolume in range(columeCount):
+        colume+=float(observed[i+icolume*columeCount])
+    pc+=(row*colume)
+pc = pc/(N**2)
+k =  (po - pc)/(1-pc)
+</pre></div>
+
+
+</li>
+<li>
+<p>计算kappa值的标准误差。</p>
+</li>
+</ol>
+<p>$$ \sqrt{\frac{1}{(1-pc)^{2}}(Pe^{2}+Pe-\sum R_{i}C_{i}(R_{i}+C_{i})/N^{3})} $$</p>
+<p>pc 同1</p>
+<p>Ri，Ci 对应的行总和与列总和</p>
+<p>N 总样本数（去除无效值或缺失值）</p>
+<p>这里选用的计算方法如上,还有另一种计算方法，参照文章后1987的那篇引用。那篇论文是先去估计整体标准差，然后根据表格的不同大小，再进一步估计标准误差。感觉精度会更高一些，但这个估计过程太麻烦了，或者说按照论文中的做法，人的决定因数太大，暂时先不用。</p>
+<div class="highlight"><pre><span></span>    ppp = 0.0
+    for i in range(columeCount):
+        row = 0.0
+        colume = 0.0
+        for irow in range(columeCount):
+            row+=float(observed[columeCount*i+irow])
+        for icolume in range(columeCount):
+            colume+=float(observed[i+icolume*columeCount])
+        ppp+=(row*colume)*(row+colume)
+    E= 1/(N*(1-pc)**2)  * ( pc**2 + pc - ( ppp/math.pow(N,3) ) )
+    SE = math.sqrt(E)
+</pre></div>
+
+
+<ol>
+<li>计算kappa的标准误差的p-value<div class="highlight"><pre><span></span>def poSE(SE):
+    SE_MAX = 6.0
+    if (SE == 0.0) :
+        x = 0.0
+    else:
+        y = 0.5 * math.fabs(SE)
+        if y &amp;gt;= (SE_MAX * 0.5) :
+            x = 1.0
+        elif y &amp;lt; 1.0:
+            w = y * y
+            x = ((((((((0.000124818987 * w
+                    - 0.001075204047) * w + 0.005198775019) * w
+                    - 0.019198292004) * w + 0.059054035642) * w
+                    - 0.151968751364) * w + 0.319152932694) * w
+                    - 0.531923007300) * w + 0.797884560593) * y * 2.0
+        else:
+            y -= 2.0
+            x = (((((((((((((-0.000045255659 * y
+                    + 0.000152529290) * y - 0.000019538132) * y
+                    - 0.000676904986) * y + 0.001390604284) * y
+                    - 0.000794620820) * y - 0.002034254874) * y
+                    + 0.006549791214) * y - 0.010557625006) * y
+                    + 0.011630447319) * y - 0.009279453341) * y
+                    + 0.005353579108) * y - 0.002141268741) * y
+                    + 0.000535310849) * y + 0.999936657524
+    if SE &amp;gt; 0.0:
+        return (x + 1.0) * 0.5
+    else:
+        return (1.0 - x) * 0.5
+</pre></div>
+
+
+</li>
+</ol>
+<p><center><img alt="4.png" src="/article_img/ChiSquare_2017_06_28_19_29/4.png"></center></p>
+<p>这里的图截图的时候，交叉表并不是方阵，所以kappa为0。</p>
+<p>不过这里的<code>gamma</code> 和 <code>T</code> 就没做，分析员说这些东西基本不看，所以就就没贴过来。</p>
+<p>References:</p>
+<blockquote>
+<p><a href="https://www.ee.ucl.ac.uk/~mflanaga/java/">Michael Thomas Flanagan's Java Scientific Library.</a></p>
+<p><a href="http://influentialpoints.com/Training/standard_error_of_kappa.htm">Standard Error of Kappa.</a></p>
+<p><a href="http://www.med.mcgill.ca/epidemiology/Hanley/Reprints/Standard_Error_1987.pdf">Standard Error of The Kappa Statistic（1987）.</a></p>
+</blockquote>
+        </div>
+    </section>
+    <footer class="footer-article">
+        <div class="tags-and-categories">Filed under <a href="/category/machinelearning.html">MachineLearning</a>
+        | Tagged: <a href="/tag/algorithm.html">algorithm </a><a href="/tag/ml.html">ML </a><a href="/tag/math.html">Math </a>
+        | <a href="/2017/ChiSquare_2017_06_28_19_29.html" rel="bookmark"
+         title="Permalink to Chi-Square test">Permalink</a>            
+        </div>
+        <!-- metaldata 
+        -->
+    </footer>
+</div>
+<div id="disqus_thread"></div>
+<script type="text/javascript" src="/theme/js/disqus.js"></script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+            </div>
+            
+            
+			<div class="large-3 aside column">
+				<img class="headIcon-large avatar" src="/sys_img/head.jpg" alt="(┬＿┬)">
+                <h2>魏凯</h2>
+                <h3>kairns leeky</h3>
+				<a href="mailto:kai_kai03@hotmail.com?subject=%20&body=from%20blog"><Email>kai_kai03@hotmail.com</Email></a>
+            </div>
+            
+            
+			
+			<div class="large-3 aside column">
+                <h3>Socials</h3>
+                <ul>
+                    <li><a href="http://weibo.com/mipamipami">新浪weibo</a></li>
+                    <li><a href="https://plus.google.com/105166364351021934050">g+</a></li>
+                </ul>
+            </div> 
+            
+            <div class="large-3 category-column column">
+                <h3>Categories</h3>
+                <ul>
+                    <li><a href="/category/bu-kao-pu-chan-pin-ri-ji.html">不靠谱产品日记</a> (28)</li>
+                    <li><a href="/category/db.html">DB</a> (3)</li>
+                    <li><a href="/category/idev.html">iDev</a> (14)</li>
+                    <li class="active"><a href="/category/machinelearning.html">MachineLearning</a> (24)</li>
+                    <li><a href="/category/musical.html">Musical</a> (3)</li>
+                    <li><a href="/category/other.html">other</a> (3)</li>
+                    <li><a href="/category/pydev.html">pyDev</a> (19)</li>
+                    <li><a href="/category/yin-shi-pin.html">音视频</a> (18)</li>
+                </ul>
+            </div> 
+            
+            <div class="large-3 category-column column">
+                <h3>Feeds</h3>
+                <ul>
+                    <li ><a href="/feeds/all.atom.xml" type="application/atom+xml">Atom Feed</a></li>
+                    <li ><a href="/feeds/all.rss.xml" type="application/rss+xml">RSS Feed</a></li>
+                </ul>
+            </div>
+            
+        
+        
+
+                <!--
+            <iframe width="100%" height="600" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=600&fansRow=1&ptype=1&speed=0&skin=1&isTitle=0&noborder=0&isWeibo=1&isFans=0&uid=1819436507&verifier=4060feb2&colors=fc1f12,ffffff,666666,0082cb,ecfbfd&dpc=1"></iframe>            </div>
+            -->
+         
+    </div>
+</div>
+    <div class="footer">
+        <div class="data-holder">
+        <div class="row">
+            <div class="large-3 column">
+<div class="Verse">
+    <h3>bo主偈语</h3>
+    <p>これも欲しい</p>
+    <p>あれも欲しい</p>
+    <p1>金がなくて悲しい</p1>
+    <p>これもセール</p>
+    <p>あれもセール</p>
+    <p1>全部買うと責められる</p1>
+    <p>これかっこい</p>
+    <p>あれも可愛い</p>
+    <p1>買えないので悔しい</p1>
+    <p>いつ金が入る？</p>
+    <p>いつ金が入る？</p>
+    <p1>あの時まだ間に合う？</p1>
+    <p>phaも買った</p>
+    <p>hmzも買った</p>
+    <p>嬉しいけど.....</p>
+    <p1>土しか食べられるものは無かった</p1>
+    <p1>嗯...2015年...vps不续费了...</p1>
+</div>           </div>
+           <div class="large-6 tag-cloud column">
+                <h3>Tags</h3>
+                <ul class="tagcloud">
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/nao-dong.html">脑洞
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/chord.html">Chord
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/websocket.html">WebSocket
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/mongo.html">mongo
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/classification.html">classification
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/shi-xu-tu.html">时序图
+                        </a></li>
+                    <li>
+											<span class="badge">33</span>
+                        <a href="/tag/chan-pin.html">产品
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/fuck.html">fuck
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/gc.html">GC
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/rtmp.html">RTMP
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/unicode.html">unicode
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/dylib.html">dylib
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/protocol.html">protocol
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/pycon.html">PyCon
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/cai-ji.html">采集
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/clustering.html">clustering
+                        </a></li>
+                    <li>
+											<span class="badge">7</span>
+                        <a href="/tag/web.html">Web
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/yi-zhi.html">移植
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/network.html">network
+                        </a></li>
+                    <li>
+											<span class="badge">6</span>
+                        <a href="/tag/flask.html">Flask
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/review.html">review
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/nodejs.html">Node.js
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/pep.html">PEP
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/linear.html">Linear
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/features.html">Features
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/wu-tai.html">舞台
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/cnn.html">CNN
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/pca.html">PCA
+                        </a></li>
+                    <li>
+											<span class="badge">7</span>
+                        <a href="/tag/webrtc.html">webRtc
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/css.html">CSS
+                        </a></li>
+                    <li>
+											<span class="badge">8</span>
+                        <a href="/tag/object-c.html">Object-C
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/memory.html">Memory
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/life.html">life
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/flask-socketio.html">Flask-SocketIO
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/http.html">HTTP
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/finance.html">finance
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/dataprocessing.html">DataProcessing
+                        </a></li>
+                    <li>
+											<span class="badge">18</span>
+                        <a href="/tag/python.html">Python
+                        </a></li>
+                    <li>
+											<span class="badge">6</span>
+                        <a href="/tag/javascript.html">JavaScript
+                        </a></li>
+                    <li>
+											<span class="badge">18</span>
+                        <a href="/tag/ios.html">iOS
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/encode.html">encode
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/xcode.html">xCode
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/appstore.html">appstore
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/html5.html">html5
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/liu-cheng.html">流程
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/uiimage.html">UIImage
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/decorator.html">Decorator
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/ipad.html">iPad
+                        </a></li>
+                    <li>
+											<span class="badge">5</span>
+                        <a href="/tag/c.html">C++
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/jia-gou.html">架构
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/ffmpeg.html">FFmpeg
+                        </a></li>
+                    <li>
+											<span class="badge">22</span>
+                        <a href="/tag/algorithm.html">algorithm
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/database.html">database
+                        </a></li>
+                    <li>
+											<span class="badge">17</span>
+                        <a href="/tag/ml.html">ML
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/yan-zou.html">演奏
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/framework.html">framework
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/gbk.html">GBK
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/rfc.html">rfc
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/cache.html">cache
+                        </a></li>
+                    <li>
+											<span class="badge">19</span>
+                        <a href="/tag/math.html">Math
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/audio.html">audio
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/obs.html">OBS
+                        </a></li>
+                </ul>
+            </div>
+
+            <div class="large-3 aside column">
+                <h3>Links</h3>
+                <ul>
+                    <li><a href="http://mikanani.me/">蜜柑计划</a></li><br/>
+                    <li><a href="http://josh.agarrado.net/music/anime/index.php">ジョシュの楽譜集</a></li><br/>
+                    <li><a href="http://deeplearning.stanford.edu/">Deep Learning</a></li><br/>
+                    <li><a href="http://getpelican.com/">Pelican</a></li><br/>
+                    <li><a href="http://python.org/">Python</a></li><br/>
+                    <li><a href="http://jinja.pocoo.org/">Jinja2</a></li><br/>
+                </ul>
+                
+            </div>
+
+        </row>
+        </div>
+        <div class="row">
+            <div class="small-12 column">
+                <p style="font-size: 0.7em; text-align:center;">
+                ∠( ᐛ 」∠)＿不会有人拉到这么下边的呀就算拉下来也不会去看的呀这么小的字也看不清的口牙！ ©2015.
+                <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1257347159'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1257347159%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+                <!--<script type="text/javascript" src="/theme/js/analytics.js"></script> -->
+                </p>
+            </div>
+        </div>
+    </div>
+
+    
+</body>
+</html>

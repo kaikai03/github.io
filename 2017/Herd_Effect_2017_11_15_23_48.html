@@ -1,0 +1,475 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="Access-Control-Allow-Origin" content="*">
+        <link rel="stylesheet" href="/theme/css/foundation.min.css" media="all">
+		<link rel="stylesheet" href="/theme/css/pygments.css" /> 
+		<link rel="stylesheet" href="/theme/css/style.css" />
+		<link rel="stylesheet" href="/theme/css/ukagaka.css" /> 
+        <script type="text/javascript" src="/theme/js/modernizr.js"></script>
+		<script type='text/javascript' src='/theme/js/jquery-1.11.1.min.js'></script>
+	    <script type="text/javascript" src="/theme/js/damoo.min.js"></script>
+		<script type="text/x-mathjax-config">MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});</script>
+        <script type="text/javascript">var js=document.createElement('script');js.setAttribute('src',(('https:' == document.location.protocol) ? ' https://' : ' http://')+'cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML');document.head.appendChild(js);</script>
+
+        <link href='https://fonts.lug.ustc.edu.cn/css?family=Exo+2:400,300,700,300italic,400italic,700italic,900,900italic' rel='stylesheet' type='text/css'>
+        <link rel="stylesheet" href="/theme/css/lamboz.css" media="all">
+        <title>羊群效应 - kairnsの记事簿</title>
+        <meta charset="utf-8" />
+        <link href="/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="kairnsの记事簿 Full Atom Feed" />
+        <link href="/feeds/all.rss.xml" type="application/rss+xml" rel="alternate" title="kairnsの记事簿 Full RSS Feed" />
+        <!-- |format(category.slug) -->
+        <link href="/feeds/{slug}.atom.xml" type="application/atom+xml" rel="alternate" title="kairnsの记事簿 Categories Atom Feed" />
+ 
+ 
+        
+        
+</head>
+<body onblur="leavePage()" onfocus="comebackPage()">
+    <div class="pages">
+        <ul>
+            <li class="home"><a href="/index.html">Home</a></li>
+            <li ><a href="/pages/about-me.html">About Me</a></li>
+            <li ><a href="/pages/Python_Packages_2012_11_05_12_18.html">Python Packages</a></li>
+        </ul>
+    </div>
+
+<div class="hp-header-inner">
+    <div class="page-header">
+        <div class="content-header">
+            <div id="title-block">
+            <h1>  <a href="/2017/Herd_Effect_2017_11_15_23_48.html" rel="bookmark"
+                    title="Permalink to 羊群效应">羊群效应</a></h1>
+            </div>
+        </div>
+    </div>
+</div>
+    <div class="content">
+        <div class="data-holder">
+        <div class="row">
+           <div class="large-9 content-column column">
+<div class="content-article">
+    <header class="header-article">
+        <div class="read-more">Posted on Wed 15 November 2017</div>
+ 
+   </header>
+    <section class='article'>
+        
+        <div class="entry-summary">
+            <p>准备换个搞模型的思路。</p>
+        </div>
+    
+        <div class="entry-content">
+            <h1>Herd Effect</h1>
+<p>年纪大了嘛，一个毛病就是时不时回马灯。（误</p>
+<p>一直以来的都是以抗短期波动小风险的思路来做设计，结果虽然没亏，但一直没什么收入也不是那么回事。过去唯独几次高收益率的事件都是利用泡沫爆炸临界点及炸的瞬间，靠人工操作得到的。</p>
+<p>一个是央视掺合的大妈们买金事件，一个是前年所有同事都一窝蜂涌进A股市场的时候，最近一个是去年靠“金融创新”之风撸羊毛的时候。这些时间点都有一个共通的特性，明显有“人”带节奏。但即便是非常明显的钓鱼，依旧是傻子太多骗子不够用的祥和场面。</p>
+<p>总的起来看，这不都是羊群效应的实例么。</p>
+<h3>羊群效应</h3>
+<p>在市场上看，羊群效应基本上跟吃饭一样常见：共享单车之后的各种单车，打车之后的各种打车，看到什么生意赚钱（可能）了，一堆企业领着投资钻进去，资本、生产力饱和不是终点，供需失调。</p>
+<p>生活上这些场景也不少：以前公务员收入不错还稳定，公务员都快成毕业生必考项目了；上世纪，做管理咨询赚钱，冒出了咨询公司；本世纪搞IT赚钱了，全都一股脑的“30转码农还来不来得急？在线等”。</p>
+<p>资本市场也同样，一个没有人投资的产品大概率不会有人去投资，即便前景再好；一个看起来不那么对劲的东西有个领投的，后面一窝蜂。</p>
+<p>一个人在太阳底下看天，不一会就会有别人跟这一起看；一个人在大街上跑，一会也有人跟着跑。换个更常用说法，叫从众心理。这是从心理学角度去讲问题，今天我关心的是金融问题。</p>
+<h3>乱翻书</h3>
+<p>看资料，得如下说法</p>
+<p><em>金融市场中的“羊群行为”(herd behaviors)是一种特殊的非理性行为，它是指投资者在信息环境不确定的情况下，行为受到其他投资者的影响，模仿他人决策，或者过度依赖于舆论，而不考虑自己的信息的行为由于羊群行为是涉及多个投资主体的相关性行为，对于市场的稳定性效率有很大的影响，也和金融危机有密切的关系。</em></p>
+<p>经济学家们从信息的角度来解释羊群行为：</p>
+<h4>信息不完整，会产生羊群效应####</h4>
+<p>信息的增加将会带来确定性，高效准确完整的信息能直接带来高额回报或避免损失。但在实际市场上，信息获取成本实际很高，不同的投资者个人能力和经济能力各不相同，就会出现消息不对称。机构投资者，某些业内，某些专业人士手上的信息，将会（或是被认为）比一般人的信息更全更即时。</p>
+<p>个体投资者在获取有效信息总（自认为）处于不利地位。那么为了避险和增加收益，肯定对于各种“小道消息”津津乐道。即便是信息是被完全纰漏的，也会有人认为一定还有“内幕消息”的存在。这样一来，部分人对这种心理稍加利用，便能够某种程度达到操纵市场的目的。</p>
+<p>对于机构也无法充分地确认市场信息的真实有效性，或者信息的质量。那么其会根据他人的行为来增加自身决策“正确性”判断。例如前年光大误操作触发所有机构跟风引起A股的瞬时震荡。</p>
+<h4>信息“渠道”单一，会产生羊群效应</h4>
+<p>这个信息渠道指的不光是真正的数据来源，“道”其实还包括了意识对信息的主观加工。</p>
+<p>同一时期机构投资经过市场磨炼，最后生存下来的投资者具有极高的同质性。在同一个“市场”筛选出来；假设机构信息能力到顶，那么他们每天还面对相似的信息；相似的高校，相似的专业，甚至可能是同一套教程，相似的经历，产生相似的世界观与思维方式。那么机构投资者通常会更关注同样的市场信息，使用同样的技术，使用同样的模型，最终做出同样的决策。</p>
+<h3>羊群行为的影响</h3>
+<p>1.由于“羊群行为”者往往抛弃自己的私人信息追随别人，这会导致市场信息传递链的中断。但这一情况有两面的影响:第一，“羊群行为”由于具有一定的趋同性，从而削弱了市场基本面因素对未来价格走势的作用。当投资基金存在“羊群行为”时，许多基金将在同一时间买卖相同股票，买卖压力将超过市场所能提供的流动性，股票的超额需求对股价变化具有重要影响，当基金净卖出股票时，将使这些股票的价格出现一定幅度的下跃;当基金净买入股票时，则使这些股票在当季度出现大幅上涨。从而导致股价的不连续性和大幅变动，破坏了市场的稳定运行。第二，如果“羊群行为”是因为投资者对相同的基础信息作出了迅速反应，在这种情况下，投资者的“羊群行为”加快了股价对信息的吸收速度，促使市场更为有效。</p>
+<p>2.如果“羊群行为”超过某一限度，将诱发另一个重要的市场现象一一过度反应的出现。在上升的市场中(如牛市)，盲目的追涨越过价值的限度，只能是制造泡沫;在下降的市场中（如熊市），盲目的杀跌，只能是危机的加深。投资者的“羊群行为”造成了股价的较大波动，使证券市场的稳定性下降。</p>
+<p>3.所有“羊群行为”的发生基础都是信息的不完全性。因此，一旦市场的信息状态发生变化，如新信息的到来，“羊群行为”就会瓦解。这时由 “羊群行为”造成的股价过度上涨或过度下跌，就会停止，甚至还会向相反的方向过度回归。这意味着“羊群行为”具有不稳定性和脆弱性。这一点也直接导致了金融市场价格的不稳定性和脆弱性。 </p>
+<h3>羊群效应的利用</h3>
+<p>虽然从描述以及宏观来看，羊群行为往往会带来负面结果。但是只不管在市场营销还是企业管理方面，羊群效应都有大量被利用的案例。</p>
+<p>当然不想去考虑宏观（大长线）上的事，因为去改变大佬啥下的伏笔是异想天开；没有后台去市场上带节奏又是作死行为。所以像我这样的小屁民最优做法就是去跟着羊群走，大佬掉的面包屑捡一点，羊群聚集的时候摸一摸，跑掉前薅一把羊毛，就够了。</p>
+<p>要干的事大致有3点：
+1.大佬下伏笔的信号捕捉
+2.加入羊群队伍的时机
+3.风险最低的退出时机</p>
+<p>大致思路
+1.第一点的方法很多，方差标度、个股收益相对市场收益横截面绝对偏离、不同指标的波动性、马尔科夫猜行为模式然后的分类等等等等。随便想都有一大把。现在手上有些经济新闻的数据，还可以尝试section vector做因子，或者再搞个模型的判别模型来做训练控制器。</p>
+<p>2.在1）的基础上，在加入人为label（？也许分类出来还需要“训练一下人”），接着蒙特卡洛尝试最优点，最后用label和各种最优点训练交易模型。</p>
+<p>3.对于退出时机应该能跟2）放一起尝试一下。</p>
+<h3>最后</h3>
+<p>噼里啪啦的一转眼也些了不少。不早了就到这吧，等忙完这一阵，去翻翻近两年的论文，多收集点思路，在尝试之后，在继续这个话题。</p>
+        </div>
+    </section>
+    <footer class="footer-article">
+        <div class="tags-and-categories">Filed under <a href="/category/other.html">other</a>
+        | Tagged: <a href="/tag/math.html">Math </a><a href="/tag/finance.html">finance </a>
+        | <a href="/2017/Herd_Effect_2017_11_15_23_48.html" rel="bookmark"
+         title="Permalink to 羊群效应">Permalink</a>            
+        </div>
+        <!-- metaldata 
+        -->
+    </footer>
+</div>
+<div id="disqus_thread"></div>
+<script type="text/javascript" src="/theme/js/disqus.js"></script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+            </div>
+            
+            
+			<div class="large-3 aside column">
+				<img class="headIcon-large avatar" src="/sys_img/head.jpg" alt="(┬＿┬)">
+                <h2>魏凯</h2>
+                <h3>kairns leeky</h3>
+				<a href="mailto:kai_kai03@hotmail.com?subject=%20&body=from%20blog"><Email>kai_kai03@hotmail.com</Email></a>
+            </div>
+            
+            
+			
+			<div class="large-3 aside column">
+                <h3>Socials</h3>
+                <ul>
+                    <li><a href="http://weibo.com/mipamipami">新浪weibo</a></li>
+                    <li><a href="https://plus.google.com/105166364351021934050">g+</a></li>
+                </ul>
+            </div> 
+            
+            <div class="large-3 category-column column">
+                <h3>Categories</h3>
+                <ul>
+                    <li><a href="/category/bu-kao-pu-chan-pin-ri-ji.html">不靠谱产品日记</a> (28)</li>
+                    <li><a href="/category/db.html">DB</a> (3)</li>
+                    <li><a href="/category/idev.html">iDev</a> (14)</li>
+                    <li><a href="/category/machinelearning.html">MachineLearning</a> (24)</li>
+                    <li><a href="/category/musical.html">Musical</a> (3)</li>
+                    <li class="active"><a href="/category/other.html">other</a> (3)</li>
+                    <li><a href="/category/pydev.html">pyDev</a> (19)</li>
+                    <li><a href="/category/yin-shi-pin.html">音视频</a> (18)</li>
+                </ul>
+            </div> 
+            
+            <div class="large-3 category-column column">
+                <h3>Feeds</h3>
+                <ul>
+                    <li ><a href="/feeds/all.atom.xml" type="application/atom+xml">Atom Feed</a></li>
+                    <li ><a href="/feeds/all.rss.xml" type="application/rss+xml">RSS Feed</a></li>
+                </ul>
+            </div>
+            
+        
+        
+
+                <!--
+            <iframe width="100%" height="600" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=600&fansRow=1&ptype=1&speed=0&skin=1&isTitle=0&noborder=0&isWeibo=1&isFans=0&uid=1819436507&verifier=4060feb2&colors=fc1f12,ffffff,666666,0082cb,ecfbfd&dpc=1"></iframe>            </div>
+            -->
+         
+    </div>
+</div>
+    <div class="footer">
+        <div class="data-holder">
+        <div class="row">
+            <div class="large-3 column">
+<div class="Verse">
+    <h3>bo主偈语</h3>
+    <p>これも欲しい</p>
+    <p>あれも欲しい</p>
+    <p1>金がなくて悲しい</p1>
+    <p>これもセール</p>
+    <p>あれもセール</p>
+    <p1>全部買うと責められる</p1>
+    <p>これかっこい</p>
+    <p>あれも可愛い</p>
+    <p1>買えないので悔しい</p1>
+    <p>いつ金が入る？</p>
+    <p>いつ金が入る？</p>
+    <p1>あの時まだ間に合う？</p1>
+    <p>phaも買った</p>
+    <p>hmzも買った</p>
+    <p>嬉しいけど.....</p>
+    <p1>土しか食べられるものは無かった</p1>
+    <p1>嗯...2015年...vps不续费了...</p1>
+</div>           </div>
+           <div class="large-6 tag-cloud column">
+                <h3>Tags</h3>
+                <ul class="tagcloud">
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/nao-dong.html">脑洞
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/chord.html">Chord
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/websocket.html">WebSocket
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/mongo.html">mongo
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/classification.html">classification
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/shi-xu-tu.html">时序图
+                        </a></li>
+                    <li>
+											<span class="badge">33</span>
+                        <a href="/tag/chan-pin.html">产品
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/fuck.html">fuck
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/gc.html">GC
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/rtmp.html">RTMP
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/unicode.html">unicode
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/dylib.html">dylib
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/protocol.html">protocol
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/pycon.html">PyCon
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/cai-ji.html">采集
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/clustering.html">clustering
+                        </a></li>
+                    <li>
+											<span class="badge">7</span>
+                        <a href="/tag/web.html">Web
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/yi-zhi.html">移植
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/network.html">network
+                        </a></li>
+                    <li>
+											<span class="badge">6</span>
+                        <a href="/tag/flask.html">Flask
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/review.html">review
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/nodejs.html">Node.js
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/pep.html">PEP
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/linear.html">Linear
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/features.html">Features
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/wu-tai.html">舞台
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/cnn.html">CNN
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/pca.html">PCA
+                        </a></li>
+                    <li>
+											<span class="badge">7</span>
+                        <a href="/tag/webrtc.html">webRtc
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/css.html">CSS
+                        </a></li>
+                    <li>
+											<span class="badge">8</span>
+                        <a href="/tag/object-c.html">Object-C
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/memory.html">Memory
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/life.html">life
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/flask-socketio.html">Flask-SocketIO
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/http.html">HTTP
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/finance.html">finance
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/dataprocessing.html">DataProcessing
+                        </a></li>
+                    <li>
+											<span class="badge">18</span>
+                        <a href="/tag/python.html">Python
+                        </a></li>
+                    <li>
+											<span class="badge">6</span>
+                        <a href="/tag/javascript.html">JavaScript
+                        </a></li>
+                    <li>
+											<span class="badge">18</span>
+                        <a href="/tag/ios.html">iOS
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/encode.html">encode
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/xcode.html">xCode
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/appstore.html">appstore
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/html5.html">html5
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/liu-cheng.html">流程
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/uiimage.html">UIImage
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/decorator.html">Decorator
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/ipad.html">iPad
+                        </a></li>
+                    <li>
+											<span class="badge">5</span>
+                        <a href="/tag/c.html">C++
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/jia-gou.html">架构
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/ffmpeg.html">FFmpeg
+                        </a></li>
+                    <li>
+											<span class="badge">22</span>
+                        <a href="/tag/algorithm.html">algorithm
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/database.html">database
+                        </a></li>
+                    <li>
+											<span class="badge">17</span>
+                        <a href="/tag/ml.html">ML
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/yan-zou.html">演奏
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/framework.html">framework
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/gbk.html">GBK
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/rfc.html">rfc
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/cache.html">cache
+                        </a></li>
+                    <li>
+											<span class="badge">19</span>
+                        <a href="/tag/math.html">Math
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/audio.html">audio
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/obs.html">OBS
+                        </a></li>
+                </ul>
+            </div>
+
+            <div class="large-3 aside column">
+                <h3>Links</h3>
+                <ul>
+                    <li><a href="http://mikanani.me/">蜜柑计划</a></li><br/>
+                    <li><a href="http://josh.agarrado.net/music/anime/index.php">ジョシュの楽譜集</a></li><br/>
+                    <li><a href="http://deeplearning.stanford.edu/">Deep Learning</a></li><br/>
+                    <li><a href="http://getpelican.com/">Pelican</a></li><br/>
+                    <li><a href="http://python.org/">Python</a></li><br/>
+                    <li><a href="http://jinja.pocoo.org/">Jinja2</a></li><br/>
+                </ul>
+                
+            </div>
+
+        </row>
+        </div>
+        <div class="row">
+            <div class="small-12 column">
+                <p style="font-size: 0.7em; text-align:center;">
+                ∠( ᐛ 」∠)＿不会有人拉到这么下边的呀就算拉下来也不会去看的呀这么小的字也看不清的口牙！ ©2015.
+                <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1257347159'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1257347159%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+                <!--<script type="text/javascript" src="/theme/js/analytics.js"></script> -->
+                </p>
+            </div>
+        </div>
+    </div>
+
+    
+</body>
+</html>

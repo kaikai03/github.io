@@ -1,0 +1,1245 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="Access-Control-Allow-Origin" content="*">
+        <link rel="stylesheet" href="/theme/css/foundation.min.css" media="all">
+		<link rel="stylesheet" href="/theme/css/pygments.css" /> 
+		<link rel="stylesheet" href="/theme/css/style.css" />
+		<link rel="stylesheet" href="/theme/css/ukagaka.css" /> 
+        <script type="text/javascript" src="/theme/js/modernizr.js"></script>
+		<script type='text/javascript' src='/theme/js/jquery-1.11.1.min.js'></script>
+	    <script type="text/javascript" src="/theme/js/damoo.min.js"></script>
+		<script type="text/x-mathjax-config">MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});</script>
+        <script type="text/javascript">var js=document.createElement('script');js.setAttribute('src',(('https:' == document.location.protocol) ? ' https://' : ' http://')+'cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML');document.head.appendChild(js);</script>
+
+        <link href='https://fonts.lug.ustc.edu.cn/css?family=Exo+2:400,300,700,300italic,400italic,700italic,900,900italic' rel='stylesheet' type='text/css'>
+        <link rel="stylesheet" href="/theme/css/lamboz.css" media="all">
+        <title>Python Garbage Collection - kairnsの记事簿</title>
+        <meta charset="utf-8" />
+        <link href="/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="kairnsの记事簿 Full Atom Feed" />
+        <link href="/feeds/all.rss.xml" type="application/rss+xml" rel="alternate" title="kairnsの记事簿 Full RSS Feed" />
+        <!-- |format(category.slug) -->
+        <link href="/feeds/{slug}.atom.xml" type="application/atom+xml" rel="alternate" title="kairnsの记事簿 Categories Atom Feed" />
+ 
+ 
+        
+        
+</head>
+<body onblur="leavePage()" onfocus="comebackPage()">
+    <div class="pages">
+        <ul>
+            <li class="home"><a href="/index.html">Home</a></li>
+            <li ><a href="/pages/about-me.html">About Me</a></li>
+            <li ><a href="/pages/Python_Packages_2012_11_05_12_18.html">Python Packages</a></li>
+        </ul>
+    </div>
+
+<div class="hp-header-inner">
+    <div class="page-header">
+        <div class="content-header">
+            <div id="title-block">
+            <h1>  <a href="/2014/Python_Garbage_Collection_2014_10_02_13_03.html" rel="bookmark"
+                    title="Permalink to Python Garbage Collection">Python Garbage Collection</a></h1>
+            </div>
+        </div>
+    </div>
+</div>
+    <div class="content">
+        <div class="data-holder">
+        <div class="row">
+           <div class="large-9 content-column column">
+<div class="content-article">
+    <header class="header-article">
+        <div class="read-more">Posted on Thu 02 October 2014</div>
+ 
+   </header>
+    <section class='article'>
+        
+        <div class="entry-summary">
+            <p>Python 源码阅读 - 垃圾回收机制</p>
+        </div>
+    
+        <div class="entry-content">
+            <h2>Python 垃圾回收机制 ##</h2>
+<h3>概述</h3>
+<p>无论何种垃圾收集机制, 一般都是两阶段: 垃圾检测和垃圾回收.</p>
+<p>在Python中, 大多数对象的生命周期都是通过对象的引用计数来管理的.</p>
+<p>问题: 但是存在循环引用的问题: a 引用 b, b 引用 a, 导致每一个对象的引用计数都不为0, 所占用的内存永远不会被回收</p>
+<p>要解决循环引用: 必需引入其他垃圾收集技术来打破循环引用. Python中使用了标记-清除以及分代收集</p>
+<p>即, Python 中垃圾回收机制: 引用计数(主要), 标记清除, 分代收集(辅助)</p>
+<h3>引用计数</h3>
+<p>引用计数, 意味着必须在每次分配和释放内存的时候, 加入管理引用计数的动作</p>
+<p>引用计数的优点: 最直观最简单, 实时性, 任何内存, 一旦没有指向它的引用, 就会立即被回收</p>
+<h4>计数存储</h4>
+<p>回顾 Python 的对象</p>
+<p><center><img alt="" src="/article_img/Python_Garbage_Collection_2014_10_02_13_03/PyObject.png"></center></p>
+<p><center><img alt="" src="/article_img/Python_Garbage_Collection_2014_10_02_13_03/PyVarObject.png"></center></p>
+<p>e.g. 引用计数增加以及减少</p>
+<div class="highlight"><pre><span></span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="kn">from</span> <span class="nn">sys</span> <span class="kn">import</span> <span class="n">getrefcount</span>
+<span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span>
+<span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="n">a</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+<span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="n">getrefcount</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+<span class="mi">2</span>
+<span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="n">b</span> <span class="o">=</span> <span class="n">a</span>
+<span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="n">getrefcount</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+<span class="mi">3</span>
+<span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="k">del</span> <span class="n">b</span>
+<span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="n">getrefcount</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+<span class="mi">2</span>
+</pre></div>
+
+
+<h4>计数增加</h4>
+<p>增加对象引用计数, refcnt incr</p>
+<div class="highlight"><pre><span></span>#define Py_INCREF(op) (                         \
+  _Py_INC_REFTOTAL  _Py_REF_DEBUG_COMMA       \
+  ((PyObject*)(op))-&amp;gt;ob_refcnt++)
+</pre></div>
+
+
+<h4>计数减少</h4>
+<p>减少对象引用计数, refcnt desc</p>
+<div class="highlight"><pre><span></span>#define _Py_DEC_REFTOTAL        _Py_RefTotal--
+#define _Py_REF_DEBUG_COMMA     ,
+
+#define Py_DECREF(op)                                   \
+  do {                                                \
+      if (_Py_DEC_REFTOTAL  _Py_REF_DEBUG_COMMA       \
+      --((PyObject*)(op))-&amp;gt;ob_refcnt != 0)            \
+          _Py_CHECK_REFCNT(op)                        \
+      else                                            \
+      _Py_Dealloc((PyObject *)(op));                  \
+  } while (0)
+</pre></div>
+
+
+<p>即, 发现refcnt变成0的时候, 会调用<code>_Py_Dealloc</code></p>
+<div class="highlight"><pre><span></span>PyAPI_FUNC(void) _Py_Dealloc(PyObject *);
+#define _Py_REF_DEBUG_COMMA     ,
+
+#define _Py_Dealloc(op) (                               \
+  _Py_INC_TPFREES(op) _Py_COUNT_ALLOCS_COMMA          \
+  (*Py_TYPE(op)-&amp;gt;tp_dealloc)((PyObject *)(op)))
+#endif /* !Py_TRACE_REFS */
+</pre></div>
+
+
+<p>会调用各自类型的<code>tp_dealloc</code></p>
+<p>例如dict</p>
+<div class="highlight"><pre><span></span>PyTypeObject PyDict_Type = {
+    PyVarObject_HEAD_INIT(&amp;amp;PyType_Type, 0)
+    &quot;dict&quot;,
+    sizeof(PyDictObject),
+    0,
+    (destructor)dict_dealloc,                   /* tp_dealloc */
+    ....
+}
+
+static void
+dict_dealloc(register PyDictObject *mp)
+{
+    .....
+    // 如果满足条件, 放入到缓冲池freelist中
+    if (numfree &amp;lt; PyDict_MAXFREELIST &amp;amp;&amp;amp; Py_TYPE(mp) == &amp;amp;PyDict_Type)
+        free_list[numfree++] = mp;
+    // 否则, 调用tp_free
+    else
+        Py_TYPE(mp)-&amp;gt;tp_free((PyObject *)mp);
+    Py_TRASHCAN_SAFE_END(mp)
+}
+</pre></div>
+
+
+<p>Python基本类型的<code>tp_dealloc</code>, 通常都会与各自的缓冲池机制相关, 释放会优先放入缓冲池中(对应的分配会优先从缓冲池取). 这个内存分配与回收同缓冲池机制相关</p>
+<p>当无法放入缓冲池时, 会调用各自类型的<code>tp_free</code></p>
+<p>int, 比较特殊</p>
+<div class="highlight"><pre><span></span>// int, 通用整数对象缓冲池机制
+(freefunc)int_free,                         /* tp_free */
+</pre></div>
+
+
+<p>string</p>
+<div class="highlight"><pre><span></span>// string
+PyObject_Del,                               /* tp_free */
+</pre></div>
+
+
+<p>dict/tuple/list</p>
+<div class="highlight"><pre><span></span>PyObject_GC_Del,                            /* tp_free */
+</pre></div>
+
+
+<p>然后, 我们再回头看, 自定义对象的<code>tp_free</code></p>
+<div class="highlight"><pre><span></span>PyTypeObject PyType_Type = {
+    PyVarObject_HEAD_INIT(&amp;amp;PyType_Type, 0)
+    &quot;type&quot;,                                     /* tp_name */
+    ...
+    PyObject_GC_Del,                            /* tp_free */
+};
+</pre></div>
+
+
+<p>即, 最终, 当计数变为0, 触发内存回收动作. 涉及函数<code>PyObject_Del</code>和<code>PyObject_GC_Del</code>, 并且, 自定义类以及容器类型(dict/list/tuple/set等)使用的都是后者<code>PyObject_GC_Del</code>.</p>
+<h4>内存回收 PyObject_Del / PyObject_GC_Del</h4>
+<p>如果引用计数=0:</p>
+<ol>
+<li>放入缓冲池</li>
+<li>真正销毁, PyObject_Del/PyObject_GC_Del内存操作</li>
+</ol>
+<p>这两个操作都是进行内存级别的操作</p>
+<ul>
+<li>PyObject_Del</li>
+</ul>
+<blockquote>
+<p>PyObject_Del(op) releases the memory allocated for an object. It does not run a destructor -- it only frees the memory. PyObject_Free is identical.</p>
+</blockquote>
+<p>这块删除, <code>PyObject_Free</code> 涉及到了Python底层内存的分配和管理机制, 具体见前面的博文</p>
+<ul>
+<li>
+<p>PyObject_GC_Del</p>
+<p>void
+PyObject_GC_Del(void <em>op)
+{
+    PyGC_Head </em>g = AS_GC(op);</p>
+<div class="highlight"><pre><span></span>// Returns true if a given object is tracked
+if (IS_TRACKED(op))
+    // 从跟踪链表中移除
+    gc_list_remove(g);
+if (generations[0].count &amp;gt; 0) {
+    generations[0].count--;
+}
+</pre></div>
+
+
+<p>PyObject_FREE(g);
+}</p>
+</li>
+</ul>
+<p><code>IS_TRACKED</code> 涉及到标记-清除的机制</p>
+<p><code>generations</code> 涉及到了分代回收</p>
+<p><code>PyObject_FREE</code>, 则和Python底层内存池机制相关</p>
+<h3>标记-清除</h3>
+<h4>问题: 什么对象可能产生循环引用?</h4>
+<p>只需要关注关注可能产生循环引用的对象</p>
+<p>PyIntObject/PyStringObject等不可能</p>
+<p>Python中的循环引用总是发生在container对象之间, 所谓containser对象即是内部可持有对其他对象的引用: list/dict/class/instance等等</p>
+<p>垃圾收集带来的开销依赖于container对象的数量, 必需跟踪所创建的每一个container对象, 并将这些对象组织到一个集合中.</p>
+<h4>可收集对象链表</h4>
+<p>可收集对象链表: 将需要被收集和跟踪的container, 放到可收集的链表中</p>
+<p>任何一个python对象都分为两部分: <code>PyObject_HEAD</code> + 对象本身数据</p>
+<div class="highlight"><pre><span></span><span class="cm">/* PyObject_HEAD defines the initial segment of every PyObject. */</span><span class="w"></span>
+<span class="err">#</span>define<span class="w"> </span>PyObject_HEAD<span class="w">                   </span><span class="o">\</span><span class="w"></span>
+<span class="w">    </span>_PyObject_HEAD_EXTRA<span class="w">                </span><span class="o">\</span><span class="w"></span>
+<span class="w">    </span>Py_ssize_t<span class="w"> </span>ob_refcnt<span class="err">;</span><span class="w">               </span><span class="o">\</span><span class="w"></span>
+<span class="w">    </span>struct<span class="w"> </span>_typeobject<span class="w"> </span><span class="o">*</span>ob_type<span class="err">;</span><span class="w"></span>
+
+<span class="o">//----------------------------------------------------</span><span class="w"></span>
+
+<span class="w">  </span><span class="err">#</span>define<span class="w"> </span>_PyObject_HEAD_EXTRA<span class="w">            </span><span class="o">\</span><span class="w"></span>
+<span class="w">      </span>struct<span class="w"> </span>_object<span class="w"> </span><span class="o">*</span>_ob_next<span class="err">;</span><span class="w">           </span><span class="o">\</span><span class="w"></span>
+<span class="w">      </span>struct<span class="w"> </span>_object<span class="w"> </span><span class="o">*</span>_ob_prev<span class="err">;</span><span class="w"></span>
+
+<span class="o">//</span><span class="w"> </span><span class="err">双向链表结构</span><span class="o">,</span><span class="w"> </span><span class="err">垃圾回收</span><span class="w"></span>
+</pre></div>
+
+
+<p>可收集对象链表</p>
+<p><em>Modules/gcmodule.c</em></p>
+<div class="highlight"><pre><span></span> /* GC information is stored BEFORE the object structure. */
+  typedef union _gc_head {
+      struct {
+          // 建立链表需要的前后指针
+          union _gc_head *gc_next;
+          union _gc_head *gc_prev;
+          // 在初始化时会被初始化为 GC_UNTRACED
+          Py_ssize_t gc_refs;
+      } gc;
+      long double dummy;  /* force worst-case alignment */
+  } PyGC_Head;
+</pre></div>
+
+
+<p>创建container的过程: <code>container对象 = pyGC_Head | PyObject_HEAD | Container Object</code></p>
+<p>PyObject <em>
+_PyObject_GC_New(PyTypeObject </em>tp)
+{
+    PyObject *op = _PyObject_GC_Malloc(_PyObject_SIZE(tp));
+    if (op != NULL)
+        op = PyObject_INIT(op, tp);
+    return op;
+}</p>
+<p>=&gt; _PyObject_GC_Malloc</p>
+<h1>define _PyGC_REFS_UNTRACKED                    (-2)</h1>
+<h1>define GC_UNTRACKED                    _PyGC_REFS_UNTRACKED</h1>
+<div class="highlight"><pre><span></span>PyObject *
+_PyObject_GC_Malloc(size_t basicsize)
+{
+    PyObject *op;
+    PyGC_Head *g;
+    if (basicsize &amp;gt; PY_SSIZE_T_MAX - sizeof(PyGC_Head))
+        return PyErr_NoMemory();
+
+    // 为 对象本身+PyGC_Head申请内存, 注意分配的size
+    g = (PyGC_Head *)PyObject_MALLOC(
+        sizeof(PyGC_Head) + basicsize);
+    if (g == NULL)
+        return PyErr_NoMemory();
+
+    // 初始化 GC_UNTRACED
+    g-&amp;gt;gc.gc_refs = GC_UNTRACKED;
+    generations[0].count++; /* number of allocated GC objects */
+
+    // 如果大于阈值, 执行分代回收
+    if (generations[0].count &amp;gt; generations[0].threshold &amp;amp;&amp;amp;
+        enabled &amp;amp;&amp;amp;
+        generations[0].threshold &amp;amp;&amp;amp;
+        !collecting &amp;amp;&amp;amp;
+        !PyErr_Occurred()) {
+
+        collecting = 1;
+        collect_generations();
+        collecting = 0;
+    }
+    op = FROM_GC(g);
+    return op;
+}
+</pre></div>
+
+
+<h4>PyObject_HEAD and PyGC_HEAD</h4>
+<p>注意, <code>FROM_GC</code>和<code>AS_GC</code>用于 <code>PyObject_HEAD &lt;=&gt; PyGC_HEAD</code>地址相互转换</p>
+<p><em>Modules/gcmodule.c</em></p>
+<div class="highlight"><pre><span></span> /* Get an object&#39;s GC head */
+  #define AS_GC(o) ((PyGC_Head *)(o)-1)
+
+  /* Get the object given the GC head */
+  #define FROM_GC(g) ((PyObject *)(((PyGC_Head *)g)+1))
+
+objimpl.h
+
+#define _Py_AS_GC(o) ((PyGC_Head *)(o)-1)
+</pre></div>
+
+
+<h4>问题: 什么时候将container放到这个对象链表中</h4>
+<p>e.g list</p>
+<p><em>listobject.c</em></p>
+<div class="highlight"><pre><span></span>PyObject *
+PyList_New(Py_ssize_t size)
+{
+    PyListObject *op;
+    op = PyObject_GC_New(PyListObject, &amp;amp;PyList_Type);
+    _PyObject_GC_TRACK(op);
+    return (PyObject *) op;
+}
+
+// =&amp;gt;  _PyObject_GC_TRACK
+
+// objimpl.h
+// 加入到可收集对象链表中
+
+#define _PyObject_GC_TRACK(o) do { \
+    PyGC_Head *g = _Py_AS_GC(o); \
+    if (g-&amp;gt;gc.gc_refs != _PyGC_REFS_UNTRACKED) \
+        Py_FatalError(&quot;GC object already tracked&quot;); \
+    g-&amp;gt;gc.gc_refs = _PyGC_REFS_REACHABLE; \
+    g-&amp;gt;gc.gc_next = _PyGC_generation0; \
+    g-&amp;gt;gc.gc_prev = _PyGC_generation0-&amp;gt;gc.gc_prev; \
+    g-&amp;gt;gc.gc_prev-&amp;gt;gc.gc_next = g; \
+    _PyGC_generation0-&amp;gt;gc.gc_prev = g; \
+    } while (0);
+</pre></div>
+
+
+<h4>问题: 什么时候将container从这个对象链表中摘除</h4>
+<div class="highlight"><pre><span></span>// Objects/listobject.c
+
+static void
+list_dealloc(PyListObject *op)
+{
+    Py_ssize_t i;
+    PyObject_GC_UnTrack(op);
+    .....
+}
+
+// =&amp;gt; PyObject_GC_UnTrack =&amp;gt; _PyObject_GC_UNTRACK
+
+// 对象销毁的时候
+#define _PyObject_GC_UNTRACK(o) do { \
+    PyGC_Head *g = _Py_AS_GC(o); \
+    assert(g-&amp;gt;gc.gc_refs != _PyGC_REFS_UNTRACKED); \
+    g-&amp;gt;gc.gc_refs = _PyGC_REFS_UNTRACKED; \
+    g-&amp;gt;gc.gc_prev-&amp;gt;gc.gc_next = g-&amp;gt;gc.gc_next; \
+    g-&amp;gt;gc.gc_next-&amp;gt;gc.gc_prev = g-&amp;gt;gc.gc_prev; \
+    g-&amp;gt;gc.gc_next = NULL; \
+    } while (0);
+</pre></div>
+
+
+<h4>问题: 如何进行标记-清除</h4>
+<p>现在, 我们得到了一个链表</p>
+<p>Python将自己的垃圾收集限制在这个链表上, 循环引用一定发生在这个链表的一群独享之间.</p>
+<h5>概览</h5>
+<p><code>_PyObject_GC_Malloc</code> 分配内存时, 发现超过阈值, 此时, 会触发gc, <code>collect_generation</code>s 然后调用collect, collect包含标记-清除逻辑</p>
+<p><em>gcmodule.c</em></p>
+<div class="highlight"><pre><span></span>  /* This is the main function.  Read this to understand how the
+   * collection process works. */
+  static Py_ssize_t
+  collect(int generation)
+  {
+    // 第1步: 将所有比 当前代 年轻的代中的对象 都放到 当前代 的对象链表中
+    /* merge younger generations with one we are currently collecting */
+    for (i = 0; i &amp;lt; generation; i++) {
+        gc_list_merge(GEN_HEAD(i), GEN_HEAD(generation));
+    }
+
+
+    // 第2步
+    update_refs(young);
+    // 第3步
+    subtract_refs(young);
+
+    // 第4步
+    gc_list_init(&amp;amp;unreachable);
+    move_unreachable(young, &amp;amp;unreachable);
+
+    // 第5步
+      /* Move reachable objects to next generation. */
+      if (young != old) {
+          if (generation == NUM_GENERATIONS - 2) {
+              long_lived_pending += gc_list_size(young);
+          }
+          gc_list_merge(young, old);
+      }
+      else {
+          /* We only untrack dicts in full collections, to avoid quadratic
+             dict build-up. See issue #14775. */
+          untrack_dicts(young);
+          long_lived_pending = 0;
+          long_lived_total = gc_list_size(young);
+      }
+
+    // 第6步
+      delete_garbage(&amp;amp;unreachable, old);
+
+  }
+</pre></div>
+
+
+<h5>第一步: gc_list_merge #####</h5>
+<p>将所有比 当前代 年轻的代中的对象 都放到 当前代 的对象链表中</p>
+<div class="highlight"><pre><span></span>=&amp;gt; gc_list_merge
+
+// 执行拷贝而已
+/* append list `from` onto list `to`; `from` becomes an empty list */
+static void
+gc_list_merge(PyGC_Head *from, PyGC_Head *to)
+{
+    PyGC_Head *tail;
+    assert(from != to);
+    if (!gc_list_is_empty(from)) {
+        tail = to-&amp;gt;gc.gc_prev;
+        tail-&amp;gt;gc.gc_next = from-&amp;gt;gc.gc_next;
+        tail-&amp;gt;gc.gc_next-&amp;gt;gc.gc_prev = tail;
+        to-&amp;gt;gc.gc_prev = from-&amp;gt;gc.gc_prev;
+        to-&amp;gt;gc.gc_prev-&amp;gt;gc.gc_next = to;
+    }
+    // 清空
+    gc_list_init(from);
+}
+
+=&amp;gt;
+
+static void
+gc_list_init(PyGC_Head *list)
+{
+    list-&amp;gt;gc.gc_prev = list;
+    list-&amp;gt;gc.gc_next = list;
+}
+</pre></div>
+
+
+<p>即, 此刻, 所有待进行处理的对象都集中在同一个链表中</p>
+<p>处理,</p>
+<p>其逻辑是, 要去除循环引用, 得到有效引用计数</p>
+<p>有效引用计数: 将循环引用的计数去除, 最终得到的 =&gt; 将环从引用中摘除, 各自引用计数数值-1</p>
+<p>实际操作, 并不要直接修改对象的 <code>ob_refcnt</code>, 而是修改其副本, <code>PyGC_Head中的gc.gc_ref</code></p>
+<h5>第二步: update_refs</h5>
+<p>遍历对象链表, 将每个对象的<code>gc.gc_ref</code>值设置为<code>ob_refcnt</code></p>
+<p><em>gcmodule.c</em></p>
+<div class="highlight"><pre><span></span>static void
+update_refs(PyGC_Head *containers)
+{
+    PyGC_Head *gc = containers-&amp;gt;gc.gc_next;
+    for (; gc != containers; gc = gc-&amp;gt;gc.gc_next) {
+        assert(gc-&amp;gt;gc.gc_refs == GC_REACHABLE);
+        gc-&amp;gt;gc.gc_refs = Py_REFCNT(FROM_GC(gc));
+        /* Python&#39;s cyclic gc should never see an incoming refcount
+         * of 0:  if something decref&#39;ed to 0, it should have been
+         * deallocated immediately at that time.
+         * Possible cause (if the assert triggers):  a tp_dealloc
+         * routine left a gc-aware object tracked during its teardown
+         * phase, and did something-- or allowed something to happen --
+         * that called back into Python.  gc can trigger then, and may
+         * see the still-tracked dying object.  Before this assert
+         * was added, such mistakes went on to allow gc to try to
+         * delete the object again.  In a debug build, that caused
+         * a mysterious segfault, when _Py_ForgetReference tried
+         * to remove the object from the doubly-linked list of all
+         * objects a second time.  In a release build, an actual
+         * double deallocation occurred, which leads to corruption
+         * of the allocator&#39;s internal bookkeeping pointers.  That&#39;s
+         * so serious that maybe this should be a release-build
+         * check instead of an assert?
+         */
+        assert(gc-&amp;gt;gc.gc_refs != 0);
+    }
+}
+</pre></div>
+
+
+<h5>第三步: 计算有效引用计数</h5>
+<div class="highlight"><pre><span></span>  /* A traversal callback for subtract_refs. */
+  static int
+  visit_decref(PyObject *op, void *data)
+  {
+      assert(op != NULL);
+      // 判断op指向的对象是否是被垃圾收集监控的, 对象的type对象中有Py_TPFLAGS_HAVE_GC符号
+      if (PyObject_IS_GC(op)) {
+          PyGC_Head *gc = AS_GC(op);
+          /* We&#39;re only interested in gc_refs for objects in the
+           * generation being collected, which can be recognized
+           * because only they have positive gc_refs.
+           */
+          assert(gc-&amp;gt;gc.gc_refs != 0); /* else refcount was too small */
+          if (gc-&amp;gt;gc.gc_refs &amp;gt; 0)
+              gc-&amp;gt;gc.gc_refs--;  // -1
+      }
+      return 0;
+  }
+
+
+  /* Subtract internal references from gc_refs.  After this, gc_refs is &amp;gt;= 0
+   * for all objects in containers, and is GC_REACHABLE for all tracked gc
+   * objects not in containers.  The ones with gc_refs &amp;gt; 0 are directly
+   * reachable from outside containers, and so can&#39;t be collected.
+   */
+  static void
+  subtract_refs(PyGC_Head *containers)
+  {
+      traverseproc traverse;
+      PyGC_Head *gc = containers-&amp;gt;gc.gc_next;
+      // 遍历链表
+      for (; gc != containers; gc=gc-&amp;gt;gc.gc_next) {
+          // 与特定的类型相关, 得到类型对应的traverse函数
+          traverse = Py_TYPE(FROM_GC(gc))-&amp;gt;tp_traverse;
+          // 调用
+          (void) traverse(FROM_GC(gc),
+                         (visitproc)visit_decref, // 回调形式传入
+                         NULL);
+      }
+  }
+</pre></div>
+
+
+<p>我们可以看看dictobject的traverse函数</p>
+<div class="highlight"><pre><span></span>  static int
+  dict_traverse(PyObject *op, visitproc visit, void *arg)
+  {
+      Py_ssize_t i = 0;
+      PyObject *pk;
+      PyObject *pv;
+
+      // 遍历所有键和值
+      while (PyDict_Next(op, &amp;amp;i, &amp;amp;pk, &amp;amp;pv)) {
+          Py_VISIT(pk);
+          Py_VISIT(pv);
+      }
+      return 0;
+  }
+</pre></div>
+
+
+<p>逻辑大概是: 遍历容器对象里面的所有对象, 通过<code>visit_decref</code>将这些对象的引用计数都-1,</p>
+<p>最终, 遍历完链表之后, 整个可收集对象链表中所有container对象之间的循环引用都被去掉了</p>
+<h5>第四步: 垃圾标记</h5>
+<p><code>move_unreachable</code>, 将可收集对象链表中, 根据有效引用计数 不等于0(root对象) 和 等于0(非root对象, 垃圾, 可回收), 一分为二</p>
+<div class="highlight"><pre><span></span> /* Move the unreachable objects from young to unreachable.  After this,
+   * all objects in young have gc_refs = GC_REACHABLE, and all objects in
+   * unreachable have gc_refs = GC_TENTATIVELY_UNREACHABLE.  All tracked
+   * gc objects not in young or unreachable still have gc_refs = GC_REACHABLE.
+   * All objects in young after this are directly or indirectly reachable
+   * from outside the original young; and all objects in unreachable are
+   * not.
+   */
+  static void
+  move_unreachable(PyGC_Head *young, PyGC_Head *unreachable)
+  {
+      PyGC_Head *gc = young-&amp;gt;gc.gc_next;
+
+      /* Invariants:  all objects &quot;to the left&quot; of us in young have gc_refs
+       * = GC_REACHABLE, and are indeed reachable (directly or indirectly)
+       * from outside the young list as it was at entry.  All other objects
+       * from the original young &quot;to the left&quot; of us are in unreachable now,
+       * and have gc_refs = GC_TENTATIVELY_UNREACHABLE.  All objects to the
+       * left of us in &#39;young&#39; now have been scanned, and no objects here
+       * or to the right have been scanned yet.
+       */
+
+      while (gc != young) {
+          PyGC_Head *next;
+
+          // 对于root object,
+          if (gc-&amp;gt;gc.gc_refs) {
+              /* gc is definitely reachable from outside the
+               * original &#39;young&#39;.  Mark it as such, and traverse
+               * its pointers to find any other objects that may
+               * be directly reachable from it.  Note that the
+               * call to tp_traverse may append objects to young,
+               * so we have to wait until it returns to determine
+               * the next object to visit.
+               */
+              PyObject *op = FROM_GC(gc);
+              traverseproc traverse = Py_TYPE(op)-&amp;gt;tp_traverse;
+              assert(gc-&amp;gt;gc.gc_refs &amp;gt; 0);
+              // 设置其gc-&amp;gt;gc.gc_refs = GC_REACHABLE
+              gc-&amp;gt;gc.gc_refs = GC_REACHABLE;
+
+              // 注意这里逻辑, visit_reachable, 意图是?
+              (void) traverse(op,
+                              (visitproc)visit_reachable,
+                              (void *)young);
+              next = gc-&amp;gt;gc.gc_next;
+              if (PyTuple_CheckExact(op)) {
+                  _PyTuple_MaybeUntrack(op);
+              }
+          }
+          // 有效引用计数=0, 非root对象, 移动到unreachable链表中
+          else {
+              /* This *may* be unreachable.  To make progress,
+               * assume it is.  gc isn&#39;t directly reachable from
+               * any object we&#39;ve already traversed, but may be
+               * reachable from an object we haven&#39;t gotten to yet.
+               * visit_reachable will eventually move gc back into
+               * young if that&#39;s so, and we&#39;ll see it again.
+               */
+              next = gc-&amp;gt;gc.gc_next;
+              gc_list_move(gc, unreachable);
+              gc-&amp;gt;gc.gc_refs = GC_TENTATIVELY_UNREACHABLE;
+          }
+          gc = next;
+      }
+  }
+</pre></div>
+
+
+<h5>第五步: 将存活对象放入下一代</h5>
+<div class="highlight"><pre><span></span>  /* Move reachable objects to next generation. */
+  if (young != old) {
+      if (generation == NUM_GENERATIONS - 2) {
+          long_lived_pending += gc_list_size(young);
+      }
+      gc_list_merge(young, old);
+  }
+  else {
+      /* We only untrack dicts in full collections, to avoid quadratic
+         dict build-up. See issue #14775. */
+      untrack_dicts(young);
+      long_lived_pending = 0;
+      long_lived_total = gc_list_size(young);
+  }
+</pre></div>
+
+
+<h5>第六步: 执行回收</h5>
+<p><em>gcmoudle.c</em></p>
+<div class="highlight"><pre><span></span>  static int
+  gc_list_is_empty(PyGC_Head *list)
+  {
+      return (list-&amp;gt;gc.gc_next == list);
+  }
+
+
+  /* Break reference cycles by clearing the containers involved.  This is
+   * tricky business as the lists can be changing and we don&#39;t know which
+   * objects may be freed.  It is possible I screwed something up here.
+   */
+  static void
+  delete_garbage(PyGC_Head *collectable, PyGC_Head *old)
+  {
+      inquiry clear;
+
+      // 遍历
+      while (!gc_list_is_empty(collectable)) {
+          PyGC_Head *gc = collectable-&amp;gt;gc.gc_next;
+          // 得到对象
+          PyObject *op = FROM_GC(gc);
+
+          assert(IS_TENTATIVELY_UNREACHABLE(op));
+          if (debug &amp;amp; DEBUG_SAVEALL) {
+              PyList_Append(garbage, op);
+          }
+          else {
+              // 清引用
+              if ((clear = Py_TYPE(op)-&amp;gt;tp_clear) != NULL) {
+                  Py_INCREF(op);
+                  // 这个操作会调整container对象中每个引用所有对象的引用计数, 从而完成打破循环的最终目标
+                  clear(op);
+                  Py_DECREF(op);
+              }
+          }
+
+          // 重新送回到reachable链表.
+          // 原因: 在进行clear动作, 如果成功, 会把自己从垃圾收集机制维护的链表中摘除, 由于某些原因, 对象可能在clear的时候, 没有成功完成必要动作, 还不能被销毁, 所以放回去
+          if (collectable-&amp;gt;gc.gc_next == gc) {
+              /* object is still alive, move it, it may die later */
+              gc_list_move(gc, old);
+              gc-&amp;gt;gc.gc_refs = GC_REACHABLE;
+          }
+      }
+  }
+
+=&amp;gt; 来看下, list的clear
+
+static int
+list_clear(PyListObject *a)
+{
+    Py_ssize_t i;
+    PyObject **item = a-&amp;gt;ob_item;
+    if (item != NULL) {
+        /* Because XDECREF can recursively invoke operations on
+           this list, we make it empty first. */
+        i = Py_SIZE(a);
+        Py_SIZE(a) = 0;
+        a-&amp;gt;ob_item = NULL;
+        a-&amp;gt;allocated = 0;
+        while (--i &amp;gt;= 0) {
+            // 减引用
+            Py_XDECREF(item[i]);
+        }
+        PyMem_FREE(item);
+    }
+    /* Never fails; the return value can be ignored.
+       Note that there is no guarantee that the list is actually empty
+       at this point, because XDECREF may have populated it again! */
+    return 0;
+}
+
+
+// e.g. 处理list3, 调用其list_clear, 减少list4的引用计数, list4.ob_refcnt=0, 引发对象销毁, 调用list4的list_dealloc
+
+
+static void
+list_dealloc(PyListObject *op)
+{
+    Py_ssize_t i;
+    PyObject_GC_UnTrack(op);  //  从可收集对象链表中去除, 会影响到list4所引用所有对象的引用计数, =&amp;gt; list3.refcnt=0, list3的销毁动作也被触发
+
+    Py_TRASHCAN_SAFE_BEGIN(op)
+    if (op-&amp;gt;ob_item != NULL) {
+        /* Do it backwards, for Christian Tismer.
+           There&#39;s a simple test case where somehow this reduces
+           thrashing when a *very* large list is created and
+           immediately deleted. */
+        i = Py_SIZE(op);
+        while (--i &amp;gt;= 0) {
+            Py_XDECREF(op-&amp;gt;ob_item[i]);
+        }
+        PyMem_FREE(op-&amp;gt;ob_item);
+    }
+    if (numfree &amp;lt; PyList_MAXFREELIST &amp;amp;&amp;amp; PyList_CheckExact(op))
+        free_list[numfree++] = op;
+    else
+        Py_TYPE(op)-&amp;gt;tp_free((PyObject *)op);
+    Py_TRASHCAN_SAFE_END(op)
+}
+</pre></div>
+
+
+<h5>gc逻辑</h5>
+<div class="highlight"><pre><span></span>分配内存
+-&amp;gt; 发现超过阈值了
+-&amp;gt; 触发垃圾回收
+-&amp;gt; 将所有可收集对象链表放到一起
+-&amp;gt; 遍历, 计算有效引用计数
+-&amp;gt; 分成 有效引用计数=0 和 有效引用计数 &amp;gt; 0 两个集合
+-&amp;gt; 大于0的, 放入到更老一代
+-&amp;gt; =0的, 执行回收
+-&amp;gt; 回收遍历容器内的各个元素, 减掉对应元素引用计数(破掉循环引用)
+-&amp;gt; 执行-1的逻辑, 若发现对象引用计数=0, 触发内存回收
+-&amp;gt; python底层内存管理机制回收内存
+</pre></div>
+
+
+<h3>分代回收</h3>
+<p>分代收集: 以空间换时间</p>
+<p>思想: 将系统中的所有内存块根据其存货的时间划分为不同的集合, 每个集合就成为一个"代", 垃圾收集的频率随着"代"的存活时间的增大而减小(活得越长的对象, 就越不可能是垃圾, 就应该减少去收集的频率)</p>
+<p>Python中, 引入了分代收集, 总共三个"代". Python 中, 一个代就是一个链表, 所有属于同一"代"的内存块都链接在同一个链表中</p>
+<h4>表头数据结构</h4>
+<p><em>gcmodule.c</em></p>
+<div class="highlight"><pre><span></span>  struct gc_generation {
+      PyGC_Head head;
+      int threshold; /* collection threshold */  // 阈值
+      int count; /* count of allocations or collections of younger
+                    generations */    // 实时个数
+  };
+</pre></div>
+
+
+<h4>三个代的定义</h4>
+<div class="highlight"><pre><span></span><span class="x">  #define NUM_GENERATIONS 3</span>
+<span class="x">  #define GEN_HEAD(n) (&amp;amp;generations[n].head)</span>
+
+<span class="x">  //  三代都放到这个数组中</span>
+<span class="x">  /* linked lists of container objects */</span>
+<span class="x">  static struct gc_generation generations[NUM_GENERATIONS] = {</span>
+<span class="x">      /* PyGC_Head,                               threshold,      count */</span>
+<span class="x">      </span><span class="cp">{{</span><span class="o">{</span><span class="nv">GEN_HEAD</span><span class="o">(</span><span class="m">0</span><span class="o">),</span> <span class="nv">GEN_HEAD</span><span class="o">(</span><span class="m">0</span><span class="o">),</span> <span class="m">0</span><span class="cp">}}</span><span class="x">,           700,            0},    //700个container, 超过立即触发垃圾回收机制</span>
+<span class="x">      </span><span class="cp">{{</span><span class="o">{</span><span class="nv">GEN_HEAD</span><span class="o">(</span><span class="m">1</span><span class="o">),</span> <span class="nv">GEN_HEAD</span><span class="o">(</span><span class="m">1</span><span class="o">),</span> <span class="m">0</span><span class="cp">}}</span><span class="x">,           10,             0},    // 10个</span>
+<span class="x">      </span><span class="cp">{{</span><span class="o">{</span><span class="nv">GEN_HEAD</span><span class="o">(</span><span class="m">2</span><span class="o">),</span> <span class="nv">GEN_HEAD</span><span class="o">(</span><span class="m">2</span><span class="o">),</span> <span class="m">0</span><span class="cp">}}</span><span class="x">,           10,             0},    // 10个</span>
+<span class="x">  };</span>
+
+<span class="x">  PyGC_Head *_PyGC_generation0 = GEN_HEAD(0);</span>
+</pre></div>
+
+
+<h4>超过阈值, 触发垃圾回收</h4>
+<div class="highlight"><pre><span></span> PyObject *
+  _PyObject_GC_Malloc(size_t basicsize)
+  {
+      // 执行分配
+      ....
+      generations[0].count++; /* number of allocated GC objects */  //增加一个
+      if (generations[0].count &amp;gt; generations[0].threshold &amp;amp;&amp;amp; // 发现大于预支了
+          enabled &amp;amp;&amp;amp;
+          generations[0].threshold &amp;amp;&amp;amp;
+          !collecting &amp;amp;&amp;amp;
+          !PyErr_Occurred())
+          {
+              collecting = 1;
+              collect_generations();  //  执行收集
+              collecting = 0;
+          }
+      op = FROM_GC(g);
+      return op;
+  }
+
+=&amp;gt; collect_generations
+
+  static Py_ssize_t
+  collect_generations(void)
+  {
+      int i;
+      Py_ssize_t n = 0;
+
+      /* Find the oldest generation (highest numbered) where the count
+       * exceeds the threshold.  Objects in the that generation and
+       * generations younger than it will be collected. */
+
+      // 从最老的一代, 开始回收
+      for (i = NUM_GENERATIONS-1; i &amp;gt;= 0; i--) {  // 遍历所有generation
+          if (generations[i].count &amp;gt; generations[i].threshold) {  // 如果超过了阈值
+              /* Avoid quadratic performance degradation in number
+                 of tracked objects. See comments at the beginning
+                 of this file, and issue #4074.
+              */
+              if (i == NUM_GENERATIONS - 1
+                  &amp;amp;&amp;amp; long_lived_pending &amp;lt; long_lived_total / 4)
+                  continue;
+              n = collect(i); // 执行收集
+              break;  // notice: break了
+          }
+      }
+      return n;
+  }
+</pre></div>
+
+
+<h3>Python 中的gc模块</h3>
+<p>gc模块, 提供了观察和手动使用gc的接口</p>
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">gc</span>
+
+<span class="n">gc</span><span class="o">.</span><span class="n">set_debug</span><span class="p">(</span><span class="n">gc</span><span class="o">.</span><span class="n">DEBUG_STATS</span> <span class="o">|</span> <span class="n">gc</span><span class="o">.</span><span class="n">DEBUG_LEAK</span><span class="p">)</span>
+
+<span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
+</pre></div>
+
+
+<p>注意<code>__del__</code>给gc带来的影响</p>
+<hr>
+<p>版权声明：自由转载-非商用-非衍生-保持署名 | <a href="http://creativecommons.org/licenses/by-nc-nd/3.0/deed.zh">Creative Commons BY-NC-ND 3.0</a></p>
+        </div>
+    </section>
+    <footer class="footer-article">
+        <div class="tags-and-categories">Filed under <a href="/category/pydev.html">pyDev</a>
+        | Tagged: <a href="/tag/gc.html">GC </a><a href="/tag/features.html">Features </a><a href="/tag/python.html">Python </a>
+        | <a href="/2014/Python_Garbage_Collection_2014_10_02_13_03.html" rel="bookmark"
+         title="Permalink to Python Garbage Collection">Permalink</a>            
+        </div>
+        <!-- metaldata 
+        -->
+    </footer>
+</div>
+<div id="disqus_thread"></div>
+<script type="text/javascript" src="/theme/js/disqus.js"></script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+            </div>
+            
+            
+			<div class="large-3 aside column">
+				<img class="headIcon-large avatar" src="/sys_img/head.jpg" alt="(┬＿┬)">
+                <h2>魏凯</h2>
+                <h3>kairns leeky</h3>
+				<a href="mailto:kai_kai03@hotmail.com?subject=%20&body=from%20blog"><Email>kai_kai03@hotmail.com</Email></a>
+            </div>
+            
+            
+			
+			<div class="large-3 aside column">
+                <h3>Socials</h3>
+                <ul>
+                    <li><a href="http://weibo.com/mipamipami">新浪weibo</a></li>
+                    <li><a href="https://plus.google.com/105166364351021934050">g+</a></li>
+                </ul>
+            </div> 
+            
+            <div class="large-3 category-column column">
+                <h3>Categories</h3>
+                <ul>
+                    <li><a href="/category/bu-kao-pu-chan-pin-ri-ji.html">不靠谱产品日记</a> (28)</li>
+                    <li><a href="/category/db.html">DB</a> (3)</li>
+                    <li><a href="/category/idev.html">iDev</a> (14)</li>
+                    <li><a href="/category/machinelearning.html">MachineLearning</a> (24)</li>
+                    <li><a href="/category/musical.html">Musical</a> (3)</li>
+                    <li><a href="/category/other.html">other</a> (3)</li>
+                    <li class="active"><a href="/category/pydev.html">pyDev</a> (19)</li>
+                    <li><a href="/category/yin-shi-pin.html">音视频</a> (18)</li>
+                </ul>
+            </div> 
+            
+            <div class="large-3 category-column column">
+                <h3>Feeds</h3>
+                <ul>
+                    <li ><a href="/feeds/all.atom.xml" type="application/atom+xml">Atom Feed</a></li>
+                    <li ><a href="/feeds/all.rss.xml" type="application/rss+xml">RSS Feed</a></li>
+                </ul>
+            </div>
+            
+        
+        
+
+                <!--
+            <iframe width="100%" height="600" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=600&fansRow=1&ptype=1&speed=0&skin=1&isTitle=0&noborder=0&isWeibo=1&isFans=0&uid=1819436507&verifier=4060feb2&colors=fc1f12,ffffff,666666,0082cb,ecfbfd&dpc=1"></iframe>            </div>
+            -->
+         
+    </div>
+</div>
+    <div class="footer">
+        <div class="data-holder">
+        <div class="row">
+            <div class="large-3 column">
+<div class="Verse">
+    <h3>bo主偈语</h3>
+    <p>これも欲しい</p>
+    <p>あれも欲しい</p>
+    <p1>金がなくて悲しい</p1>
+    <p>これもセール</p>
+    <p>あれもセール</p>
+    <p1>全部買うと責められる</p1>
+    <p>これかっこい</p>
+    <p>あれも可愛い</p>
+    <p1>買えないので悔しい</p1>
+    <p>いつ金が入る？</p>
+    <p>いつ金が入る？</p>
+    <p1>あの時まだ間に合う？</p1>
+    <p>phaも買った</p>
+    <p>hmzも買った</p>
+    <p>嬉しいけど.....</p>
+    <p1>土しか食べられるものは無かった</p1>
+    <p1>嗯...2015年...vps不续费了...</p1>
+</div>           </div>
+           <div class="large-6 tag-cloud column">
+                <h3>Tags</h3>
+                <ul class="tagcloud">
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/nao-dong.html">脑洞
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/chord.html">Chord
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/websocket.html">WebSocket
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/mongo.html">mongo
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/classification.html">classification
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/shi-xu-tu.html">时序图
+                        </a></li>
+                    <li>
+											<span class="badge">33</span>
+                        <a href="/tag/chan-pin.html">产品
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/fuck.html">fuck
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/gc.html">GC
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/rtmp.html">RTMP
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/unicode.html">unicode
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/dylib.html">dylib
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/protocol.html">protocol
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/pycon.html">PyCon
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/cai-ji.html">采集
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/clustering.html">clustering
+                        </a></li>
+                    <li>
+											<span class="badge">7</span>
+                        <a href="/tag/web.html">Web
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/yi-zhi.html">移植
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/network.html">network
+                        </a></li>
+                    <li>
+											<span class="badge">6</span>
+                        <a href="/tag/flask.html">Flask
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/review.html">review
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/nodejs.html">Node.js
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/pep.html">PEP
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/linear.html">Linear
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/features.html">Features
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/wu-tai.html">舞台
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/cnn.html">CNN
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/pca.html">PCA
+                        </a></li>
+                    <li>
+											<span class="badge">7</span>
+                        <a href="/tag/webrtc.html">webRtc
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/css.html">CSS
+                        </a></li>
+                    <li>
+											<span class="badge">8</span>
+                        <a href="/tag/object-c.html">Object-C
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/memory.html">Memory
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/life.html">life
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/flask-socketio.html">Flask-SocketIO
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/http.html">HTTP
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/finance.html">finance
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/dataprocessing.html">DataProcessing
+                        </a></li>
+                    <li>
+											<span class="badge">18</span>
+                        <a href="/tag/python.html">Python
+                        </a></li>
+                    <li>
+											<span class="badge">6</span>
+                        <a href="/tag/javascript.html">JavaScript
+                        </a></li>
+                    <li>
+											<span class="badge">18</span>
+                        <a href="/tag/ios.html">iOS
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/encode.html">encode
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/xcode.html">xCode
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/appstore.html">appstore
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/html5.html">html5
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/liu-cheng.html">流程
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/uiimage.html">UIImage
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/decorator.html">Decorator
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/ipad.html">iPad
+                        </a></li>
+                    <li>
+											<span class="badge">5</span>
+                        <a href="/tag/c.html">C++
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/jia-gou.html">架构
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/ffmpeg.html">FFmpeg
+                        </a></li>
+                    <li>
+											<span class="badge">22</span>
+                        <a href="/tag/algorithm.html">algorithm
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/database.html">database
+                        </a></li>
+                    <li>
+											<span class="badge">17</span>
+                        <a href="/tag/ml.html">ML
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/yan-zou.html">演奏
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/framework.html">framework
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/gbk.html">GBK
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/rfc.html">rfc
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/cache.html">cache
+                        </a></li>
+                    <li>
+											<span class="badge">19</span>
+                        <a href="/tag/math.html">Math
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/audio.html">audio
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/obs.html">OBS
+                        </a></li>
+                </ul>
+            </div>
+
+            <div class="large-3 aside column">
+                <h3>Links</h3>
+                <ul>
+                    <li><a href="http://mikanani.me/">蜜柑计划</a></li><br/>
+                    <li><a href="http://josh.agarrado.net/music/anime/index.php">ジョシュの楽譜集</a></li><br/>
+                    <li><a href="http://deeplearning.stanford.edu/">Deep Learning</a></li><br/>
+                    <li><a href="http://getpelican.com/">Pelican</a></li><br/>
+                    <li><a href="http://python.org/">Python</a></li><br/>
+                    <li><a href="http://jinja.pocoo.org/">Jinja2</a></li><br/>
+                </ul>
+                
+            </div>
+
+        </row>
+        </div>
+        <div class="row">
+            <div class="small-12 column">
+                <p style="font-size: 0.7em; text-align:center;">
+                ∠( ᐛ 」∠)＿不会有人拉到这么下边的呀就算拉下来也不会去看的呀这么小的字也看不清的口牙！ ©2015.
+                <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1257347159'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1257347159%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+                <!--<script type="text/javascript" src="/theme/js/analytics.js"></script> -->
+                </p>
+            </div>
+        </div>
+    </div>
+
+    
+</body>
+</html>

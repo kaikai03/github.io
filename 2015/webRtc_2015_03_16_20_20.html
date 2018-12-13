@@ -1,0 +1,888 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="Access-Control-Allow-Origin" content="*">
+        <link rel="stylesheet" href="/theme/css/foundation.min.css" media="all">
+		<link rel="stylesheet" href="/theme/css/pygments.css" /> 
+		<link rel="stylesheet" href="/theme/css/style.css" />
+		<link rel="stylesheet" href="/theme/css/ukagaka.css" /> 
+        <script type="text/javascript" src="/theme/js/modernizr.js"></script>
+		<script type='text/javascript' src='/theme/js/jquery-1.11.1.min.js'></script>
+	    <script type="text/javascript" src="/theme/js/damoo.min.js"></script>
+		<script type="text/x-mathjax-config">MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});</script>
+        <script type="text/javascript">var js=document.createElement('script');js.setAttribute('src',(('https:' == document.location.protocol) ? ' https://' : ' http://')+'cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML');document.head.appendChild(js);</script>
+
+        <link href='https://fonts.lug.ustc.edu.cn/css?family=Exo+2:400,300,700,300italic,400italic,700italic,900,900italic' rel='stylesheet' type='text/css'>
+        <link rel="stylesheet" href="/theme/css/lamboz.css" media="all">
+        <title>webRtc 前端 - kairnsの记事簿</title>
+        <meta charset="utf-8" />
+        <link href="/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="kairnsの记事簿 Full Atom Feed" />
+        <link href="/feeds/all.rss.xml" type="application/rss+xml" rel="alternate" title="kairnsの记事簿 Full RSS Feed" />
+        <!-- |format(category.slug) -->
+        <link href="/feeds/{slug}.atom.xml" type="application/atom+xml" rel="alternate" title="kairnsの记事簿 Categories Atom Feed" />
+ 
+ 
+        
+        
+</head>
+<body onblur="leavePage()" onfocus="comebackPage()">
+    <div class="pages">
+        <ul>
+            <li class="home"><a href="/index.html">Home</a></li>
+            <li ><a href="/pages/about-me.html">About Me</a></li>
+            <li ><a href="/pages/Python_Packages_2012_11_05_12_18.html">Python Packages</a></li>
+        </ul>
+    </div>
+
+<div class="hp-header-inner">
+    <div class="page-header">
+        <div class="content-header">
+            <div id="title-block">
+            <h1>  <a href="/2015/webRtc_2015_03_16_20_20.html" rel="bookmark"
+                    title="Permalink to webRtc 前端">webRtc 前端</a></h1>
+            </div>
+        </div>
+    </div>
+</div>
+    <div class="content">
+        <div class="data-holder">
+        <div class="row">
+           <div class="large-9 content-column column">
+<div class="content-article">
+    <header class="header-article">
+        <div class="read-more">Posted on Mon 16 March 2015</div>
+ 
+   </header>
+    <section class='article'>
+        
+        <div class="entry-summary">
+            <p>一个最简化操作的demo，写给研发同事学习用的。</p>
+        </div>
+    
+        <div class="entry-content">
+            <h2>简单说明</h2>
+<p>主要流程就是：</p>
+<ol>
+<li>用getUserMedia 打开摄像头；</li>
+<li>通过iceServer中设置的stun服务器来获取当前设备的网络链路信息；</li>
+<li>用PeerConnection建立p2p；</li>
+<li>如果p2p无法连通，将使用iceServer中设置的turn服务器进行数据转发，当然demo里面没设置turn服务，后面有空我再写篇turn的安装和配置，挺简单的；</li>
+</ol>
+<p>发起通话请求的用户会发送__offer(含sdp)给平台（具体见前一篇），平台转发给被请求用户。被请求用户接受的话会返回__answer(含sdp)给平台，平台呢再发送给发起请求的用户，两者确定关系后，两者通过平台交换跟自身设备相关的网络节点信息__ice_candidate，根据不同网络环境，这个交互的数量是不一定的，接下来就是设备自己去测试__ice_candidate中描述的网络节点，看走哪p2p能连通。如果都不能通就去走turn了。</p>
+<p>其实平台不是必须的，只不过去掉平台的前提是两个通话者永远知道对方的位置（ip），并且两个设备之间网络保证是互通的，否者没有信令交互就没有后面的事。</p>
+<h2>注意</h2>
+<p>截止到现在，safari、ie还不支持webRtc，不过快了，firefox里的webRtc是个半成品，并且不稳定，要用网页开发产品的话，最好是针对chrome，目前测试下来，最新版本的pc版与android版都很稳定。</p>
+<p>不过不稳定的firefox有个好处，它能拍照录音（录像能不能忘了），而chrome安全级别很高，完全不允许录音录像。</p>
+<h2>代码</h2>
+<div class="highlight"><pre><span></span><span class="o">&amp;</span><span class="nx">lt</span><span class="p">;</span><span class="o">!</span><span class="nx">doctype</span> <span class="nx">html</span><span class="o">&amp;</span><span class="nx">gt</span><span class="p">;</span>
+<span class="o">&amp;</span><span class="nx">lt</span><span class="p">;</span><span class="nx">html</span> <span class="nx">lang</span><span class="o">=</span><span class="s2">&quot;zh-CN&quot;</span><span class="o">&amp;</span><span class="nx">gt</span><span class="p">;</span>
+<span class="o">&amp;</span><span class="nx">lt</span><span class="p">;</span><span class="nx">head</span><span class="o">&amp;</span><span class="nx">gt</span><span class="p">;</span>
+  <span class="o">&amp;</span><span class="nx">lt</span><span class="p">;</span><span class="nx">meta</span> <span class="nx">http</span><span class="o">-</span><span class="nx">equiv</span><span class="o">=</span><span class="s2">&quot;Content-Type&quot;</span> <span class="nx">content</span><span class="o">=</span><span class="s2">&quot;text/html; charset=utf-8&quot;</span> <span class="o">/&amp;</span><span class="nx">gt</span><span class="p">;</span>
+  <span class="o">&amp;</span><span class="nx">lt</span><span class="p">;</span><span class="nx">title</span><span class="o">&amp;</span><span class="nx">gt</span><span class="p">;</span><span class="nx">test1</span><span class="o">&amp;</span><span class="nx">lt</span><span class="p">;</span><span class="err">/title&amp;gt;</span>
+  <span class="o">&amp;</span><span class="nx">lt</span><span class="p">;</span><span class="nx">style</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text/css&quot;</span><span class="o">&amp;</span><span class="nx">gt</span><span class="p">;</span>
+    <span class="nx">html</span><span class="p">,</span> <span class="nx">body</span> <span class="p">{</span>
+      <span class="nx">width</span>: <span class="kt">100</span><span class="o">%</span><span class="p">;</span>
+      <span class="nx">height</span>: <span class="kt">100</span><span class="o">%</span><span class="p">;</span>
+      <span class="nx">margin</span>: <span class="kt">0</span><span class="p">;</span>
+      <span class="nx">padding</span>: <span class="kt">0</span><span class="p">;</span>
+      <span class="nx">background</span><span class="o">-</span><span class="nx">color</span><span class="o">:</span> <span class="err">#</span><span class="nx">f0f0f0</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="err">#</span><span class="nx">videos</span> <span class="p">{</span>
+      <span class="nx">position</span>: <span class="kt">absolute</span><span class="p">;</span>
+      <span class="nx">left</span>: <span class="kt">30</span><span class="o">%</span><span class="p">;</span>
+      <span class="nx">top</span>: <span class="kt">0</span><span class="p">;</span>
+      <span class="nx">bottom</span>: <span class="kt">0</span><span class="p">;</span>
+      <span class="nx">right</span>: <span class="kt">0</span><span class="p">;</span>
+      <span class="nx">overflow</span>: <span class="kt">auto</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="err">#</span><span class="nx">videos</span> <span class="nx">video</span> <span class="p">{</span>
+      <span class="nx">display</span>: <span class="kt">inline</span><span class="o">-</span><span class="nx">block</span><span class="p">;</span>
+      <span class="nx">width</span>: <span class="kt">30</span><span class="o">%</span><span class="p">;</span>
+      <span class="nx">background</span><span class="o">:</span><span class="s2">&quot;#000000&quot;</span><span class="p">;</span>
+    <span class="p">}</span>
+  <span class="o">&amp;</span><span class="nx">lt</span><span class="p">;</span><span class="err">/style&amp;gt;</span>
+<span class="o">&amp;</span><span class="nx">lt</span><span class="p">;</span><span class="err">/head&amp;gt;</span>
+<span class="o">&amp;</span><span class="nx">lt</span><span class="p">;</span><span class="nx">body</span><span class="o">&amp;</span><span class="nx">gt</span><span class="p">;</span>
+  <span class="o">&amp;</span><span class="nx">lt</span><span class="p">;</span><span class="nx">div</span> <span class="nx">id</span><span class="o">=</span><span class="s2">&quot;btn&quot;</span><span class="o">&amp;</span><span class="nx">gt</span><span class="p">;</span>
+    <span class="o">&amp;</span><span class="nx">lt</span><span class="p">;</span><span class="nx">button</span> <span class="nx">id</span><span class="o">=</span><span class="s2">&quot;sendtext&quot;</span> <span class="kr">class</span><span class="o">=</span><span class="s2">&quot;sendBtn&quot;</span>  <span class="nx">style</span><span class="o">=</span><span class="s2">&quot;width:50px;height:50px;&quot;</span><span class="o">&amp;</span><span class="nx">gt</span><span class="p">;</span><span class="nx">sendtextbySocket</span><span class="o">&amp;</span><span class="nx">lt</span><span class="p">;</span><span class="sr">/button&amp;gt;&amp;lt;br/</span><span class="o">&amp;</span><span class="nx">gt</span><span class="p">;</span>
+    <span class="o">&amp;</span><span class="nx">lt</span><span class="p">;</span><span class="nx">button</span> <span class="nx">id</span><span class="o">=</span><span class="s2">&quot;createPeerConnectt&quot;</span> <span class="kr">class</span><span class="o">=</span><span class="s2">&quot;sendBtn&quot;</span><span class="o">&amp;</span><span class="nx">gt</span><span class="p">;</span><span class="nx">createPeerConnect</span><span class="o">&amp;</span><span class="nx">lt</span><span class="p">;</span><span class="sr">/button&amp;gt;&amp;lt;br/</span><span class="o">&amp;</span><span class="nx">gt</span><span class="p">;</span>
+    <span class="o">&amp;</span><span class="nx">lt</span><span class="p">;</span><span class="nx">button</span> <span class="nx">id</span><span class="o">=</span><span class="s2">&quot;sendTextByFataChannel&quot;</span> <span class="kr">class</span><span class="o">=</span><span class="s2">&quot;sendBtn&quot;</span><span class="o">&amp;</span><span class="nx">gt</span><span class="p">;</span><span class="nx">sendTextByFataChannel</span><span class="o">&amp;</span><span class="nx">lt</span><span class="p">;</span><span class="err">/button&amp;gt;</span>
+
+  <span class="o">&amp;</span><span class="nx">lt</span><span class="p">;</span><span class="err">/div&amp;gt;</span>
+  <span class="o">&amp;</span><span class="nx">lt</span><span class="p">;</span><span class="nx">div</span> <span class="nx">id</span><span class="o">=</span><span class="s2">&quot;videos&quot;</span><span class="o">&amp;</span><span class="nx">gt</span><span class="p">;</span>
+    <span class="o">&amp;</span><span class="nx">lt</span><span class="p">;</span><span class="nx">video</span> <span class="nx">id</span><span class="o">=</span><span class="s2">&quot;selfVideo&quot;</span>   <span class="nx">autoplay</span><span class="o">&amp;</span><span class="nx">gt</span><span class="p">;</span><span class="o">&amp;</span><span class="nx">lt</span><span class="p">;</span><span class="err">/video&amp;gt;</span>
+    <span class="o">&amp;</span><span class="nx">lt</span><span class="p">;</span><span class="nx">video</span> <span class="nx">id</span><span class="o">=</span><span class="s2">&quot;remoteVideo&quot;</span> <span class="nx">autoplay</span><span class="o">&amp;</span><span class="nx">gt</span><span class="p">;</span><span class="o">&amp;</span><span class="nx">lt</span><span class="p">;</span><span class="err">/video&amp;gt;</span>
+    <span class="o">&amp;</span><span class="nx">lt</span><span class="p">;</span><span class="nx">video</span> <span class="nx">id</span><span class="o">=</span><span class="s2">&quot;thirdRemoteVideo&quot;</span> <span class="nx">autoplay</span><span class="o">&amp;</span><span class="nx">gt</span><span class="p">;</span><span class="o">&amp;</span><span class="nx">lt</span><span class="p">;</span><span class="err">/video&amp;gt;</span>
+  <span class="o">&amp;</span><span class="nx">lt</span><span class="p">;</span><span class="err">/div&amp;gt;</span>
+<span class="o">&amp;</span><span class="nx">lt</span><span class="p">;</span><span class="err">/body&amp;gt;</span>
+
+<span class="o">&amp;</span><span class="nx">lt</span><span class="p">;</span><span class="nx">script</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span><span class="o">&amp;</span><span class="nx">gt</span><span class="p">;</span>
+<span class="kd">var</span> <span class="nx">sendtextBtn</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s2">&quot;sendtext&quot;</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">createPeerConnectBtn</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s2">&quot;createPeerConnectt&quot;</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">sendTextByFataChannelBtn</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s1">&#39;sendTextByFataChannel&#39;</span><span class="p">);</span>
+
+<span class="kd">var</span> <span class="nx">selfVideo</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s1">&#39;selfVideo&#39;</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">remoteVideo</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s1">&#39;remoteVideo&#39;</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">thirdRemoteVideo</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s1">&#39;thirdRemoteVideo&#39;</span><span class="p">);</span>
+
+
+
+<span class="c1">///Adaptive browser variable</span>
+<span class="kd">var</span> <span class="nx">PeerConnection</span> <span class="o">=</span> <span class="p">(</span><span class="nb">window</span><span class="p">.</span><span class="nx">PeerConnection</span> <span class="o">||</span> <span class="nb">window</span><span class="p">.</span><span class="nx">webkitPeerConnection00</span> <span class="o">||</span> <span class="nb">window</span><span class="p">.</span><span class="nx">webkitRTCPeerConnection</span> <span class="o">||</span> <span class="nb">window</span><span class="p">.</span><span class="nx">mozRTCPeerConnection</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">URL</span> <span class="o">=</span> <span class="p">(</span><span class="nb">window</span><span class="p">.</span><span class="nx">URL</span> <span class="o">||</span> <span class="nb">window</span><span class="p">.</span><span class="nx">webkitURL</span> <span class="o">||</span> <span class="nb">window</span><span class="p">.</span><span class="nx">msURL</span> <span class="o">||</span> <span class="nb">window</span><span class="p">.</span><span class="nx">oURL</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">getUserMedia</span> <span class="o">=</span> <span class="p">(</span><span class="nx">navigator</span><span class="p">.</span><span class="nx">getUserMedia</span> <span class="o">||</span> <span class="nx">navigator</span><span class="p">.</span><span class="nx">webkitGetUserMedia</span> <span class="o">||</span> <span class="nx">navigator</span><span class="p">.</span><span class="nx">mozGetUserMedia</span> <span class="o">||</span> <span class="nx">navigator</span><span class="p">.</span><span class="nx">msGetUserMedia</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">nativeRTCIceCandidate</span> <span class="o">=</span> <span class="p">(</span><span class="nb">window</span><span class="p">.</span><span class="nx">mozRTCIceCandidate</span> <span class="o">||</span> <span class="nb">window</span><span class="p">.</span><span class="nx">RTCIceCandidate</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">nativeRTCSessionDescription</span> <span class="o">=</span> <span class="p">(</span><span class="nb">window</span><span class="p">.</span><span class="nx">mozRTCSessionDescription</span> <span class="o">||</span> <span class="nb">window</span><span class="p">.</span><span class="nx">RTCSessionDescription</span><span class="p">);</span> <span class="c1">// order is very important: &quot;RTCSessionDescription&quot; defined in Nighly but useless</span>
+<span class="kd">var</span> <span class="nx">moz</span> <span class="o">=</span> <span class="o">!!</span> <span class="nx">navigator</span><span class="p">.</span><span class="nx">mozGetUserMedia</span><span class="p">;</span>
+
+<span class="kd">var</span> <span class="nx">BlobBuilder</span> <span class="o">=</span> <span class="nb">window</span><span class="p">.</span><span class="nx">blobBuilder</span> <span class="o">||</span> <span class="nb">window</span><span class="p">.</span><span class="nx">webKitBlobBuilder</span> <span class="o">||</span> <span class="nb">window</span><span class="p">.</span><span class="nx">mozBlobBuilder</span><span class="p">;</span>
+
+
+<span class="kd">var</span> <span class="nx">iceServer</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;iceServers&quot;</span><span class="o">:</span> <span class="p">[{</span>
+            <span class="s2">&quot;url&quot;</span><span class="o">:</span> <span class="s2">&quot;stun:stun.ekiga.net&quot;</span>
+        <span class="p">}]</span>
+    <span class="p">};</span>
+<span class="c1">//stun.l.google.com:19302</span>
+<span class="c1">//stun1.l.google.com:19302</span>
+<span class="c1">//stun2.l.google.com:19302</span>
+<span class="c1">//stun3.l.google.com:19302</span>
+<span class="c1">//stun4.l.google.com:19302</span>
+<span class="c1">//stun01.sipphone.com</span>
+<span class="c1">//stun.ekiga.net</span>
+<span class="c1">//stun.fwdnet.net</span>
+<span class="c1">//stun.ideasip.com</span>
+<span class="c1">//stun.iptel.org</span>
+<span class="c1">//stun.rixtelecom.se</span>
+<span class="c1">//stun.schlund.de</span>
+<span class="c1">//stunserver.org</span>
+<span class="c1">//stun.softjoys.com</span>
+<span class="c1">//stun.voiparound.com</span>
+<span class="c1">//stun.voipbuster.com</span>
+<span class="c1">//stun.voipstunt.com</span>
+<span class="c1">//stun.voxgratia.org</span>
+<span class="c1">//stun.xten.com</span>
+<span class="c1">//stun.voipbuster.com</span>
+<span class="c1">//stun.wirlab.net</span>
+<span class="c1">//stun.ideasip.com</span>
+<span class="c1">//stun.iptel.org</span>
+<span class="c1">//stun.schlund.de</span>
+<span class="c1">//numb.viagenie.ca</span>
+<span class="c1">//stun.voxgratia.org</span>
+<span class="c1">//stun.ekiga.net</span>
+<span class="c1">//stun.voipstunt.com</span>
+<span class="c1">//stunserver.org</span>
+
+
+<span class="c1">//self variable</span>
+<span class="kd">var</span> <span class="nx">selfStream</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+<span class="kd">var</span> <span class="nx">selfPeerConnection</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+<span class="kd">var</span> <span class="nx">cPeerConnection</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+<span class="kd">var</span> <span class="nx">selfSession</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+<span class="kd">var</span> <span class="nx">isCaller</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+<span class="kd">var</span> <span class="nx">socket</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+<span class="kd">var</span> <span class="nx">datachannel</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+<span class="kd">var</span> <span class="nx">remoteVideoCompelet</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+<span class="kd">var</span> <span class="nx">is2C</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+
+
+
+<span class="kd">function</span> <span class="nx">saveAs</span><span class="p">(</span><span class="nx">blob</span><span class="p">,</span> <span class="nx">filename</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">type</span> <span class="o">=</span> <span class="nx">blob</span><span class="p">.</span><span class="nx">type</span><span class="p">;</span>
+    <span class="kd">var</span> <span class="nx">force_saveable_type</span> <span class="o">=</span> <span class="s1">&#39;application/octet-stream&#39;</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">type</span> <span class="o">&amp;</span><span class="nx">amp</span><span class="p">;</span><span class="o">&amp;</span><span class="nx">amp</span><span class="p">;</span> <span class="nx">type</span> <span class="o">!=</span> <span class="nx">force_saveable_type</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// 强制下载，而非在浏览器中打开</span>
+        <span class="kd">var</span> <span class="nx">slice</span> <span class="o">=</span> <span class="nx">blob</span><span class="p">.</span><span class="nx">slice</span> <span class="o">||</span> <span class="nx">blob</span><span class="p">.</span><span class="nx">webkitSlice</span> <span class="o">||</span> <span class="nx">blob</span><span class="p">.</span><span class="nx">mozSlice</span><span class="p">;</span>
+        <span class="nx">blob</span> <span class="o">=</span> <span class="nx">slice</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">blob</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">blob</span><span class="p">.</span><span class="nx">size</span><span class="p">,</span> <span class="nx">force_saveable_type</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="kd">var</span> <span class="nx">url</span> <span class="o">=</span> <span class="nx">URL</span><span class="p">.</span><span class="nx">createObjectURL</span><span class="p">(</span><span class="nx">blob</span><span class="p">);</span>
+    <span class="kd">var</span> <span class="nx">save_link</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">createElementNS</span><span class="p">(</span><span class="s1">&#39;http://www.w3.org/1999/xhtml&#39;</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">);</span>
+    <span class="nx">save_link</span><span class="p">.</span><span class="nx">href</span> <span class="o">=</span> <span class="nx">url</span><span class="p">;</span>
+    <span class="nx">save_link</span><span class="p">.</span><span class="nx">download</span> <span class="o">=</span> <span class="nx">filename</span><span class="p">;</span>
+
+    <span class="kd">var</span> <span class="nx">event</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">createEvent</span><span class="p">(</span><span class="s1">&#39;MouseEvents&#39;</span><span class="p">);</span>
+    <span class="nx">event</span><span class="p">.</span><span class="nx">initMouseEvent</span><span class="p">(</span><span class="s1">&#39;click&#39;</span><span class="p">,</span> <span class="kc">true</span><span class="p">,</span> <span class="kc">false</span><span class="p">,</span> <span class="nb">window</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">false</span><span class="p">,</span> <span class="kc">false</span><span class="p">,</span> <span class="kc">false</span><span class="p">,</span> <span class="kc">false</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">null</span><span class="p">);</span>
+    <span class="nx">save_link</span><span class="p">.</span><span class="nx">dispatchEvent</span><span class="p">(</span><span class="nx">event</span><span class="p">);</span>
+    <span class="nx">URL</span><span class="p">.</span><span class="nx">revokeObjectURL</span><span class="p">(</span><span class="nx">url</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="c1">////peer function,and setup callback </span>
+<span class="kd">function</span> <span class="nx">createPeerConnect</span><span class="p">(){</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;createPeerConnect&#39;</span><span class="p">);</span>
+    <span class="kd">var</span> <span class="nx">constraints</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="nx">mandatory</span><span class="o">:</span> <span class="p">{</span>
+            <span class="nx">OfferToReceiveAudio</span>: <span class="kt">true</span><span class="p">,</span>
+            <span class="nx">OfferToReceiveVideo</span>: <span class="kt">true</span> 
+        <span class="p">},</span>
+        <span class="nx">optional</span><span class="o">:</span><span class="p">[</span>
+            <span class="p">{</span><span class="nx">RtpDataChannels</span>: <span class="kt">true</span><span class="p">}</span>
+        <span class="p">]</span>
+    <span class="p">};</span>
+
+    <span class="nx">pc</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">PeerConnection</span><span class="p">(</span><span class="nx">iceServer</span><span class="p">,</span><span class="nx">constraints</span><span class="p">);</span>
+
+    <span class="nx">pc</span><span class="p">.</span><span class="nx">onicecandidate</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">evt</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">evt</span><span class="p">);</span>
+
+        <span class="nx">sendSession</span> <span class="o">=</span> <span class="nx">selfSession</span><span class="p">;</span>
+        <span class="k">if</span><span class="p">(</span><span class="nx">is2C</span><span class="p">){</span>
+            <span class="nx">sendSession</span> <span class="o">=</span> <span class="s2">&quot;c&quot;</span><span class="p">;</span>
+        <span class="p">};</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="nx">evt</span><span class="p">.</span><span class="nx">candidate</span><span class="p">){</span>
+            <span class="nx">socket</span><span class="p">.</span><span class="nx">send</span><span class="p">(</span><span class="nx">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">({</span>
+                <span class="s2">&quot;event&quot;</span><span class="o">:</span> <span class="s2">&quot;__ice_candidate&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;data&quot;</span><span class="o">:</span> <span class="p">{</span>
+          <span class="s2">&quot;candidate&quot;</span><span class="o">:</span> <span class="nx">evt</span><span class="p">.</span><span class="nx">candidate</span><span class="p">,</span>
+          <span class="s2">&quot;remoteSession&quot;</span><span class="o">:</span><span class="nx">sendSession</span>
+            <span class="p">}</span>
+         <span class="p">}));</span>
+         <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;onicecandidate sucess&#39;</span><span class="p">);</span>
+        <span class="p">}</span><span class="k">else</span><span class="p">{</span>
+        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;onicecandidate error&#39;</span><span class="p">);</span>
+        <span class="p">};</span>
+        <span class="p">};</span>
+
+    <span class="nx">pc</span><span class="p">.</span><span class="nx">onopen</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;pc open&#39;</span><span class="p">);</span>
+        <span class="p">};</span>
+
+    <span class="nx">pc</span><span class="p">.</span><span class="nx">onaddstream</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">event</span><span class="p">){</span>
+        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;pc get remote stream&#39;</span><span class="p">);</span>
+        <span class="nx">v</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">remoteVideoCompelet</span><span class="p">){</span>
+            <span class="nx">v</span> <span class="o">=</span> <span class="nx">remoteVideo</span> 
+            <span class="nx">remoteVideoCompelet</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+            <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;pc get remote stream: remoteVideo&#39;</span><span class="p">);</span>
+        <span class="p">}</span><span class="k">else</span><span class="p">{</span><span class="c1">//c</span>
+            <span class="nx">v</span> <span class="o">=</span> <span class="nx">thirdRemoteVideo</span>
+            <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;pc get remote stream: thirdRemoteVideo&#39;</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="nx">v</span><span class="p">.</span><span class="nx">src</span> <span class="o">=</span> <span class="nb">window</span><span class="p">.</span><span class="nx">URL</span><span class="p">.</span><span class="nx">createObjectURL</span><span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">stream</span><span class="p">);</span>
+        <span class="nx">v</span><span class="p">.</span><span class="nx">play</span><span class="p">();</span>
+        <span class="nx">v</span><span class="p">.</span><span class="nx">onloadedmetadata</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;Label: &quot;</span> <span class="o">+</span> <span class="nx">event</span><span class="p">.</span><span class="nx">stream</span><span class="p">.</span><span class="nx">label</span><span class="p">);</span>
+      <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;AudioTracks&quot;</span> <span class="p">,</span> <span class="nx">event</span><span class="p">.</span><span class="nx">stream</span><span class="p">.</span><span class="nx">getAudioTracks</span><span class="p">());</span>
+      <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;VideoTracks&quot;</span> <span class="p">,</span> <span class="nx">event</span><span class="p">.</span><span class="nx">stream</span><span class="p">.</span><span class="nx">getVideoTracks</span><span class="p">());</span>
+    <span class="p">};</span>
+
+    <span class="p">};</span>
+
+    <span class="nx">pc</span><span class="p">.</span><span class="nx">ondatachannel</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">evt</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;pc ondatachannel&#39;</span><span class="p">);</span>
+        <span class="p">};</span>
+    <span class="k">return</span> <span class="nx">pc</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="kd">function</span> <span class="nx">closePeerConnection</span><span class="p">(</span><span class="nx">pc</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">pc</span><span class="p">)</span><span class="k">return</span><span class="p">;</span>
+    <span class="nx">pc</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+<span class="p">};</span>
+
+
+
+
+<span class="c1">////connect function to btn</span>
+<span class="nx">sendtextBtn</span><span class="p">.</span><span class="nx">onclick</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">event</span><span class="p">){</span>
+    <span class="nx">socket</span><span class="p">.</span><span class="nx">send</span><span class="p">(</span><span class="s1">&#39;socket sendsendsend &#39;</span><span class="p">);</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;send&#39;</span><span class="p">);</span>
+ <span class="p">};</span>
+
+ <span class="nx">sendTextByFataChannelBtn</span><span class="p">.</span><span class="nx">onclick</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">event</span><span class="p">){</span>
+    <span class="nx">dataChannel</span><span class="p">.</span><span class="nx">send</span><span class="p">(</span><span class="s1">&#39;dataChannel sendsendsend &#39;</span><span class="p">);</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;dataChannel send&#39;</span><span class="p">);</span>
+ <span class="p">};</span>
+
+<span class="nx">createPeerConnectBtn</span><span class="p">.</span><span class="nx">onclick</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">event</span><span class="p">){</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;createPeerConnectBtn.onclick&#39;</span><span class="p">,</span><span class="nx">getUserMedia</span><span class="p">);</span>
+
+
+
+    <span class="c1">////create and config peerConnection ,</span>
+           <span class="c1">// &quot;googNoiseReduction&quot;: false</span>
+    <span class="c1">///at the same time,open local camera and set the stream to &#39;video&#39;, &quot;maxAspectRatio&quot;: &quot;1.334&quot; </span>
+    <span class="nx">getUserMedia</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">navigator</span><span class="p">,</span> <span class="p">{</span>
+  <span class="s2">&quot;video&quot;</span><span class="o">:</span> <span class="p">{</span>
+        <span class="s2">&quot;mandatory&quot;</span><span class="o">:</span> <span class="p">{</span> <span class="s2">&quot;minAspectRatio&quot;</span><span class="o">:</span> <span class="mf">2.333</span><span class="p">,</span><span class="s2">&quot;maxAspectRatio&quot;</span><span class="o">:</span> <span class="mf">2.334</span><span class="p">},</span>
+        <span class="s2">&quot;optional&quot;</span> <span class="o">:</span><span class="p">[</span>
+            <span class="p">{</span><span class="s2">&quot;minFrameRate&quot;</span><span class="o">:</span> <span class="mi">2</span><span class="p">},</span>
+          <span class="p">{</span> <span class="s2">&quot;maxWidth&quot;</span><span class="o">:</span> <span class="mi">640</span> <span class="p">},</span>
+          <span class="p">{</span> <span class="s2">&quot;maxHeigth&quot;</span><span class="o">:</span> <span class="mi">480</span><span class="p">}</span>
+        <span class="p">]</span>
+      <span class="p">},</span>
+  <span class="nx">audio</span><span class="o">:</span><span class="p">{</span>
+        <span class="nx">mandatory</span><span class="o">:</span> <span class="p">{</span>
+            <span class="nx">googEchoCancellation</span>: <span class="kt">true</span><span class="p">,</span>
+            <span class="nx">googEchoCancellation2</span>: <span class="kt">true</span><span class="p">,</span>
+            <span class="nx">googAutoGainControl</span>: <span class="kt">true</span><span class="p">,</span>
+            <span class="nx">googAutoGainControl2</span>: <span class="kt">true</span><span class="p">,</span>
+            <span class="nx">googNoiseSuppression</span>: <span class="kt">true</span><span class="p">,</span>
+            <span class="nx">googNoiseSuppression2</span>: <span class="kt">true</span><span class="p">,</span>
+            <span class="nx">googHighpassFilter</span>: <span class="kt">true</span>  <span class="p">,</span>
+            <span class="nx">googTypingNoiseDetection</span>: <span class="kt">true</span>  
+        <span class="p">},</span>
+        <span class="nx">optional</span><span class="o">:</span> <span class="p">[</span>
+                <span class="p">{</span><span class="nx">adjustPeerVolume</span>:<span class="kt">true</span><span class="p">},</span>
+                        <span class="p">{</span><span class="nx">peerVolumeWhenSpeaking</span>:<span class="kt">1</span><span class="p">},</span>
+                        <span class="p">{</span><span class="nx">googNoiseReduction</span>: <span class="kt">true</span><span class="p">},</span>
+                        <span class="p">{</span><span class="nx">googTypingNoiseDetection</span>: <span class="kt">true</span><span class="p">},</span>
+            <span class="p">{</span><span class="nx">googAudioMirroring</span>: <span class="kt">true</span><span class="p">}</span>
+                        <span class="p">]</span>
+    <span class="p">},</span>
+  <span class="nx">autoAdjustMic</span>: <span class="kt">true</span><span class="p">,</span>
+  <span class="nx">googCombinedAudioVideoBwe</span>:<span class="kt">true</span>
+    <span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">stream</span><span class="p">){</span>
+        <span class="c1">//</span>
+      <span class="kd">var</span> <span class="nx">sendOfferFn</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">desc</span><span class="p">){</span>
+          <span class="nx">selfPeerConnection</span><span class="p">.</span><span class="nx">setLocalDescription</span><span class="p">(</span><span class="nx">desc</span><span class="p">);</span>
+          <span class="nx">socket</span><span class="p">.</span><span class="nx">send</span><span class="p">(</span><span class="nx">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">({</span> 
+            <span class="s2">&quot;event&quot;</span><span class="o">:</span> <span class="s2">&quot;__offer&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;data&quot;</span><span class="o">:</span> <span class="p">{</span>
+              <span class="s2">&quot;sdp&quot;</span><span class="o">:</span> <span class="nx">desc</span><span class="p">,</span>
+              <span class="s2">&quot;remoteSession&quot;</span><span class="o">:</span><span class="nx">selfSession</span>
+            <span class="p">}</span>
+          <span class="p">}));</span>
+        <span class="p">}</span>
+        <span class="c1">//,</span>
+      <span class="c1">//sendAnswerFn = function(desc){</span>
+      <span class="c1">//    selfPeerConnection.setLocalDescription(desc);</span>
+      <span class="c1">//    socket.send(JSON.stringify({ </span>
+      <span class="c1">//      &quot;event&quot;: &quot;__answer&quot;,</span>
+      <span class="c1">//      &quot;data&quot;: {</span>
+      <span class="c1">//        &quot;sdp&quot;: desc,</span>
+      <span class="c1">//        &quot;remoteSession&quot;:selfSession</span>
+      <span class="c1">//      }}));</span>
+    <span class="c1">//  };</span>
+    <span class="nx">selfStream</span> <span class="o">=</span> <span class="nx">stream</span><span class="p">;</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;selfStream: &quot;</span> <span class="o">+</span> <span class="nx">selfStream</span><span class="p">);</span>
+    <span class="nx">selfVideo</span><span class="p">.</span><span class="nx">src</span> <span class="o">=</span> <span class="nb">window</span><span class="p">.</span><span class="nx">URL</span><span class="p">.</span><span class="nx">createObjectURL</span><span class="p">(</span><span class="nx">selfStream</span><span class="p">);</span>
+    <span class="nx">selfVideo</span><span class="p">.</span><span class="nx">volume</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;selfVideo.src: &quot;</span> <span class="o">+</span> <span class="nx">selfVideo</span><span class="p">.</span><span class="nx">src</span><span class="p">);</span>
+
+        <span class="nx">selfVideo</span><span class="p">.</span><span class="nx">onloadedmetadata</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;Label: &quot;</span> <span class="o">+</span> <span class="nx">selfStream</span><span class="p">.</span><span class="nx">label</span><span class="p">);</span>
+      <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;AudioTracks&quot;</span> <span class="p">,</span> <span class="nx">selfStream</span><span class="p">.</span><span class="nx">getAudioTracks</span><span class="p">());</span>
+      <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;VideoTracks&quot;</span> <span class="p">,</span> <span class="nx">selfStream</span><span class="p">.</span><span class="nx">getVideoTracks</span><span class="p">());</span>
+
+    <span class="p">};</span>
+        <span class="c1">//selfVideo.play();</span>
+
+
+
+
+
+
+        <span class="nx">selfPeerConnection</span><span class="p">.</span><span class="nx">addStream</span><span class="p">(</span><span class="nx">selfStream</span><span class="p">);</span>
+
+        <span class="nx">dataChannel</span> <span class="o">=</span> <span class="nx">selfPeerConnection</span><span class="p">.</span><span class="nx">createDataChannel</span><span class="p">(</span><span class="s2">&quot;label&quot;</span><span class="p">);</span>
+        <span class="nx">dataChannel</span><span class="p">.</span><span class="nx">onmessage</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">event</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;dataChannel,onmessage:&#39;</span><span class="p">,</span><span class="nx">event</span><span class="p">.</span><span class="nx">data</span><span class="p">);</span>
+        <span class="p">};</span>
+
+        <span class="k">if</span><span class="p">(</span><span class="nx">isCaller</span><span class="p">){</span>
+        <span class="nx">selfPeerConnection</span><span class="p">.</span><span class="nx">createOffer</span><span class="p">(</span><span class="nx">sendOfferFn</span><span class="p">);</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="c1">//selfPeerConnection.createAnswer(sendAnswerFn);</span>
+    <span class="p">}</span>
+
+    <span class="p">},</span><span class="kd">function</span><span class="p">(</span><span class="nx">error</span><span class="p">){</span>
+            <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;stream errpr&#39;</span><span class="p">,</span><span class="nx">error</span><span class="p">);</span>
+        <span class="p">});</span>
+<span class="p">};</span>
+
+
+
+
+<span class="kd">function</span> <span class="nx">StreamSave</span><span class="p">(</span><span class="nx">blob</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">bb</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">BlobBuilder</span><span class="p">;</span>
+        <span class="nx">bb</span><span class="p">.</span><span class="nx">append</span><span class="p">(</span><span class="s1">&#39;Hello, world!&#39;</span><span class="p">);</span>
+        <span class="nx">saveAs</span><span class="p">(</span><span class="nx">bb</span><span class="p">.</span><span class="nx">getBlob</span><span class="p">(</span><span class="s1">&#39;text/plain;charset=utf-8&#39;</span><span class="p">),</span> <span class="s1">&#39;hello world.txt&#39;</span><span class="p">);</span>
+ <span class="p">};</span>
+
+
+<span class="c1">///connect to server</span>
+<span class="nx">socket</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">WebSocket</span><span class="p">(</span><span class="s1">&#39;ws://192.168.18.53:50000&#39;</span><span class="p">);</span>
+<span class="nx">socket</span><span class="p">.</span><span class="nx">onopen</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">event</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">//sucess callback,the next action would wait for it</span>
+      <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;open&#39;</span><span class="p">);</span>
+
+      <span class="nx">selfPeerConnection</span> <span class="o">=</span> <span class="nx">createPeerConnect</span><span class="p">();</span>
+        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">selfPeerConnection</span><span class="p">);</span>
+
+      <span class="c1">//listen port and message received callback </span>
+      <span class="nx">socket</span><span class="p">.</span><span class="nx">onmessage</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">event</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;Client received a message:&#39;</span><span class="p">);</span>
+        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">data</span><span class="p">);</span>
+        <span class="k">try</span><span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">json</span> <span class="o">=</span> <span class="nx">JSON</span><span class="p">.</span><span class="nx">parse</span><span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">data</span><span class="p">);</span>
+        <span class="p">}</span><span class="k">catch</span><span class="p">(</span><span class="nx">e</span><span class="p">){</span>
+            <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;is no json&#39;</span><span class="p">);</span>
+            <span class="k">return</span><span class="p">;</span>
+            <span class="p">}</span>
+
+        <span class="c1">//junze create</span>
+            <span class="k">if</span><span class="p">(</span><span class="nx">json</span><span class="p">.</span><span class="nx">event</span> <span class="o">===</span> <span class="s2">&quot;_usersesion&quot;</span><span class="p">){</span>
+                <span class="nx">selfSession</span> <span class="o">=</span> <span class="nx">json</span><span class="p">.</span><span class="nx">data</span>
+                <span class="k">if</span><span class="p">(</span><span class="nx">selfSession</span> <span class="o">===</span> <span class="s2">&quot;b&quot;</span> <span class="o">||</span> <span class="nx">selfSession</span> <span class="o">===</span> <span class="s2">&quot;c&quot;</span><span class="p">)</span>
+                    <span class="nx">isCaller</span> <span class="o">=</span> <span class="kc">true</span>
+                <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;isCaller&#39;</span><span class="p">,</span><span class="nx">isCaller</span><span class="p">);</span>
+                <span class="k">return</span><span class="p">;</span>
+                <span class="p">};</span>
+
+            <span class="k">if</span><span class="p">(</span> <span class="nx">json</span><span class="p">.</span><span class="nx">event</span> <span class="o">===</span> <span class="s2">&quot;__ice_candidate&quot;</span> <span class="p">){</span>
+                <span class="nx">pc</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+                <span class="k">if</span><span class="p">(</span><span class="nx">json</span><span class="p">.</span><span class="nx">data</span><span class="p">.</span><span class="nx">remoteSession</span> <span class="o">===</span> <span class="s2">&quot;c&quot;</span> <span class="o">&amp;</span><span class="nx">amp</span><span class="p">;</span><span class="o">&amp;</span><span class="nx">amp</span><span class="p">;</span> <span class="nx">selfSession</span> <span class="o">===</span> <span class="s2">&quot;a&quot;</span><span class="p">){</span>
+                    <span class="nx">pc</span> <span class="o">=</span> <span class="nx">cPeerConnection</span><span class="p">;</span>
+            <span class="p">}</span><span class="k">else</span><span class="p">{</span>
+                <span class="nx">pc</span> <span class="o">=</span> <span class="nx">selfPeerConnection</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="k">if</span><span class="p">(</span><span class="nx">pc</span> <span class="o">===</span> <span class="nx">cPeerConnection</span><span class="p">)</span>
+                <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;pc === cPeerConnection&#39;</span><span class="p">);</span>
+                <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">cPeerConnection</span><span class="p">);</span>
+
+            <span class="k">try</span><span class="p">{</span>
+                <span class="nx">pc</span><span class="p">.</span><span class="nx">addIceCandidate</span><span class="p">(</span><span class="k">new</span> <span class="nx">RTCIceCandidate</span><span class="p">(</span><span class="nx">json</span><span class="p">.</span><span class="nx">data</span><span class="p">.</span><span class="nx">candidate</span><span class="p">));</span>
+            <span class="p">}</span><span class="k">catch</span><span class="p">(</span><span class="nx">e</span><span class="p">){</span>
+                <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;pc.addIceCandidate error&#39;</span><span class="p">,</span><span class="nx">e</span><span class="p">);</span>
+                <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;json.data&#39;</span><span class="p">,</span><span class="nx">json</span><span class="p">.</span><span class="nx">data</span><span class="p">)</span>
+                <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;json.data.candidate&#39;</span><span class="p">,</span><span class="nx">json</span><span class="p">.</span><span class="nx">data</span><span class="p">.</span><span class="nx">candidate</span><span class="p">)</span>
+            <span class="p">}</span>
+
+            <span class="k">return</span><span class="p">;</span>
+        <span class="p">}</span> 
+        <span class="k">if</span><span class="p">(</span> <span class="nx">json</span><span class="p">.</span><span class="nx">event</span> <span class="o">===</span> <span class="s2">&quot;__offer&quot;</span> <span class="p">)</span> <span class="p">{</span>
+            <span class="nx">pc</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+            <span class="nx">romoteSesson</span> <span class="o">=</span> <span class="nx">json</span><span class="p">.</span><span class="nx">data</span><span class="p">.</span><span class="nx">remoteSession</span><span class="p">;</span>
+            <span class="k">if</span><span class="p">(</span><span class="nx">json</span><span class="p">.</span><span class="nx">data</span><span class="p">.</span><span class="nx">remoteSession</span> <span class="o">===</span> <span class="s2">&quot;c&quot;</span><span class="p">){</span>
+                <span class="nx">cPeerConnection</span> <span class="o">=</span> <span class="nx">createPeerConnect</span><span class="p">();</span>
+                    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;cPc:&quot;</span><span class="p">,</span><span class="nx">cPeerConnection</span><span class="p">);</span>
+                    <span class="nx">pc</span> <span class="o">=</span> <span class="nx">cPeerConnection</span><span class="p">;</span>
+                    <span class="nx">is2C</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+            <span class="p">}</span><span class="k">else</span><span class="p">{</span>
+                <span class="nx">pc</span> <span class="o">=</span> <span class="nx">selfPeerConnection</span><span class="p">;</span>
+            <span class="p">};</span>
+
+            <span class="k">if</span><span class="p">(</span><span class="nx">is2C</span><span class="p">){</span>
+                <span class="nx">sendSession</span> <span class="o">=</span> <span class="s2">&quot;c&quot;</span><span class="p">;</span>
+            <span class="p">}</span><span class="k">else</span><span class="p">{</span>
+                <span class="nx">sendSession</span> <span class="o">=</span> <span class="nx">selfSession</span><span class="p">;</span>
+            <span class="p">};</span>
+
+            <span class="nx">pc</span><span class="p">.</span><span class="nx">setRemoteDescription</span><span class="p">(</span><span class="k">new</span> <span class="nx">RTCSessionDescription</span><span class="p">(</span><span class="nx">json</span><span class="p">.</span><span class="nx">data</span><span class="p">.</span><span class="nx">sdp</span><span class="p">));</span>
+
+            <span class="nx">sendAnswerFn</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">desc</span><span class="p">){</span>
+              <span class="nx">pc</span><span class="p">.</span><span class="nx">setLocalDescription</span><span class="p">(</span><span class="nx">desc</span><span class="p">);</span>
+              <span class="nx">socket</span><span class="p">.</span><span class="nx">send</span><span class="p">(</span><span class="nx">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">({</span> 
+                <span class="s2">&quot;event&quot;</span><span class="o">:</span> <span class="s2">&quot;__answer&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;data&quot;</span><span class="o">:</span> <span class="p">{</span>
+                  <span class="s2">&quot;sdp&quot;</span><span class="o">:</span> <span class="nx">desc</span><span class="p">,</span>
+                  <span class="s2">&quot;remoteSession&quot;</span><span class="o">:</span><span class="nx">sendSession</span>
+                <span class="p">}}));</span>
+                <span class="p">};</span>
+            <span class="nx">pc</span><span class="p">.</span><span class="nx">createAnswer</span><span class="p">(</span><span class="nx">sendAnswerFn</span><span class="p">);</span>
+            <span class="k">return</span><span class="p">;</span>
+        <span class="p">};</span>
+
+        <span class="k">if</span><span class="p">(</span> <span class="nx">json</span><span class="p">.</span><span class="nx">event</span> <span class="o">===</span> <span class="s2">&quot;__answer&quot;</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">selfPeerConnection</span><span class="p">.</span><span class="nx">setRemoteDescription</span><span class="p">(</span><span class="k">new</span> <span class="nx">RTCSessionDescription</span><span class="p">(</span><span class="nx">json</span><span class="p">.</span><span class="nx">data</span><span class="p">.</span><span class="nx">sdp</span><span class="p">));</span>
+            <span class="k">return</span><span class="p">;</span>
+        <span class="p">};</span>
+      <span class="p">};</span>
+      <span class="c1">//close connect callback</span>
+      <span class="nx">socket</span><span class="p">.</span><span class="nx">onclose</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">event</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;Client notified socket has closed&#39;</span><span class="p">);</span>
+      <span class="p">};</span>
+      <span class="c1">//close</span>
+      <span class="c1">//socket.close()</span>
+    <span class="p">};</span>
+
+
+
+<span class="c1">//var recordRTC = RecordRTC(stream, {</span>
+<span class="c1">//    type: &#39;video&#39;,</span>
+<span class="c1">//    canvas: {</span>
+<span class="c1">//        width: 1280,</span>
+<span class="c1">//        height: 720</span>
+<span class="c1">//    }</span>
+<span class="c1">//});</span>
+
+<span class="o">&amp;</span><span class="nx">lt</span><span class="p">;</span><span class="err">/script&amp;gt;</span>
+<span class="o">&amp;</span><span class="nx">lt</span><span class="p">;</span><span class="err">/html&amp;gt;</span>
+</pre></div>
+        </div>
+    </section>
+    <footer class="footer-article">
+        <div class="tags-and-categories">Filed under <a href="/category/yin-shi-pin.html">音视频</a>
+        | Tagged: <a href="/tag/webrtc.html">webRtc </a><a href="/tag/javascript.html">JavaScript </a><a href="/tag/html5.html">html5 </a>
+        | <a href="/2015/webRtc_2015_03_16_20_20.html" rel="bookmark"
+         title="Permalink to webRtc 前端">Permalink</a>            
+        </div>
+        <!-- metaldata 
+        -->
+    </footer>
+</div>
+<div id="disqus_thread"></div>
+<script type="text/javascript" src="/theme/js/disqus.js"></script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+            </div>
+            
+            
+			<div class="large-3 aside column">
+				<img class="headIcon-large avatar" src="/sys_img/head.jpg" alt="(┬＿┬)">
+                <h2>魏凯</h2>
+                <h3>kairns leeky</h3>
+				<a href="mailto:kai_kai03@hotmail.com?subject=%20&body=from%20blog"><Email>kai_kai03@hotmail.com</Email></a>
+            </div>
+            
+            
+			
+			<div class="large-3 aside column">
+                <h3>Socials</h3>
+                <ul>
+                    <li><a href="http://weibo.com/mipamipami">新浪weibo</a></li>
+                    <li><a href="https://plus.google.com/105166364351021934050">g+</a></li>
+                </ul>
+            </div> 
+            
+            <div class="large-3 category-column column">
+                <h3>Categories</h3>
+                <ul>
+                    <li><a href="/category/bu-kao-pu-chan-pin-ri-ji.html">不靠谱产品日记</a> (28)</li>
+                    <li><a href="/category/db.html">DB</a> (3)</li>
+                    <li><a href="/category/idev.html">iDev</a> (14)</li>
+                    <li><a href="/category/machinelearning.html">MachineLearning</a> (24)</li>
+                    <li><a href="/category/musical.html">Musical</a> (3)</li>
+                    <li><a href="/category/other.html">other</a> (3)</li>
+                    <li><a href="/category/pydev.html">pyDev</a> (19)</li>
+                    <li class="active"><a href="/category/yin-shi-pin.html">音视频</a> (18)</li>
+                </ul>
+            </div> 
+            
+            <div class="large-3 category-column column">
+                <h3>Feeds</h3>
+                <ul>
+                    <li ><a href="/feeds/all.atom.xml" type="application/atom+xml">Atom Feed</a></li>
+                    <li ><a href="/feeds/all.rss.xml" type="application/rss+xml">RSS Feed</a></li>
+                </ul>
+            </div>
+            
+        
+        
+
+                <!--
+            <iframe width="100%" height="600" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=600&fansRow=1&ptype=1&speed=0&skin=1&isTitle=0&noborder=0&isWeibo=1&isFans=0&uid=1819436507&verifier=4060feb2&colors=fc1f12,ffffff,666666,0082cb,ecfbfd&dpc=1"></iframe>            </div>
+            -->
+         
+    </div>
+</div>
+    <div class="footer">
+        <div class="data-holder">
+        <div class="row">
+            <div class="large-3 column">
+<div class="Verse">
+    <h3>bo主偈语</h3>
+    <p>これも欲しい</p>
+    <p>あれも欲しい</p>
+    <p1>金がなくて悲しい</p1>
+    <p>これもセール</p>
+    <p>あれもセール</p>
+    <p1>全部買うと責められる</p1>
+    <p>これかっこい</p>
+    <p>あれも可愛い</p>
+    <p1>買えないので悔しい</p1>
+    <p>いつ金が入る？</p>
+    <p>いつ金が入る？</p>
+    <p1>あの時まだ間に合う？</p1>
+    <p>phaも買った</p>
+    <p>hmzも買った</p>
+    <p>嬉しいけど.....</p>
+    <p1>土しか食べられるものは無かった</p1>
+    <p1>嗯...2015年...vps不续费了...</p1>
+</div>           </div>
+           <div class="large-6 tag-cloud column">
+                <h3>Tags</h3>
+                <ul class="tagcloud">
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/nao-dong.html">脑洞
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/chord.html">Chord
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/websocket.html">WebSocket
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/mongo.html">mongo
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/classification.html">classification
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/shi-xu-tu.html">时序图
+                        </a></li>
+                    <li>
+											<span class="badge">33</span>
+                        <a href="/tag/chan-pin.html">产品
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/fuck.html">fuck
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/gc.html">GC
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/rtmp.html">RTMP
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/unicode.html">unicode
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/dylib.html">dylib
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/protocol.html">protocol
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/pycon.html">PyCon
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/cai-ji.html">采集
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/clustering.html">clustering
+                        </a></li>
+                    <li>
+											<span class="badge">7</span>
+                        <a href="/tag/web.html">Web
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/yi-zhi.html">移植
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/network.html">network
+                        </a></li>
+                    <li>
+											<span class="badge">6</span>
+                        <a href="/tag/flask.html">Flask
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/review.html">review
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/nodejs.html">Node.js
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/pep.html">PEP
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/linear.html">Linear
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/features.html">Features
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/wu-tai.html">舞台
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/cnn.html">CNN
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/pca.html">PCA
+                        </a></li>
+                    <li>
+											<span class="badge">7</span>
+                        <a href="/tag/webrtc.html">webRtc
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/css.html">CSS
+                        </a></li>
+                    <li>
+											<span class="badge">8</span>
+                        <a href="/tag/object-c.html">Object-C
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/memory.html">Memory
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/life.html">life
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/flask-socketio.html">Flask-SocketIO
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/http.html">HTTP
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/finance.html">finance
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/dataprocessing.html">DataProcessing
+                        </a></li>
+                    <li>
+											<span class="badge">18</span>
+                        <a href="/tag/python.html">Python
+                        </a></li>
+                    <li>
+											<span class="badge">6</span>
+                        <a href="/tag/javascript.html">JavaScript
+                        </a></li>
+                    <li>
+											<span class="badge">18</span>
+                        <a href="/tag/ios.html">iOS
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/encode.html">encode
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/xcode.html">xCode
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/appstore.html">appstore
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/html5.html">html5
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/liu-cheng.html">流程
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/uiimage.html">UIImage
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/decorator.html">Decorator
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/ipad.html">iPad
+                        </a></li>
+                    <li>
+											<span class="badge">5</span>
+                        <a href="/tag/c.html">C++
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/jia-gou.html">架构
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/ffmpeg.html">FFmpeg
+                        </a></li>
+                    <li>
+											<span class="badge">22</span>
+                        <a href="/tag/algorithm.html">algorithm
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/database.html">database
+                        </a></li>
+                    <li>
+											<span class="badge">17</span>
+                        <a href="/tag/ml.html">ML
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/yan-zou.html">演奏
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/framework.html">framework
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/gbk.html">GBK
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/rfc.html">rfc
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/cache.html">cache
+                        </a></li>
+                    <li>
+											<span class="badge">19</span>
+                        <a href="/tag/math.html">Math
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/audio.html">audio
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/obs.html">OBS
+                        </a></li>
+                </ul>
+            </div>
+
+            <div class="large-3 aside column">
+                <h3>Links</h3>
+                <ul>
+                    <li><a href="http://mikanani.me/">蜜柑计划</a></li><br/>
+                    <li><a href="http://josh.agarrado.net/music/anime/index.php">ジョシュの楽譜集</a></li><br/>
+                    <li><a href="http://deeplearning.stanford.edu/">Deep Learning</a></li><br/>
+                    <li><a href="http://getpelican.com/">Pelican</a></li><br/>
+                    <li><a href="http://python.org/">Python</a></li><br/>
+                    <li><a href="http://jinja.pocoo.org/">Jinja2</a></li><br/>
+                </ul>
+                
+            </div>
+
+        </row>
+        </div>
+        <div class="row">
+            <div class="small-12 column">
+                <p style="font-size: 0.7em; text-align:center;">
+                ∠( ᐛ 」∠)＿不会有人拉到这么下边的呀就算拉下来也不会去看的呀这么小的字也看不清的口牙！ ©2015.
+                <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1257347159'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1257347159%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+                <!--<script type="text/javascript" src="/theme/js/analytics.js"></script> -->
+                </p>
+            </div>
+        </div>
+    </div>
+
+    
+</body>
+</html>

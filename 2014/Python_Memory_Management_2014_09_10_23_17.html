@@ -1,0 +1,1023 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="Access-Control-Allow-Origin" content="*">
+        <link rel="stylesheet" href="/theme/css/foundation.min.css" media="all">
+		<link rel="stylesheet" href="/theme/css/pygments.css" /> 
+		<link rel="stylesheet" href="/theme/css/style.css" />
+		<link rel="stylesheet" href="/theme/css/ukagaka.css" /> 
+        <script type="text/javascript" src="/theme/js/modernizr.js"></script>
+		<script type='text/javascript' src='/theme/js/jquery-1.11.1.min.js'></script>
+	    <script type="text/javascript" src="/theme/js/damoo.min.js"></script>
+		<script type="text/x-mathjax-config">MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});</script>
+        <script type="text/javascript">var js=document.createElement('script');js.setAttribute('src',(('https:' == document.location.protocol) ? ' https://' : ' http://')+'cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML');document.head.appendChild(js);</script>
+
+        <link href='https://fonts.lug.ustc.edu.cn/css?family=Exo+2:400,300,700,300italic,400italic,700italic,900,900italic' rel='stylesheet' type='text/css'>
+        <link rel="stylesheet" href="/theme/css/lamboz.css" media="all">
+        <title>Python Memory Management(2) - kairnsの记事簿</title>
+        <meta charset="utf-8" />
+        <link href="/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="kairnsの记事簿 Full Atom Feed" />
+        <link href="/feeds/all.rss.xml" type="application/rss+xml" rel="alternate" title="kairnsの记事簿 Full RSS Feed" />
+        <!-- |format(category.slug) -->
+        <link href="/feeds/{slug}.atom.xml" type="application/atom+xml" rel="alternate" title="kairnsの记事簿 Categories Atom Feed" />
+ 
+ 
+        
+        
+</head>
+<body onblur="leavePage()" onfocus="comebackPage()">
+    <div class="pages">
+        <ul>
+            <li class="home"><a href="/index.html">Home</a></li>
+            <li ><a href="/pages/about-me.html">About Me</a></li>
+            <li ><a href="/pages/Python_Packages_2012_11_05_12_18.html">Python Packages</a></li>
+        </ul>
+    </div>
+
+<div class="hp-header-inner">
+    <div class="page-header">
+        <div class="content-header">
+            <div id="title-block">
+            <h1>  <a href="/2014/Python_Memory_Management_2014_09_10_23_17.html" rel="bookmark"
+                    title="Permalink to Python Memory Management(2)">Python Memory Management(2)</a></h1>
+            </div>
+        </div>
+    </div>
+</div>
+    <div class="content">
+        <div class="data-holder">
+        <div class="row">
+           <div class="large-9 content-column column">
+<div class="content-article">
+    <header class="header-article">
+        <div class="read-more">Posted on Wed 10 September 2014</div>
+ 
+   </header>
+    <section class='article'>
+        
+        <div class="entry-summary">
+            <p>Python源码阅读-内存管理机制(二)</p>
+        </div>
+    
+        <div class="entry-content">
+            <h2>Python 的内存分配策略</h2>
+<h3>arena</h3>
+<p>多个pool聚合的结果。</p>
+<h3>arena size</h3>
+<p>pool的大小默认值位4KB</p>
+<p>arena的大小默认值256KB, 能放置 256/4=64 个pool</p>
+<p><em>obmalloc.c</em>中代码：</p>
+<div class="highlight"><pre><span></span>#define ARENA_SIZE              (256 &amp;lt;&amp;lt; 10)     /* 256KB */
+</pre></div>
+
+
+<h3>arena 结构</h3>
+<blockquote>
+<p>一个完整的arena = arena_object + pool集合</p>
+</blockquote>
+<div class="highlight"><pre><span></span>typedef uchar block;
+
+/* Record keeping for arenas. */
+struct arena_object {
+    /* The address of the arena, as returned by malloc.  Note that 0
+     * will never be returned by a successful malloc, and is used
+     * here to mark an arena_object that doesn&#39;t correspond to an
+     * allocated arena.
+     */
+    uptr address;
+
+    /* Pool-aligned pointer to the next pool to be carved off. */
+    block* pool_address;
+
+    /* The number of available pools in the arena:  free pools + never-
+     * allocated pools.
+     */
+    uint nfreepools;
+
+    /* The total number of pools in the arena, whether or not available. */
+    uint ntotalpools;
+
+    /* Singly-linked list of available pools. */
+    // 单链表, 可用pool集合
+    struct pool_header* freepools;
+
+    /* Whenever this arena_object is not associated with an allocated
+     * arena, the nextarena member is used to link all unassociated
+     * arena_objects in the singly-linked `unused_arena_objects` list.
+     * The prevarena member is unused in this case.
+     *
+     * When this arena_object is associated with an allocated arena
+     * with at least one available pool, both members are used in the
+     * doubly-linked `usable_arenas` list, which is maintained in
+     * increasing order of `nfreepools` values.
+     *
+     * Else this arena_object is associated with an allocated arena
+     * all of whose pools are in use.  `nextarena` and `prevarena`
+     * are both meaningless in this case.
+     */
+    // arena链表
+    struct arena_object* nextarena;
+    struct arena_object* prevarena;
+};
+</pre></div>
+
+
+<p>arena_object的作用:</p>
+<ul>
+<li>与其他arena连接, 组成双向链表</li>
+<li>维护arena中可用的pool, 单链表</li>
+<li>其他信息</li>
+</ul>
+<p><code>pool_header</code> 与 <code>arena_object</code></p>
+<ul>
+<li>pool_header和管理的blocks内存是一块连续的内存 =&gt; pool_header被申请时, 其管理的block集合的内存一并被申请</li>
+<li>arena_object和其管理的内存是分离的 =&gt; arena_object被申请时, 其管理的pool集合的内存没有被申请, 而是在某一时刻建立的联系</li>
+</ul>
+<p><center><img alt="" src="/article_img/Python_Memory_Management_2014_09_10_23_17/python-memory-arena.png"></center></p>
+<h3>arena的两种状态</h3>
+<p>arena存在两种状态: 未使用(没有建立联系)/可用(建立了联系)</p>
+<p>全局由两个链表维护着</p>
+<div class="highlight"><pre><span></span><span class="cm">/* The head of the singly-linked, NULL-terminated list of available</span>
+<span class="cm"> * arena_objects.</span>
+<span class="cm"> */</span><span class="w"></span>
+<span class="o">//</span><span class="w"> </span><span class="err">单链表</span><span class="w"></span>
+static<span class="w"> </span>struct<span class="w"> </span>arena_object<span class="o">*</span><span class="w"> </span>unused_arena_objects<span class="w"> </span><span class="o">=</span><span class="w"> </span>NULL<span class="err">;</span><span class="w"></span>
+
+<span class="cm">/* The head of the doubly-linked, NULL-terminated at each end, list of</span>
+<span class="cm"> * arena_objects associated with arenas that have pools available.</span>
+<span class="cm"> */</span><span class="w"></span>
+<span class="o">//</span><span class="w"> </span><span class="err">双向链表</span><span class="w"></span>
+static<span class="w"> </span>struct<span class="w"> </span>arena_object<span class="o">*</span><span class="w"> </span>usable_arenas<span class="w"> </span><span class="o">=</span><span class="w"> </span>NULL<span class="err">;</span><span class="w"></span>
+</pre></div>
+
+
+<h3>arena的初始化</h3>
+<p>首先, 来看下初始化相关的一些参数定义
+代码<em>obmalloc.c</em></p>
+<div class="highlight"><pre><span></span><span class="cm">/* Array of objects used to track chunks of memory (arenas). */</span><span class="w"></span>
+<span class="o">//</span><span class="w"> </span>arena_object<span class="w"> </span><span class="err">数组</span><span class="w"></span>
+static<span class="w"> </span>struct<span class="w"> </span>arena_object<span class="o">*</span><span class="w"> </span>arenas<span class="w"> </span><span class="o">=</span><span class="w"> </span>NULL<span class="err">;</span><span class="w"></span>
+
+<span class="cm">/* Number of slots currently allocated in the `arenas` vector. */</span><span class="w"></span>
+<span class="o">//</span><span class="w"> </span><span class="err">当前</span>arenas<span class="err">中管理的</span>arena_object<span class="err">的个数</span><span class="o">,</span><span class="w"> </span><span class="err">初始化时</span><span class="o">=</span><span class="m">0</span><span class="w"></span>
+static<span class="w"> </span>uint<span class="w"> </span>maxarenas<span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">0</span><span class="err">;</span><span class="w"></span>
+
+<span class="cm">/* How many arena_objects do we initially allocate?</span>
+<span class="cm"> * 16 = can allocate 16 arenas = 16 * ARENA_SIZE = 4MB before growing the</span>
+<span class="cm"> * `arenas` vector.</span>
+<span class="cm"> */</span><span class="w"></span>
+<span class="o">//</span><span class="w"> </span><span class="err">初始化时申请的</span>arena_object<span class="err">个数</span><span class="w"></span>
+<span class="err">#</span>define<span class="w"> </span>INITIAL_ARENA_OBJECTS<span class="w"> </span><span class="m">16</span><span class="w"></span>
+
+<span class="cm">/* Number of arenas allocated that haven&#39;t been free()&#39;d. */</span><span class="w"></span>
+static<span class="w"> </span>size_t<span class="w"> </span>narenas_currently_allocated<span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">0</span><span class="err">;</span><span class="w"></span>
+
+
+<span class="cm">/* The head of the singly-linked, NULL-terminated list of available</span>
+<span class="cm"> * arena_objects.</span>
+<span class="cm"> */</span><span class="w"></span>
+<span class="o">//</span><span class="w"> </span><span class="err">未使用状态</span>arena<span class="err">的单链表</span><span class="w"></span>
+static<span class="w"> </span>struct<span class="w"> </span>arena_object<span class="o">*</span><span class="w"> </span>unused_arena_objects<span class="w"> </span><span class="o">=</span><span class="w"> </span>NULL<span class="err">;</span><span class="w"></span>
+
+<span class="cm">/* The head of the doubly-linked, NULL-terminated at each end, list of</span>
+<span class="cm"> * arena_objects associated with arenas that have pools available.</span>
+<span class="cm"> */</span><span class="w"></span>
+<span class="o">//</span><span class="w"> </span><span class="err">可用状态</span>arena<span class="err">的双向链表</span><span class="w"></span>
+static<span class="w"> </span>struct<span class="w"> </span>arena_object<span class="o">*</span><span class="w"> </span>usable_arenas<span class="w"> </span><span class="o">=</span><span class="w"> </span>NULL<span class="err">;</span><span class="w"></span>
+</pre></div>
+
+
+<p>然后, 看下<em>obmalloc.c</em>中arena初始化的代码</p>
+<div class="highlight"><pre><span></span><span class="cm">/* Allocate a new arena.  If we run out of memory, return NULL.  Else</span>
+<span class="cm"> * allocate a new arena, and return the address of an arena_object</span>
+<span class="cm"> * describing the new arena.  It&#39;s expected that the caller will set</span>
+<span class="cm"> * `usable_arenas` to the return value.</span>
+<span class="cm"> */</span>
+<span class="k">static</span> <span class="k">struct</span> <span class="n">arena_object</span><span class="o">*</span>
+<span class="nf">new_arena</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">struct</span> <span class="n">arena_object</span><span class="o">*</span> <span class="n">arenaobj</span><span class="p">;</span>
+    <span class="n">uint</span> <span class="n">excess</span><span class="p">;</span>        <span class="cm">/* number of bytes above pool alignment */</span>
+    <span class="kt">void</span> <span class="o">*</span><span class="n">address</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="n">err</span><span class="p">;</span>
+
+    <span class="c1">// 判断是否需要扩充&quot;未使用&quot;的arena_object列表</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">unused_arena_objects</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">uint</span> <span class="n">i</span><span class="p">;</span>
+        <span class="n">uint</span> <span class="n">numarenas</span><span class="p">;</span>
+        <span class="kt">size_t</span> <span class="n">nbytes</span><span class="p">;</span>
+
+        <span class="cm">/* Double the number of arena objects on each allocation.</span>
+<span class="cm">         * Note that it&#39;s possible for `numarenas` to overflow.</span>
+<span class="cm">         */</span>
+        <span class="c1">// 确定需要申请的个数, 首次初始化, 16, 之后每次翻倍</span>
+        <span class="n">numarenas</span> <span class="o">=</span> <span class="n">maxarenas</span> <span class="o">?</span> <span class="n">maxarenas</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="mi">1</span> <span class="o">:</span> <span class="n">INITIAL_ARENA_OBJECTS</span><span class="p">;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">numarenas</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">=</span> <span class="n">maxarenas</span><span class="p">)</span>
+            <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>                <span class="cm">/* overflow */</span>  <span class="c1">//溢出了</span>
+
+        <span class="p">....</span>
+
+        <span class="n">nbytes</span> <span class="o">=</span> <span class="n">numarenas</span> <span class="o">*</span> <span class="k">sizeof</span><span class="p">(</span><span class="o">*</span><span class="n">arenas</span><span class="p">);</span>
+        <span class="c1">// 申请内存</span>
+        <span class="n">arenaobj</span> <span class="o">=</span> <span class="p">(</span><span class="k">struct</span> <span class="n">arena_object</span> <span class="o">*</span><span class="p">)</span><span class="n">realloc</span><span class="p">(</span><span class="n">arenas</span><span class="p">,</span> <span class="n">nbytes</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">arenaobj</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span>
+            <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
+        <span class="n">arenas</span> <span class="o">=</span> <span class="n">arenaobj</span><span class="p">;</span>
+
+        <span class="cm">/* We might need to fix pointers that were copied.  However,</span>
+<span class="cm">         * new_arena only gets called when all the pages in the</span>
+<span class="cm">         * previous arenas are full.  Thus, there are *no* pointers</span>
+<span class="cm">         * into the old array. Thus, we don&#39;t have to worry about</span>
+<span class="cm">         * invalid pointers.  Just to be sure, some asserts:</span>
+<span class="cm">         */</span>
+        <span class="n">assert</span><span class="p">(</span><span class="n">usable_arenas</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">);</span>
+        <span class="n">assert</span><span class="p">(</span><span class="n">unused_arena_objects</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">);</span>
+
+        <span class="c1">// 初始化</span>
+        <span class="cm">/* Put the new arenas on the unused_arena_objects list. */</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="n">maxarenas</span><span class="p">;</span> <span class="n">i</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="n">numarenas</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">arenas</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">address</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>              <span class="cm">/* mark as unassociated */</span>
+            <span class="c1">// 新申请的一律为0, 标识着这个arena处于&quot;未使用&quot;</span>
+            <span class="n">arenas</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">nextarena</span> <span class="o">=</span> <span class="n">i</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="n">numarenas</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">?</span>
+                                   <span class="o">&amp;</span><span class="n">amp</span><span class="p">;</span><span class="n">arenas</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">:</span> <span class="nb">NULL</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="c1">// 将其放入unused_arena_objects链表中</span>
+        <span class="c1">// unused_arena_objects 为新分配内存空间的开头</span>
+        <span class="cm">/* Update globals. */</span>
+        <span class="n">unused_arena_objects</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">amp</span><span class="p">;</span><span class="n">arenas</span><span class="p">[</span><span class="n">maxarenas</span><span class="p">];</span>
+
+        <span class="c1">// 更新数量</span>
+        <span class="n">maxarenas</span> <span class="o">=</span> <span class="n">numarenas</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="cm">/* Take the next available arena object off the head of the list. */</span>
+    <span class="n">assert</span><span class="p">(</span><span class="n">unused_arena_objects</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">);</span>
+
+    <span class="c1">// 从unused_arena_objects中, 获取一个未使用的object</span>
+    <span class="n">arenaobj</span> <span class="o">=</span> <span class="n">unused_arena_objects</span><span class="p">;</span>
+    <span class="n">unused_arena_objects</span> <span class="o">=</span> <span class="n">arenaobj</span><span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span><span class="n">nextarena</span><span class="p">;</span> <span class="c1">// 更新链表</span>
+
+    <span class="c1">// 开始处理这个 arenaobject</span>
+
+    <span class="n">assert</span><span class="p">(</span><span class="n">arenaobj</span><span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span><span class="n">address</span> <span class="o">==</span> <span class="mi">0</span><span class="p">);</span>
+    <span class="c1">// 申请内存, 256KB, 内存地址赋值给arena的address. 这块内存可用</span>
+<span class="cp">#ifdef ARENAS_USE_MMAP</span>
+    <span class="n">address</span> <span class="o">=</span> <span class="n">mmap</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span> <span class="n">ARENA_SIZE</span><span class="p">,</span> <span class="n">PROT_READ</span><span class="o">|</span><span class="n">PROT_WRITE</span><span class="p">,</span>
+                   <span class="n">MAP_PRIVATE</span><span class="o">|</span><span class="n">MAP_ANONYMOUS</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+    <span class="n">err</span> <span class="o">=</span> <span class="p">(</span><span class="n">address</span> <span class="o">==</span> <span class="n">MAP_FAILED</span><span class="p">);</span>
+<span class="cp">#else</span>
+    <span class="n">address</span> <span class="o">=</span> <span class="n">malloc</span><span class="p">(</span><span class="n">ARENA_SIZE</span><span class="p">);</span>
+    <span class="n">err</span> <span class="o">=</span> <span class="p">(</span><span class="n">address</span> <span class="o">==</span> <span class="mi">0</span><span class="p">);</span>
+<span class="cp">#endif</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">err</span><span class="p">)</span> <span class="p">{</span>
+        <span class="cm">/* The allocation failed: return NULL after putting the</span>
+<span class="cm">         * arenaobj back.</span>
+<span class="cm">         */</span>
+        <span class="n">arenaobj</span><span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span><span class="n">nextarena</span> <span class="o">=</span> <span class="n">unused_arena_objects</span><span class="p">;</span>
+        <span class="n">unused_arena_objects</span> <span class="o">=</span> <span class="n">arenaobj</span><span class="p">;</span>
+        <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="n">arenaobj</span><span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span><span class="n">address</span> <span class="o">=</span> <span class="p">(</span><span class="n">uptr</span><span class="p">)</span><span class="n">address</span><span class="p">;</span>
+
+    <span class="o">++</span><span class="n">narenas_currently_allocated</span><span class="p">;</span>
+
+    <span class="c1">// 设置pool集合相关信息</span>
+    <span class="n">arenaobj</span><span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span><span class="n">freepools</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>  <span class="c1">// 设置为NULL, 只有在释放一个pool的时候才有用</span>
+    <span class="cm">/* pool_address &amp;lt;- first pool-aligned address in the arena</span>
+<span class="cm">       nfreepools &amp;lt;- number of whole pools that fit after alignment */</span>
+    <span class="n">arenaobj</span><span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span><span class="n">pool_address</span> <span class="o">=</span> <span class="p">(</span><span class="n">block</span><span class="o">*</span><span class="p">)</span><span class="n">arenaobj</span><span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span><span class="n">address</span><span class="p">;</span>
+    <span class="n">arenaobj</span><span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span><span class="n">nfreepools</span> <span class="o">=</span> <span class="n">ARENA_SIZE</span> <span class="o">/</span> <span class="n">POOL_SIZE</span><span class="p">;</span>
+
+    <span class="n">assert</span><span class="p">(</span><span class="n">POOL_SIZE</span> <span class="o">*</span> <span class="n">arenaobj</span><span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span><span class="n">nfreepools</span> <span class="o">==</span> <span class="n">ARENA_SIZE</span><span class="p">);</span>
+
+    <span class="c1">// 将pool的起始地址调整为系统页的边界</span>
+    <span class="c1">// 申请到 256KB, 放弃了一些内存, 而将可使用的内存边界pool_address调整到了与系统页对齐</span>
+    <span class="n">excess</span> <span class="o">=</span> <span class="p">(</span><span class="n">uint</span><span class="p">)(</span><span class="n">arenaobj</span><span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span><span class="n">address</span> <span class="o">&amp;</span><span class="n">amp</span><span class="p">;</span> <span class="n">POOL_SIZE_MASK</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">excess</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+        <span class="o">--</span><span class="n">arenaobj</span><span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span><span class="n">nfreepools</span><span class="p">;</span>
+        <span class="n">arenaobj</span><span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span><span class="n">pool_address</span> <span class="o">+=</span> <span class="n">POOL_SIZE</span> <span class="o">-</span> <span class="n">excess</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="n">arenaobj</span><span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span><span class="n">ntotalpools</span> <span class="o">=</span> <span class="n">arenaobj</span><span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span><span class="n">nfreepools</span><span class="p">;</span>
+
+    <span class="k">return</span> <span class="n">arenaobj</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<p>图示: 初始化arenas数组, 初始化后的所有arena都在<code>unused_arena_objects</code>单链表里面
+<center><img alt="" src="/article_img/Python_Memory_Management_2014_09_10_23_17/python-memory-arena2.png"></center>
+图示: 从arenas取一个arena进行初始化
+<center><img alt="" src="/article_img/Python_Memory_Management_2014_09_10_23_17/python-memory-arena3.png"></center></p>
+<h3>没有可用的arena?</h3>
+<p>此时</p>
+<div class="highlight"><pre><span></span>// 判断成立
+if (unused_arena_objects == NULL) {
+    ....
+    // 确定需要申请的个数, 首次初始化, 16, 之后每次翻倍
+    numarenas = maxarenas ? maxarenas &amp;lt;&amp;lt; 1 : INITIAL_ARENA_OBJECTS;
+</pre></div>
+
+
+<p>然后, 假设第一次分配了16个, 发现没有arena之后, 第二次处理结果: <code>numarenas = 32</code></p>
+<p>即, 数组扩大了一倍。</p>
+<h3>arena分配</h3>
+<p><code>new</code>了一个全新的 arena之后,</p>
+<div class="highlight"><pre><span></span>  void *
+  PyObject_Malloc(size_t nbytes)
+  {
+    // 刚开始没有可用的arena
+    if (usable_arenas == NULL) {
+        // new一个, 作为双向链表的表头
+        usable_arenas = new_arena();
+        if (usable_arenas == NULL) {
+            UNLOCK();
+            goto redirect;
+        }
+
+        usable_arenas-&amp;gt;nextarena =
+                  usable_arenas-&amp;gt;prevarena = NULL;
+
+    }
+
+    .......
+
+    // 从arena中获取一个pool
+    pool = (poolp)usable_arenas-&amp;gt;pool_address;
+    assert((block*)pool &amp;lt;= (block*)usable_arenas-&amp;gt;address +
+                                 ARENA_SIZE - POOL_SIZE);
+    pool-&amp;gt;arenaindex = usable_arenas - arenas;
+    assert(&amp;amp;arenas[pool-&amp;gt;arenaindex] == usable_arenas);
+    pool-&amp;gt;szidx = DUMMY_SIZE_IDX;
+
+    // 更新 pool_address 向下一个节点
+    usable_arenas-&amp;gt;pool_address += POOL_SIZE;
+    // 可用节点数量-1
+    --usable_arenas-&amp;gt;nfreepools;
+}
+</pre></div>
+
+
+<p>图示: 从全新的arena中获取一个pool</p>
+<p><center><img alt="" src="/article_img/Python_Memory_Management_2014_09_10_23_17/python-memory-arena4.png"></center></p>
+<p>假设arena是旧的, 怎么分配的pool</p>
+<div class="highlight"><pre><span></span>pool = usable_arenas-&amp;gt;freepools;
+if (pool != NULL) {
+</pre></div>
+
+
+<p>这个arena-&gt;freepools是何方神圣?</p>
+<p>当arena中一整块pool被释放的时候:</p>
+<div class="highlight"><pre><span></span>void
+PyObject_Free(void *p)
+{
+    struct arena_object* ao;
+    uint nf;  /* ao-&amp;gt;nfreepools */
+
+    /* Link the pool to freepools.  This is a singly-linked
+    * list, and pool-&amp;gt;prevpool isn&#39;t used there.
+    */
+    ao = &amp;amp;arenas[pool-&amp;gt;arenaindex];
+    pool-&amp;gt;nextpool = ao-&amp;gt;freepools;
+    ao-&amp;gt;freepools = pool;
+    nf = ++ao-&amp;gt;nfreepools;
+</pre></div>
+
+
+<p>也就是说, 在pool整块被释放的时候, 会将pool加入到<code>arena-&gt;freepools</code>作为单链表的表头, 然后, 在从非全新arena中分配pool时, 优先从<code>arena-&gt;freepools</code>里面取, 如果取不到, 再从arena内存块里面获取。</p>
+<p>图示</p>
+<p><center><img alt="" src="/article_img/Python_Memory_Management_2014_09_10_23_17/python-memory-arena5.png"></center></p>
+<h3>一个arena满了之后呢</h3>
+<p>很自然, 从下一个arena中获取</p>
+<div class="highlight"><pre><span></span>void *
+PyObject_Malloc(size_t nbytes)
+{
+    // 当发现用完了最后一个pool!!!!!!!!!!!
+    // nfreepools = 0
+    if (usable_arenas-&amp;gt;nfreepools == 0) {
+    assert(usable_arenas-&amp;gt;nextarena == NULL || usable_arenas-&amp;gt;nextarena-&amp;gt;prevarena == usable_arenas);
+    /* Unlink the arena:  it is completely allocated. */
+
+    // 找到下一个节点!
+    usable_arenas = usable_arenas-&amp;gt;nextarena;
+    // 右下一个
+    if (usable_arenas != NULL) {
+        usable_arenas-&amp;gt;prevarena = NULL; // 更新下一个节点的prevarens
+        assert(usable_arenas-&amp;gt;address != 0);
+    }
+    // 没有下一个, 此时 usable_arenas = NULL, 下次进行内存分配的时候, 就会从arenas数组中取一个
+    }
+}
+</pre></div>
+
+
+<p>注意: 这里有个逻辑, 就是每分配一个pool, 就检查是不是用到了最后一个, 如果是, 需要变更<code>usable_arenas</code>到下一个可用的节点, 如果没有可用的, 那么下次进行内存分配的时候, 会判定从arenas数组中取一个。</p>
+<h3>arena回收</h3>
+<p>内存分配和回收最小单位是block, 当一个block被回收的时候, 可能触发pool被回收, pool被回收, 将会触发arena的回收机制。</p>
+<p>四种情况：</p>
+<ol>
+<li>arena中所有pool都是闲置的(empty), 将arena内存释放, 返回给操作系统。</li>
+<li>如果arena中之前所有的pool都是占用的(used), 现在释放了一个pool(empty), 需要将 arena加入到usable_arenas, 会加入链表表头。</li>
+<li>如果arena中empty的pool个数n, 则从useable_arenas开始寻找可以插入的位置. 将arena插入。 (useable_arenas是一个有序链表, 按empty pool的个数, 保证empty pool数量越多, 被使用的几率越小, 最终被整体释放的机会越大)</li>
+<li>其他情况, 不对arena 进行处理。</li>
+</ol>
+<p>具体可以看<code>PyObject_Free</code>的代码。</p>
+<h2>内存分配步骤</h2>
+<p>好的, 到这里, 我们已经知道了block和pool的关系(包括pool怎么管理block的), 以及arena和pool的关系(怎么从arena中拉到可用的pool)</p>
+<p>那么, 在分析<code>PyObject_Malloc(size_t nbytes)</code>如何进行内存分配的时候, 我们就刨除掉这些管理代码。</p>
+<p>关注: 如何寻找得到一块可用的nbytes的block内存。</p>
+<p>其实代码那么多, 寻址得到对应的block也就这么几行代码, 其他代码都是pool没有, 找arena, 申请arena, arena没有, 找arenas, 最终的到一块pool, 初始化, 返回第一个block。</p>
+<p>如果有的情况, 用现成的:</p>
+<div class="highlight"><pre><span></span>pool = usedpools[size + size];
+if pool可用:
+    pool 没满, 取一个block返回
+    pool 满了, 从下一个pool取一个block返回
+否则:
+    获取arena, 从里面初始化一个pool, 拿到第一个block, 返回
+</pre></div>
+
+
+<p>从上面这个判断逻辑来看, 内存分配其实主要操作的是pool, 跟arena并不是基本的操作单元(只是用来管理pool的)</p>
+<p>结论: 进行内存分配和销毁, 所有操作都是在pool上进行的。
+<code>usedpools</code> 是什么鬼? 其实是可用pool缓冲池, 后面说。</p>
+<h2>内存池</h2>
+<h3>arena 内存池的大小</h3>
+<p>取决于用户, Python提供的编译符号, 用于决定是否控制。</p>
+<p><em>obmalloc.c</em></p>
+<div class="highlight"><pre><span></span><span class="cp">#ifdef WITH_MEMORY_LIMITS</span>
+<span class="cp">#ifndef SMALL_MEMORY_LIMIT</span>
+<span class="cp">#define SMALL_MEMORY_LIMIT      (64 * 1024 * 1024)      </span><span class="cm">/* 64 MB -- more? */</span><span class="cp"></span>
+<span class="cp">#endif</span>
+<span class="cp">#endif</span>
+
+<span class="cp">#ifdef WITH_MEMORY_LIMITS</span>
+<span class="cp">#define MAX_ARENAS              (SMALL_MEMORY_LIMIT / ARENA_SIZE)</span>
+<span class="cp">#endif</span>
+</pre></div>
+
+
+<p>具体使用中, python并不直接与arenas和arena打交道, 当Python申请内存时, 最基本的操作单元并不是arena, 而是pool。</p>
+<p>问题: pool中所有block的size一样, 但是在arena中, 每个pool的size都可能不一样, 那么最终这些pool是怎么维护的? 怎么根据大小找到需要的block所在的pool? =&gt; usedpools</p>
+<h3>pool在内存池中的三种状态</h3>
+<ol>
+<li>
+<p>used状态: pool中至少有一个block已经被使用, 并且至少有一个block未被使用. 这种状态的pool受控于Python内部维护的usedpool数组。</p>
+</li>
+<li>
+<p>full状态: pool中所有的block都已经被使用, 这种状态的pool在arena中, 但不在arena的freepools链表中
+处于full的pool各自独立, 不会被链表维护起来。</p>
+</li>
+<li>
+<p>empty状态: pool中所有block都未被使用, 处于这个状态的pool的集合通过其pool_header中的nextpool构成一个链表, 链表的表头是arena_object中的freepools。</p>
+</li>
+</ol>
+<h3>usedpools</h3>
+<p>usedpools数组: 维护着所有处于used状态的pool, 当申请内存的时候, 会通过usedpools寻找到一块可用的(处于used状态的)pool, 从中分配一个block。</p>
+<p>结构:</p>
+<div class="highlight"><pre><span></span>  #define SMALL_REQUEST_THRESHOLD 512
+  // 512/8 = 64
+  #define NB_SMALL_SIZE_CLASSES   (SMALL_REQUEST_THRESHOLD / ALIGNMENT)
+
+  #define PTA(x)  ((poolp )((uchar *)&amp;amp;(usedpools[2*(x)]) - 2*sizeof(block *)))
+  #define PT(x)   PTA(x), PTA(x)
+
+  // 2 * ((64 + 7) / 8) * 8 = 128, 大小为128的数组
+  static poolp usedpools[2 * ((NB_SMALL_SIZE_CLASSES + 7) / 8) * 8] = {
+      PT(0), PT(1), PT(2), PT(3), PT(4), PT(5), PT(6), PT(7)
+  #if NB_SMALL_SIZE_CLASSES &amp;gt; 8
+      , PT(8), PT(9), PT(10), PT(11), PT(12), PT(13), PT(14), PT(15)
+  #if NB_SMALL_SIZE_CLASSES &amp;gt; 16
+      , PT(16), PT(17), PT(18), PT(19), PT(20), PT(21), PT(22), PT(23)
+  #if NB_SMALL_SIZE_CLASSES &amp;gt; 24
+      , PT(24), PT(25), PT(26), PT(27), PT(28), PT(29), PT(30), PT(31)
+  #if NB_SMALL_SIZE_CLASSES &amp;gt; 32
+      , PT(32), PT(33), PT(34), PT(35), PT(36), PT(37), PT(38), PT(39)
+  #if NB_SMALL_SIZE_CLASSES &amp;gt; 40
+      , PT(40), PT(41), PT(42), PT(43), PT(44), PT(45), PT(46), PT(47)
+  #if NB_SMALL_SIZE_CLASSES &amp;gt; 48
+      , PT(48), PT(49), PT(50), PT(51), PT(52), PT(53), PT(54), PT(55)
+  #if NB_SMALL_SIZE_CLASSES &amp;gt; 56
+      , PT(56), PT(57), PT(58), PT(59), PT(60), PT(61), PT(62), PT(63)
+  #if NB_SMALL_SIZE_CLASSES &amp;gt; 64
+  #error &quot;NB_SMALL_SIZE_CLASSES should be less than 64&quot;
+  #endif /* NB_SMALL_SIZE_CLASSES &amp;gt; 64 */
+  #endif /* NB_SMALL_SIZE_CLASSES &amp;gt; 56 */
+  #endif /* NB_SMALL_SIZE_CLASSES &amp;gt; 48 */
+  #endif /* NB_SMALL_SIZE_CLASSES &amp;gt; 40 */
+  #endif /* NB_SMALL_SIZE_CLASSES &amp;gt; 32 */
+  #endif /* NB_SMALL_SIZE_CLASSES &amp;gt; 24 */
+  #endif /* NB_SMALL_SIZE_CLASSES &amp;gt; 16 */
+  #endif /* NB_SMALL_SIZE_CLASSES &amp;gt;  8 */
+  };
+
+  即
+
+  // 得到usedpools数组
+static poolp usedpools[128] = {
+   PTA(0), PTA(0), PTA(1), PTA(1), PTA(2), PTA(2), PTA(3), PTA(3),
+   ....
+   PTA(63), PTA(63)
+}
+</pre></div>
+
+
+<p>解开看(<em>obmalloc.c</em>)</p>
+<div class="highlight"><pre><span></span>  typedef uchar block;
+
+  /* Pool for small blocks. */
+  struct pool_header {
+      union { block *_padding;
+              uint count; } ref;          /* number of allocated blocks    */
+      block *freeblock;                   /* pool&#39;s free list head         */
+      struct pool_header *nextpool;       /* next pool of this size class  */
+      struct pool_header *prevpool;       /* previous pool       &quot;&quot;        */
+      uint arenaindex;                    /* index into arenas of base adr */
+      uint szidx;                         /* block size class index        */
+      uint nextoffset;                    /* bytes to virgin block         */
+      uint maxnextoffset;                 /* largest valid nextoffset      */
+  };
+  typedef struct pool_header *poolp;
+  usedpools[0] = PTA(0) = ((poolp )((uchar *)&amp;amp;(usedpools[0]) - 2*sizeof(block *)))
+  usedpools[1] = PTA(0) = ((poolp )((uchar *)&amp;amp;(usedpools[0]) - 2*sizeof(block *)))
+
+
+
+  *p = usedpools[0] =&amp;gt; p-&amp;gt;nextpool and p-&amp;gt;prevpool are both p
+</pre></div>
+
+
+<p>为了看懂这步的trick, 心好累&gt;_&lt;#</p>
+<p>直接上图：</p>
+<p><center><img alt="" src="/article_img/Python_Memory_Management_2014_09_10_23_17/python-memory-usedpool.png"></center></p>
+<h3>new一个pool时维护</h3>
+<p>init获得的情况, 其实就是将刚刚从arena中获取的pool加入到 usedpools 对应的双向链表中, 然后初始化, 然后返回block。</p>
+<div class="highlight"><pre><span></span>     init_pool:
+          /* Frontlink to used pools. */
+
+          // 1. 获取得到usedpools链表头
+          next = usedpools[size + size]; /* == prev */
+
+          // 2. 将新的pool加入到双向链表
+          pool-&amp;gt;nextpool = next;
+          pool-&amp;gt;prevpool = next;
+          next-&amp;gt;nextpool = pool;
+          next-&amp;gt;prevpool = pool;
+          pool-&amp;gt;ref.count = 1;
+
+          // 3. 后面的是具体pool和block的了
+          if (pool-&amp;gt;szidx == size) {
+              /* Luckily, this pool last contained blocks
+               * of the same size class, so its header
+               * and free list are already initialized.
+               */
+              bp = pool-&amp;gt;freeblock;
+              pool-&amp;gt;freeblock = *(block **)bp;
+              UNLOCK();
+              return (void *)bp;
+          }
+          /*
+           * Initialize the pool header, set up the free list to
+           * contain just the second block, and return the first
+           * block.
+           */
+          pool-&amp;gt;szidx = size;
+          size = INDEX2SIZE(size);
+          bp = (block *)pool + POOL_OVERHEAD;
+          pool-&amp;gt;nextoffset = POOL_OVERHEAD + (size &amp;lt;&amp;lt; 1);
+          pool-&amp;gt;maxnextoffset = POOL_SIZE - size;
+          pool-&amp;gt;freeblock = bp + size;
+          *(block **)(pool-&amp;gt;freeblock) = NULL;
+          UNLOCK();
+          return (void *)bp;   // here
+      }
+</pre></div>
+
+
+<h3>从现有pool中获取block</h3>
+<p>从现有的pool, 其实就是 usedpools得到双向链表头部, 判断是不是空链表, 不是的话代表有可用的pool, 直接从里面获取。</p>
+<div class="highlight"><pre><span></span>  if ((nbytes - 1) &amp;lt; SMALL_REQUEST_THRESHOLD) {
+      LOCK();
+      /*
+       * Most frequent paths first
+       */
+      size = (uint)(nbytes - 1) &amp;gt;&amp;gt; ALIGNMENT_SHIFT;
+      pool = usedpools[size + size];
+
+      // 注意这里的判断, pool != pool-&amp;gt; nextpool 表示得到的链表不是空的
+      if (pool != pool-&amp;gt;nextpool) {
+          /*
+           * There is a used pool for this size class.
+           * Pick up the head block of its free list.
+           */
+          ++pool-&amp;gt;ref.count;
+          bp = pool-&amp;gt;freeblock;
+          assert(bp != NULL);
+          if ((pool-&amp;gt;freeblock = *(block **)bp) != NULL) {
+              UNLOCK();
+              return (void *)bp;
+          }
+          /*
+           * Reached the end of the free list, try to extend it.
+           */
+          if (pool-&amp;gt;nextoffset &amp;lt;= pool-&amp;gt;maxnextoffset) {
+              /* There is room for another block. */
+              pool-&amp;gt;freeblock = (block*)pool +
+                                pool-&amp;gt;nextoffset;
+              pool-&amp;gt;nextoffset += INDEX2SIZE(size);
+              *(block **)(pool-&amp;gt;freeblock) = NULL;
+              UNLOCK();
+              return (void *)bp;
+          }
+          /* Pool is full, unlink from used pools. */
+          next = pool-&amp;gt;nextpool;
+          pool = pool-&amp;gt;prevpool;
+          next-&amp;gt;prevpool = pool;
+          pool-&amp;gt;nextpool = next;
+          UNLOCK();
+          return (void *)bp;   // here
+      }
+</pre></div>
+
+
+<h3>全局结构</h3>
+<p><center><img alt="" src="/article_img/Python_Memory_Management_2014_09_10_23_17/python-memory-usedpool2.png"></center></p>
+<hr>
+<p>先这样吧, Python中整个内存池基本结构和机制大概如此, 是不是发现有好多数组/链表等等, 在分配/回收上处理下做成各种池.....
+后面还有内存相关的就是垃圾收集了, 后面再说了吧wklken2015-08-29</p>
+<hr>
+<p>版权声明：自由转载-非商用-非衍生-保持署名 | Creative Commons BY-NC-ND 3.0 </p>
+        </div>
+    </section>
+    <footer class="footer-article">
+        <div class="tags-and-categories">Filed under <a href="/category/pydev.html">pyDev</a>
+        | Tagged: <a href="/tag/memory.html">Memory </a><a href="/tag/features.html">Features </a><a href="/tag/python.html">Python </a>
+        | <a href="/2014/Python_Memory_Management_2014_09_10_23_17.html" rel="bookmark"
+         title="Permalink to Python Memory Management(2)">Permalink</a>            
+        </div>
+        <!-- metaldata 
+        -->
+    </footer>
+</div>
+<div id="disqus_thread"></div>
+<script type="text/javascript" src="/theme/js/disqus.js"></script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+            </div>
+            
+            
+			<div class="large-3 aside column">
+				<img class="headIcon-large avatar" src="/sys_img/head.jpg" alt="(┬＿┬)">
+                <h2>魏凯</h2>
+                <h3>kairns leeky</h3>
+				<a href="mailto:kai_kai03@hotmail.com?subject=%20&body=from%20blog"><Email>kai_kai03@hotmail.com</Email></a>
+            </div>
+            
+            
+			
+			<div class="large-3 aside column">
+                <h3>Socials</h3>
+                <ul>
+                    <li><a href="http://weibo.com/mipamipami">新浪weibo</a></li>
+                    <li><a href="https://plus.google.com/105166364351021934050">g+</a></li>
+                </ul>
+            </div> 
+            
+            <div class="large-3 category-column column">
+                <h3>Categories</h3>
+                <ul>
+                    <li><a href="/category/bu-kao-pu-chan-pin-ri-ji.html">不靠谱产品日记</a> (28)</li>
+                    <li><a href="/category/db.html">DB</a> (3)</li>
+                    <li><a href="/category/idev.html">iDev</a> (14)</li>
+                    <li><a href="/category/machinelearning.html">MachineLearning</a> (24)</li>
+                    <li><a href="/category/musical.html">Musical</a> (3)</li>
+                    <li><a href="/category/other.html">other</a> (3)</li>
+                    <li class="active"><a href="/category/pydev.html">pyDev</a> (19)</li>
+                    <li><a href="/category/yin-shi-pin.html">音视频</a> (18)</li>
+                </ul>
+            </div> 
+            
+            <div class="large-3 category-column column">
+                <h3>Feeds</h3>
+                <ul>
+                    <li ><a href="/feeds/all.atom.xml" type="application/atom+xml">Atom Feed</a></li>
+                    <li ><a href="/feeds/all.rss.xml" type="application/rss+xml">RSS Feed</a></li>
+                </ul>
+            </div>
+            
+        
+        
+
+                <!--
+            <iframe width="100%" height="600" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=600&fansRow=1&ptype=1&speed=0&skin=1&isTitle=0&noborder=0&isWeibo=1&isFans=0&uid=1819436507&verifier=4060feb2&colors=fc1f12,ffffff,666666,0082cb,ecfbfd&dpc=1"></iframe>            </div>
+            -->
+         
+    </div>
+</div>
+    <div class="footer">
+        <div class="data-holder">
+        <div class="row">
+            <div class="large-3 column">
+<div class="Verse">
+    <h3>bo主偈语</h3>
+    <p>これも欲しい</p>
+    <p>あれも欲しい</p>
+    <p1>金がなくて悲しい</p1>
+    <p>これもセール</p>
+    <p>あれもセール</p>
+    <p1>全部買うと責められる</p1>
+    <p>これかっこい</p>
+    <p>あれも可愛い</p>
+    <p1>買えないので悔しい</p1>
+    <p>いつ金が入る？</p>
+    <p>いつ金が入る？</p>
+    <p1>あの時まだ間に合う？</p1>
+    <p>phaも買った</p>
+    <p>hmzも買った</p>
+    <p>嬉しいけど.....</p>
+    <p1>土しか食べられるものは無かった</p1>
+    <p1>嗯...2015年...vps不续费了...</p1>
+</div>           </div>
+           <div class="large-6 tag-cloud column">
+                <h3>Tags</h3>
+                <ul class="tagcloud">
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/nao-dong.html">脑洞
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/chord.html">Chord
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/websocket.html">WebSocket
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/mongo.html">mongo
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/classification.html">classification
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/shi-xu-tu.html">时序图
+                        </a></li>
+                    <li>
+											<span class="badge">33</span>
+                        <a href="/tag/chan-pin.html">产品
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/fuck.html">fuck
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/gc.html">GC
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/rtmp.html">RTMP
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/unicode.html">unicode
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/dylib.html">dylib
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/protocol.html">protocol
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/pycon.html">PyCon
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/cai-ji.html">采集
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/clustering.html">clustering
+                        </a></li>
+                    <li>
+											<span class="badge">7</span>
+                        <a href="/tag/web.html">Web
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/yi-zhi.html">移植
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/network.html">network
+                        </a></li>
+                    <li>
+											<span class="badge">6</span>
+                        <a href="/tag/flask.html">Flask
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/review.html">review
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/nodejs.html">Node.js
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/pep.html">PEP
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/linear.html">Linear
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/features.html">Features
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/wu-tai.html">舞台
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/cnn.html">CNN
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/pca.html">PCA
+                        </a></li>
+                    <li>
+											<span class="badge">7</span>
+                        <a href="/tag/webrtc.html">webRtc
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/css.html">CSS
+                        </a></li>
+                    <li>
+											<span class="badge">8</span>
+                        <a href="/tag/object-c.html">Object-C
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/memory.html">Memory
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/life.html">life
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/flask-socketio.html">Flask-SocketIO
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/http.html">HTTP
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/finance.html">finance
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/dataprocessing.html">DataProcessing
+                        </a></li>
+                    <li>
+											<span class="badge">18</span>
+                        <a href="/tag/python.html">Python
+                        </a></li>
+                    <li>
+											<span class="badge">6</span>
+                        <a href="/tag/javascript.html">JavaScript
+                        </a></li>
+                    <li>
+											<span class="badge">18</span>
+                        <a href="/tag/ios.html">iOS
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/encode.html">encode
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/xcode.html">xCode
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/appstore.html">appstore
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/html5.html">html5
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/liu-cheng.html">流程
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/uiimage.html">UIImage
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/decorator.html">Decorator
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/ipad.html">iPad
+                        </a></li>
+                    <li>
+											<span class="badge">5</span>
+                        <a href="/tag/c.html">C++
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/jia-gou.html">架构
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/ffmpeg.html">FFmpeg
+                        </a></li>
+                    <li>
+											<span class="badge">22</span>
+                        <a href="/tag/algorithm.html">algorithm
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/database.html">database
+                        </a></li>
+                    <li>
+											<span class="badge">17</span>
+                        <a href="/tag/ml.html">ML
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/yan-zou.html">演奏
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/framework.html">framework
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/gbk.html">GBK
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/rfc.html">rfc
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/cache.html">cache
+                        </a></li>
+                    <li>
+											<span class="badge">19</span>
+                        <a href="/tag/math.html">Math
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/audio.html">audio
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/obs.html">OBS
+                        </a></li>
+                </ul>
+            </div>
+
+            <div class="large-3 aside column">
+                <h3>Links</h3>
+                <ul>
+                    <li><a href="http://mikanani.me/">蜜柑计划</a></li><br/>
+                    <li><a href="http://josh.agarrado.net/music/anime/index.php">ジョシュの楽譜集</a></li><br/>
+                    <li><a href="http://deeplearning.stanford.edu/">Deep Learning</a></li><br/>
+                    <li><a href="http://getpelican.com/">Pelican</a></li><br/>
+                    <li><a href="http://python.org/">Python</a></li><br/>
+                    <li><a href="http://jinja.pocoo.org/">Jinja2</a></li><br/>
+                </ul>
+                
+            </div>
+
+        </row>
+        </div>
+        <div class="row">
+            <div class="small-12 column">
+                <p style="font-size: 0.7em; text-align:center;">
+                ∠( ᐛ 」∠)＿不会有人拉到这么下边的呀就算拉下来也不会去看的呀这么小的字也看不清的口牙！ ©2015.
+                <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1257347159'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1257347159%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+                <!--<script type="text/javascript" src="/theme/js/analytics.js"></script> -->
+                </p>
+            </div>
+        </div>
+    </div>
+
+    
+</body>
+</html>

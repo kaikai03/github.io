@@ -1,0 +1,626 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="Access-Control-Allow-Origin" content="*">
+        <link rel="stylesheet" href="/theme/css/foundation.min.css" media="all">
+		<link rel="stylesheet" href="/theme/css/pygments.css" /> 
+		<link rel="stylesheet" href="/theme/css/style.css" />
+		<link rel="stylesheet" href="/theme/css/ukagaka.css" /> 
+        <script type="text/javascript" src="/theme/js/modernizr.js"></script>
+		<script type='text/javascript' src='/theme/js/jquery-1.11.1.min.js'></script>
+	    <script type="text/javascript" src="/theme/js/damoo.min.js"></script>
+		<script type="text/x-mathjax-config">MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});</script>
+        <script type="text/javascript">var js=document.createElement('script');js.setAttribute('src',(('https:' == document.location.protocol) ? ' https://' : ' http://')+'cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML');document.head.appendChild(js);</script>
+
+        <link href='https://fonts.lug.ustc.edu.cn/css?family=Exo+2:400,300,700,300italic,400italic,700italic,900,900italic' rel='stylesheet' type='text/css'>
+        <link rel="stylesheet" href="/theme/css/lamboz.css" media="all">
+        <title>ROC Curve - kairnsの记事簿</title>
+        <meta charset="utf-8" />
+        <link href="/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="kairnsの记事簿 Full Atom Feed" />
+        <link href="/feeds/all.rss.xml" type="application/rss+xml" rel="alternate" title="kairnsの记事簿 Full RSS Feed" />
+        <!-- |format(category.slug) -->
+        <link href="/feeds/{slug}.atom.xml" type="application/atom+xml" rel="alternate" title="kairnsの记事簿 Categories Atom Feed" />
+ 
+ 
+        
+        
+</head>
+<body onblur="leavePage()" onfocus="comebackPage()">
+    <div class="pages">
+        <ul>
+            <li class="home"><a href="/index.html">Home</a></li>
+            <li ><a href="/pages/about-me.html">About Me</a></li>
+            <li ><a href="/pages/Python_Packages_2012_11_05_12_18.html">Python Packages</a></li>
+        </ul>
+    </div>
+
+<div class="hp-header-inner">
+    <div class="page-header">
+        <div class="content-header">
+            <div id="title-block">
+            <h1>  <a href="/2017/ROC_2017_07_03_19_46.html" rel="bookmark"
+                    title="Permalink to ROC Curve">ROC Curve</a></h1>
+            </div>
+        </div>
+    </div>
+</div>
+    <div class="content">
+        <div class="data-holder">
+        <div class="row">
+           <div class="large-9 content-column column">
+<div class="content-article">
+    <header class="header-article">
+        <div class="read-more">Posted on Mon 03 July 2017</div>
+ 
+   </header>
+    <section class='article'>
+        
+        <div class="entry-summary">
+            <p>继续抄袭SPSS！</p>
+        </div>
+    
+        <div class="entry-content">
+            <h2>ROC</h2>
+<h3>哔哔哔哔</h3>
+<p>这次这个统计工具分析不管从原理还是步骤，都比之前的卡方简单好多，但是最麻烦的地方是绘图的结果，试了很多种方法，得到的结果都与SPSS不符。最后全靠蒙，把thershold均匀分1000份，啊！！！结果看起来一样了。。。。。</p>
+<p><center><img alt="1.png" src="/article_img/ROC_2017_07_03_19_46/1.png"></center></p>
+<h3>正文</h3>
+<p>ROC的解释是反映敏感性和特异性连续变量的综合指标。简单来说就是显示<code>真阳性/(真阳性+真阴性)</code> 与 <code>假阳性/(假阳性+真阴性)</code>之间的关系，用别人文章里的话说就是预测命中率与错判率之间的关系。</p>
+<p>如果曲线下面积为1，既填满整个矩形，意味着预测准确率能够达到100%！</p>
+<p>具体过程比较简单，不分段解释了，直接贴完整的实验性质的代码吧。想知道详细过程的同学参看引用，特别是<code>第三篇</code>。</p>
+<p>这里有一点需要提的是，关于ROC，在最常被引用的、最容易被搜出来的某篇论文中，把AUC的标准误差写成标准差，而这里上面提到的那个<code>第三篇</code>则写的是标准误差，至于谁对谁错，又或是我理解错误，就没精力去深究了，至少在本文的前提下，这个<code>第三篇</code>中所描述的，和SPSS的结果输出相符。</p>
+<div class="highlight"><pre><span></span><span class="c1"># coding=utf-8</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;kai_kai03&#39;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">math</span>
+
+<span class="c1">##这里我假装我的product是sex，sample为预测值。</span>
+<span class="kp">sample</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.65432</span><span class="p">,</span><span class="mf">0.65484</span><span class="p">,</span><span class="mf">0.65555</span><span class="p">,</span><span class="mf">0.65835</span><span class="p">,</span><span class="mf">0.65841</span><span class="p">,</span><span class="mf">0.65847</span><span class="p">,</span><span class="mf">0.65873</span><span class="p">,</span><span class="mf">0.65879</span><span class="p">,</span><span class="mf">0.65919</span><span class="p">,</span><span class="mf">0.65951</span><span class="p">,</span><span class="mf">0.66061</span><span class="p">,</span><span class="mf">0.66067</span><span class="p">,</span><span class="mf">0.66106</span><span class="p">,</span><span class="mf">0.66120</span><span class="p">,</span><span class="mf">0.66133</span><span class="p">,</span><span class="mf">0.66145</span><span class="p">,</span><span class="mf">0.66164</span><span class="p">,</span><span class="mf">0.66164</span><span class="p">,</span><span class="mf">0.66165</span><span class="p">,</span><span class="mf">0.66167</span><span class="p">,</span><span class="mf">0.66171</span><span class="p">,</span><span class="mf">0.66177</span><span class="p">,</span><span class="mf">0.66184</span><span class="p">,</span><span class="mf">0.66184</span><span class="p">,</span><span class="mf">0.66222</span><span class="p">,</span><span class="mf">0.66261</span><span class="p">,</span><span class="mf">0.66275</span><span class="p">,</span><span class="mf">0.66287</span><span class="p">,</span><span class="mf">0.66293</span><span class="p">,</span><span class="mf">0.66294</span><span class="p">,</span><span class="mf">0.66300</span><span class="p">,</span><span class="mf">0.66301</span><span class="p">,</span><span class="mf">0.66325</span><span class="p">,</span><span class="mf">0.66332</span><span class="p">,</span><span class="mf">0.66338</span><span class="p">,</span><span class="mf">0.66365</span><span class="p">,</span><span class="mf">0.66383</span><span class="p">,</span><span class="mf">0.66383</span><span class="p">,</span><span class="mf">0.66390</span><span class="p">,</span><span class="mf">0.66390</span><span class="p">,</span><span class="mf">0.66423</span><span class="p">,</span><span class="mf">0.66428</span><span class="p">,</span><span class="mf">0.66437</span><span class="p">,</span><span class="mf">0.66441</span><span class="p">,</span><span class="mf">0.66448</span><span class="p">,</span><span class="mf">0.66448</span><span class="p">,</span><span class="mf">0.66450</span><span class="p">,</span><span class="mf">0.66473</span><span class="p">,</span><span class="mf">0.66481</span><span class="p">,</span><span class="mf">0.66493</span><span class="p">,</span><span class="mf">0.66494</span><span class="p">,</span><span class="mf">0.66506</span><span class="p">]</span>
+<span class="n">sex</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+
+
+<span class="k">def</span> <span class="nf">poz</span><span class="p">(</span><span class="n">z</span><span class="p">):</span>
+        <span class="n">Z_MAX</span> <span class="o">=</span> <span class="mf">6.0</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">z</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">)</span> <span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="kp">fabs</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">y</span> <span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span><span class="o">=</span> <span class="p">(</span><span class="n">Z_MAX</span> <span class="o">*</span> <span class="mf">0.5</span><span class="p">)</span> <span class="p">:</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="mf">1.0</span>
+            <span class="k">elif</span> <span class="n">y</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="mf">1.0</span><span class="p">:</span>
+                <span class="n">w</span> <span class="o">=</span> <span class="n">y</span> <span class="o">*</span> <span class="n">y</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="p">((((((((</span><span class="mf">0.000124818987</span> <span class="o">*</span> <span class="n">w</span>
+                        <span class="o">-</span> <span class="mf">0.001075204047</span><span class="p">)</span> <span class="o">*</span> <span class="n">w</span> <span class="o">+</span> <span class="mf">0.005198775019</span><span class="p">)</span> <span class="o">*</span> <span class="n">w</span>
+                        <span class="o">-</span> <span class="mf">0.019198292004</span><span class="p">)</span> <span class="o">*</span> <span class="n">w</span> <span class="o">+</span> <span class="mf">0.059054035642</span><span class="p">)</span> <span class="o">*</span> <span class="n">w</span>
+                        <span class="o">-</span> <span class="mf">0.151968751364</span><span class="p">)</span> <span class="o">*</span> <span class="n">w</span> <span class="o">+</span> <span class="mf">0.319152932694</span><span class="p">)</span> <span class="o">*</span> <span class="n">w</span>
+                        <span class="o">-</span> <span class="mf">0.531923007300</span><span class="p">)</span> <span class="o">*</span> <span class="n">w</span> <span class="o">+</span> <span class="mf">0.797884560593</span><span class="p">)</span> <span class="o">*</span> <span class="n">y</span> <span class="o">*</span> <span class="mf">2.0</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">y</span> <span class="o">-=</span> <span class="mf">2.0</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="p">(((((((((((((</span><span class="o">-</span><span class="mf">0.000045255659</span> <span class="o">*</span> <span class="n">y</span>
+                        <span class="o">+</span> <span class="mf">0.000152529290</span><span class="p">)</span> <span class="o">*</span> <span class="n">y</span> <span class="o">-</span> <span class="mf">0.000019538132</span><span class="p">)</span> <span class="o">*</span> <span class="n">y</span>
+                        <span class="o">-</span> <span class="mf">0.000676904986</span><span class="p">)</span> <span class="o">*</span> <span class="n">y</span> <span class="o">+</span> <span class="mf">0.001390604284</span><span class="p">)</span> <span class="o">*</span> <span class="n">y</span>
+                        <span class="o">-</span> <span class="mf">0.000794620820</span><span class="p">)</span> <span class="o">*</span> <span class="n">y</span> <span class="o">-</span> <span class="mf">0.002034254874</span><span class="p">)</span> <span class="o">*</span> <span class="n">y</span>
+                        <span class="o">+</span> <span class="mf">0.006549791214</span><span class="p">)</span> <span class="o">*</span> <span class="n">y</span> <span class="o">-</span> <span class="mf">0.010557625006</span><span class="p">)</span> <span class="o">*</span> <span class="n">y</span>
+                        <span class="o">+</span> <span class="mf">0.011630447319</span><span class="p">)</span> <span class="o">*</span> <span class="n">y</span> <span class="o">-</span> <span class="mf">0.009279453341</span><span class="p">)</span> <span class="o">*</span> <span class="n">y</span>
+                        <span class="o">+</span> <span class="mf">0.005353579108</span><span class="p">)</span> <span class="o">*</span> <span class="n">y</span> <span class="o">-</span> <span class="mf">0.002141268741</span><span class="p">)</span> <span class="o">*</span> <span class="n">y</span>
+                        <span class="o">+</span> <span class="mf">0.000535310849</span><span class="p">)</span> <span class="o">*</span> <span class="n">y</span> <span class="o">+</span> <span class="mf">0.999936657524</span>
+
+        <span class="k">if</span> <span class="n">z</span> <span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.5</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">x</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.5</span>
+
+
+<span class="k">def</span> <span class="nf">getROCPiont</span><span class="p">(</span><span class="n">thershold</span><span class="p">,</span><span class="kp">product</span><span class="p">,</span><span class="n">predict</span><span class="p">,</span><span class="n">boundary</span><span class="p">):</span>
+    <span class="n">sumTp</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">sumFn</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">sumFp</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">sumTn</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+    <span class="n">tpr</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">fpr</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+    <span class="n">leng</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="kp">product</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">leng</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">predict</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>  <span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span><span class="o">=</span> <span class="n">thershold</span> <span class="ow">and</span> <span class="kp">product</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">boundary</span> <span class="p">:</span>
+            <span class="n">sumTp</span> <span class="o">+=</span> <span class="mf">1.0</span>
+        <span class="k">if</span> <span class="n">predict</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>  <span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="n">thershold</span> <span class="ow">and</span> <span class="kp">product</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="n">boundary</span><span class="p">:</span>
+            <span class="n">sumFp</span> <span class="o">+=</span> <span class="mf">1.0</span>
+        <span class="k">if</span> <span class="n">predict</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>  <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">=</span> <span class="n">thershold</span> <span class="ow">and</span> <span class="kp">product</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">boundary</span><span class="p">:</span>
+            <span class="n">sumFn</span> <span class="o">+=</span> <span class="mf">1.0</span>
+        <span class="k">if</span> <span class="n">predict</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>  <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="n">thershold</span> <span class="ow">and</span> <span class="kp">product</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="n">boundary</span><span class="p">:</span>
+            <span class="n">sumTn</span> <span class="o">+=</span> <span class="mf">1.0</span>
+
+    <span class="k">if</span> <span class="n">sumTp</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">:</span>
+        <span class="n">tpr</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">tpr</span> <span class="o">=</span> <span class="n">sumTp</span> <span class="o">/</span> <span class="p">(</span><span class="n">sumTp</span> <span class="o">+</span> <span class="n">sumFn</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">sumFp</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">:</span>
+        <span class="n">fpr</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">fpr</span> <span class="o">=</span> <span class="n">sumFp</span> <span class="o">/</span> <span class="p">(</span><span class="n">sumFp</span> <span class="o">+</span> <span class="n">sumTn</span><span class="p">)</span>
+
+
+    <span class="k">return</span> <span class="n">tpr</span><span class="p">,</span><span class="n">fpr</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">min_score</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="kp">sample</span><span class="p">)</span>
+    <span class="n">max_score</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="kp">sample</span><span class="p">)</span>
+
+    <span class="c1">## 最大值最小值均匀分成1000份，得到一个阈值数组</span>
+    <span class="n">thr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="kp">linspace</span><span class="p">(</span><span class="n">min_score</span><span class="p">,</span> <span class="n">max_score</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span> 
+    <span class="n">roc_x</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">roc_y</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">thr</span><span class="p">):</span>
+        <span class="c1">## 这里我认为性别为1的为真。</span>
+        <span class="n">y</span><span class="p">,</span><span class="n">x</span><span class="o">=</span><span class="n">getROCPiont</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="n">sex</span><span class="p">,</span><span class="kp">sample</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">roc_x</span><span class="o">.</span><span class="kp">append</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">roc_y</span><span class="o">.</span><span class="kp">append</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+
+
+    <span class="c1">## 获取输出表格的数据选取,均匀取出50个用于输出</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1000</span><span class="o">/</span><span class="mi">20</span><span class="p">):</span>
+        <span class="k">print</span> <span class="n">i</span><span class="p">,</span> <span class="n">thr</span><span class="p">[</span><span class="n">i</span><span class="o">*</span><span class="mi">20</span><span class="p">],</span> <span class="n">roc_y</span><span class="p">[</span><span class="n">i</span><span class="o">*</span><span class="mi">20</span><span class="p">],</span><span class="s1">&#39;  &#39;</span><span class="p">,</span><span class="n">roc_x</span><span class="p">[</span><span class="n">i</span><span class="o">*</span><span class="mi">20</span><span class="p">]</span>
+
+    <span class="c1">##计算曲面下的面积。</span>
+    <span class="n">AUC</span><span class="o">=</span><span class="mi">0</span>
+    <span class="n">AUCList</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">last</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1000</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">i</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="c1">##对曲线进行积分</span>
+        <span class="n">area</span> <span class="o">=</span> <span class="p">(</span><span class="n">roc_x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-</span><span class="n">roc_x</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="o">*</span><span class="n">roc_y</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">AUC</span> <span class="o">+=</span> <span class="n">area</span>
+        <span class="c1">##将面积分成10片分别进行记录，用于后续计算方差。</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="mi">100</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">last</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">last</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="kp">fabs</span><span class="p">(</span><span class="n">AUC</span><span class="p">)</span>
+                <span class="n">AUCList</span><span class="o">.</span><span class="kp">append</span><span class="p">(</span><span class="n">last</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">AUCList</span><span class="o">.</span><span class="kp">append</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="kp">fabs</span><span class="p">(</span><span class="n">AUC</span><span class="p">)</span> <span class="o">-</span> <span class="n">last</span><span class="p">)</span>
+                <span class="n">last</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="kp">fabs</span><span class="p">(</span><span class="n">AUC</span><span class="p">)</span>
+
+    <span class="c1">##因为跟计算方向有关系，有可能会算出负的来，所以要去掉符号。</span>
+    <span class="n">AUC</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="kp">fabs</span><span class="p">(</span><span class="n">AUC</span><span class="p">)</span>
+    <span class="k">print</span> <span class="s2">&quot;auc:&quot;</span><span class="p">,</span><span class="n">AUC</span>
+
+    <span class="n">sump</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">sumn</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">for</span> <span class="n">ttt</span> <span class="ow">in</span> <span class="n">sex</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">ttt</span> <span class="o">==</span><span class="mi">1</span><span class="p">:</span> <span class="c1">##相当于上面getROCPiont的参数boundary，这里我假设性别为1的为真。</span>
+            <span class="n">sump</span><span class="o">+=</span><span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sumn</span><span class="o">+=</span><span class="mi">1</span>
+
+    <span class="c1">##输出SPSS对应的观察值摘要表格</span>
+    <span class="k">print</span> <span class="s2">&quot;觀察值處理摘要:&quot;</span><span class="p">,</span>  <span class="n">sump</span><span class="p">,</span><span class="n">sumn</span>
+
+    <span class="n">q1</span><span class="o">=</span><span class="n">AUC</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">-</span><span class="n">AUC</span><span class="p">)</span>
+    <span class="n">AUCPow2</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">AUC</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">q2</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">AUCPow2</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">AUC</span><span class="p">)</span>
+    <span class="n">error</span> <span class="o">=</span> <span class="p">(</span><span class="n">AUC</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">AUC</span><span class="p">)</span>  <span class="o">+</span>  <span class="p">(</span><span class="n">sumn</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">q1</span><span class="o">-</span><span class="n">AUCPow2</span><span class="p">)</span>  <span class="o">+</span>  <span class="p">(</span><span class="n">sump</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">q2</span><span class="o">-</span><span class="n">AUCPow2</span><span class="p">))</span>  <span class="o">/</span>  <span class="p">(</span><span class="n">sump</span><span class="o">*</span><span class="n">sumn</span><span class="p">)</span>
+    <span class="k">print</span> <span class="s2">&quot;q:&quot;</span><span class="p">,</span>  <span class="n">q1</span><span class="p">,</span><span class="n">q2</span>
+    <span class="k">print</span> <span class="s2">&quot;Error(auc):&quot;</span><span class="p">,</span>  <span class="n">error</span>
+
+    <span class="c1">##标准误差</span>
+    <span class="n">SE</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="kp">sqrt</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+    <span class="k">print</span> <span class="s2">&quot;SE(auc):&quot;</span><span class="p">,</span> <span class="n">SE</span>
+
+    <span class="n">z</span><span class="o">=</span><span class="p">(</span><span class="n">AUC</span><span class="o">-</span><span class="mf">0.5</span><span class="p">)</span><span class="o">/</span> <span class="n">SE</span>
+    <span class="k">print</span> <span class="s2">&quot;z:&quot;</span><span class="p">,</span><span class="n">z</span>
+    <span class="k">print</span> <span class="s2">&quot;p:&quot;</span><span class="p">,</span><span class="n">poz</span><span class="p">(</span><span class="n">z</span><span class="p">)</span><span class="o">*</span><span class="mi">2</span>
+
+    <span class="n">meanAUC</span> <span class="o">=</span> <span class="n">AUC</span><span class="o">/</span><span class="mi">10</span>
+
+    <span class="c1">##标准差</span>
+    <span class="n">d</span><span class="o">=</span><span class="mi">0</span>
+    <span class="k">for</span> <span class="n">area</span> <span class="ow">in</span> <span class="n">AUCList</span><span class="p">:</span>
+        <span class="n">d</span><span class="o">+=</span><span class="n">math</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">area</span><span class="o">-</span><span class="n">meanAUC</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">sd</span> <span class="o">=</span> <span class="n">d</span><span class="o">/</span><span class="mi">10</span>
+    <span class="k">print</span> <span class="s1">&#39;SD&#39;</span><span class="p">,</span><span class="n">math</span><span class="o">.</span><span class="kp">sqrt</span><span class="p">(</span><span class="n">sd</span><span class="p">)</span>
+
+    <span class="c1">##置信区间上下限</span>
+    <span class="n">Z_Alpha</span> <span class="o">=</span> <span class="mf">1.96</span>
+    <span class="k">print</span> <span class="s2">&quot;95% CI,下限:&quot;</span><span class="p">,</span> <span class="n">AUC</span><span class="o">-</span><span class="n">SE</span><span class="o">*</span><span class="n">Z_Alpha</span>
+    <span class="k">print</span> <span class="s2">&quot;95% CI,上限:&quot;</span><span class="p">,</span> <span class="n">AUC</span><span class="o">+</span><span class="n">SE</span><span class="o">*</span><span class="n">Z_Alpha</span>
+
+
+    <span class="c1">##绘图</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">duijiaoxian</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="kp">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">duijiaoxian</span><span class="p">,</span> <span class="n">duijiaoxian</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;coral&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">roc_x</span><span class="p">,</span> <span class="n">roc_y</span><span class="p">,</span><span class="n">label</span> <span class="o">=</span> <span class="s2">&quot;1000&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+
+
+<p>References:</p>
+<blockquote>
+<p><a href="http://blog.csdn.net/abcjennifer/article/details/7359370">ROC曲线-阈值评价标准. </a>.</p>
+<p><a href="https://en.wikipedia.org/wiki/Receiver_operating_characteristic">Receiver operating characteristic. </a></p>
+<p><a href="http://ncss.wpengine.netdna-cdn.com/wp-content/themes/ncss/pdf/Procedures/PASS/Confidence_Intervals_for_the_Area_Under_an_ROC_Curve.pdf">Confidence_Intervals_for_the_Area_Under_an_ROC_Curve. </a></p>
+</blockquote>
+        </div>
+    </section>
+    <footer class="footer-article">
+        <div class="tags-and-categories">Filed under <a href="/category/machinelearning.html">MachineLearning</a>
+        | Tagged: <a href="/tag/algorithm.html">algorithm </a><a href="/tag/ml.html">ML </a><a href="/tag/math.html">Math </a>
+        | <a href="/2017/ROC_2017_07_03_19_46.html" rel="bookmark"
+         title="Permalink to ROC Curve">Permalink</a>            
+        </div>
+        <!-- metaldata 
+        -->
+    </footer>
+</div>
+<div id="disqus_thread"></div>
+<script type="text/javascript" src="/theme/js/disqus.js"></script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+            </div>
+            
+            
+			<div class="large-3 aside column">
+				<img class="headIcon-large avatar" src="/sys_img/head.jpg" alt="(┬＿┬)">
+                <h2>魏凯</h2>
+                <h3>kairns leeky</h3>
+				<a href="mailto:kai_kai03@hotmail.com?subject=%20&body=from%20blog"><Email>kai_kai03@hotmail.com</Email></a>
+            </div>
+            
+            
+			
+			<div class="large-3 aside column">
+                <h3>Socials</h3>
+                <ul>
+                    <li><a href="http://weibo.com/mipamipami">新浪weibo</a></li>
+                    <li><a href="https://plus.google.com/105166364351021934050">g+</a></li>
+                </ul>
+            </div> 
+            
+            <div class="large-3 category-column column">
+                <h3>Categories</h3>
+                <ul>
+                    <li><a href="/category/bu-kao-pu-chan-pin-ri-ji.html">不靠谱产品日记</a> (28)</li>
+                    <li><a href="/category/db.html">DB</a> (3)</li>
+                    <li><a href="/category/idev.html">iDev</a> (14)</li>
+                    <li class="active"><a href="/category/machinelearning.html">MachineLearning</a> (24)</li>
+                    <li><a href="/category/musical.html">Musical</a> (3)</li>
+                    <li><a href="/category/other.html">other</a> (3)</li>
+                    <li><a href="/category/pydev.html">pyDev</a> (19)</li>
+                    <li><a href="/category/yin-shi-pin.html">音视频</a> (18)</li>
+                </ul>
+            </div> 
+            
+            <div class="large-3 category-column column">
+                <h3>Feeds</h3>
+                <ul>
+                    <li ><a href="/feeds/all.atom.xml" type="application/atom+xml">Atom Feed</a></li>
+                    <li ><a href="/feeds/all.rss.xml" type="application/rss+xml">RSS Feed</a></li>
+                </ul>
+            </div>
+            
+        
+        
+
+                <!--
+            <iframe width="100%" height="600" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=600&fansRow=1&ptype=1&speed=0&skin=1&isTitle=0&noborder=0&isWeibo=1&isFans=0&uid=1819436507&verifier=4060feb2&colors=fc1f12,ffffff,666666,0082cb,ecfbfd&dpc=1"></iframe>            </div>
+            -->
+         
+    </div>
+</div>
+    <div class="footer">
+        <div class="data-holder">
+        <div class="row">
+            <div class="large-3 column">
+<div class="Verse">
+    <h3>bo主偈语</h3>
+    <p>これも欲しい</p>
+    <p>あれも欲しい</p>
+    <p1>金がなくて悲しい</p1>
+    <p>これもセール</p>
+    <p>あれもセール</p>
+    <p1>全部買うと責められる</p1>
+    <p>これかっこい</p>
+    <p>あれも可愛い</p>
+    <p1>買えないので悔しい</p1>
+    <p>いつ金が入る？</p>
+    <p>いつ金が入る？</p>
+    <p1>あの時まだ間に合う？</p1>
+    <p>phaも買った</p>
+    <p>hmzも買った</p>
+    <p>嬉しいけど.....</p>
+    <p1>土しか食べられるものは無かった</p1>
+    <p1>嗯...2015年...vps不续费了...</p1>
+</div>           </div>
+           <div class="large-6 tag-cloud column">
+                <h3>Tags</h3>
+                <ul class="tagcloud">
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/nao-dong.html">脑洞
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/chord.html">Chord
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/websocket.html">WebSocket
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/mongo.html">mongo
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/classification.html">classification
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/shi-xu-tu.html">时序图
+                        </a></li>
+                    <li>
+											<span class="badge">33</span>
+                        <a href="/tag/chan-pin.html">产品
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/fuck.html">fuck
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/gc.html">GC
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/rtmp.html">RTMP
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/unicode.html">unicode
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/dylib.html">dylib
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/protocol.html">protocol
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/pycon.html">PyCon
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/cai-ji.html">采集
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/clustering.html">clustering
+                        </a></li>
+                    <li>
+											<span class="badge">7</span>
+                        <a href="/tag/web.html">Web
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/yi-zhi.html">移植
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/network.html">network
+                        </a></li>
+                    <li>
+											<span class="badge">6</span>
+                        <a href="/tag/flask.html">Flask
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/review.html">review
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/nodejs.html">Node.js
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/pep.html">PEP
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/linear.html">Linear
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/features.html">Features
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/wu-tai.html">舞台
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/cnn.html">CNN
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/pca.html">PCA
+                        </a></li>
+                    <li>
+											<span class="badge">7</span>
+                        <a href="/tag/webrtc.html">webRtc
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/css.html">CSS
+                        </a></li>
+                    <li>
+											<span class="badge">8</span>
+                        <a href="/tag/object-c.html">Object-C
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/memory.html">Memory
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/life.html">life
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/flask-socketio.html">Flask-SocketIO
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/http.html">HTTP
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/finance.html">finance
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/dataprocessing.html">DataProcessing
+                        </a></li>
+                    <li>
+											<span class="badge">18</span>
+                        <a href="/tag/python.html">Python
+                        </a></li>
+                    <li>
+											<span class="badge">6</span>
+                        <a href="/tag/javascript.html">JavaScript
+                        </a></li>
+                    <li>
+											<span class="badge">18</span>
+                        <a href="/tag/ios.html">iOS
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/encode.html">encode
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/xcode.html">xCode
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/appstore.html">appstore
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/html5.html">html5
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/liu-cheng.html">流程
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/uiimage.html">UIImage
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/decorator.html">Decorator
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/ipad.html">iPad
+                        </a></li>
+                    <li>
+											<span class="badge">5</span>
+                        <a href="/tag/c.html">C++
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/jia-gou.html">架构
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/ffmpeg.html">FFmpeg
+                        </a></li>
+                    <li>
+											<span class="badge">22</span>
+                        <a href="/tag/algorithm.html">algorithm
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/database.html">database
+                        </a></li>
+                    <li>
+											<span class="badge">17</span>
+                        <a href="/tag/ml.html">ML
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/yan-zou.html">演奏
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/framework.html">framework
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/gbk.html">GBK
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/rfc.html">rfc
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/cache.html">cache
+                        </a></li>
+                    <li>
+											<span class="badge">19</span>
+                        <a href="/tag/math.html">Math
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/audio.html">audio
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/obs.html">OBS
+                        </a></li>
+                </ul>
+            </div>
+
+            <div class="large-3 aside column">
+                <h3>Links</h3>
+                <ul>
+                    <li><a href="http://mikanani.me/">蜜柑计划</a></li><br/>
+                    <li><a href="http://josh.agarrado.net/music/anime/index.php">ジョシュの楽譜集</a></li><br/>
+                    <li><a href="http://deeplearning.stanford.edu/">Deep Learning</a></li><br/>
+                    <li><a href="http://getpelican.com/">Pelican</a></li><br/>
+                    <li><a href="http://python.org/">Python</a></li><br/>
+                    <li><a href="http://jinja.pocoo.org/">Jinja2</a></li><br/>
+                </ul>
+                
+            </div>
+
+        </row>
+        </div>
+        <div class="row">
+            <div class="small-12 column">
+                <p style="font-size: 0.7em; text-align:center;">
+                ∠( ᐛ 」∠)＿不会有人拉到这么下边的呀就算拉下来也不会去看的呀这么小的字也看不清的口牙！ ©2015.
+                <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1257347159'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1257347159%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+                <!--<script type="text/javascript" src="/theme/js/analytics.js"></script> -->
+                </p>
+            </div>
+        </div>
+    </div>
+
+    
+</body>
+</html>
