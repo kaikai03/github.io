@@ -5,28 +5,28 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
 <url>
 <loc>/</loc>
-<lastmod>2018-12-14T20:20:34-00:00</lastmod>
+<lastmod>2018-12-28T21:46:32-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.8</priority>
 </url>
 
 <url>
 <loc>/archives.html</loc>
-<lastmod>2018-12-14T20:20:34-00:00</lastmod>
+<lastmod>2018-12-28T21:46:32-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.8</priority>
 </url>
 
 <url>
 <loc>/tags.html</loc>
-<lastmod>2018-12-14T20:20:34-00:00</lastmod>
+<lastmod>2018-12-28T21:46:32-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.8</priority>
 </url>
 
 <url>
 <loc>/categories.html</loc>
-<lastmod>2018-12-14T20:20:34-00:00</lastmod>
+<lastmod>2018-12-28T21:46:32-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.8</priority>
 </url>
@@ -36,6 +36,13 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 <lastmod>2016-02-21T00:00:00+08:00</lastmod>
 <changefreq>weekly</changefreq>
 <priority>0.7</priority>
+</url>
+
+<url>
+<loc>/2018/painting_2018_12_14_20_18.html</loc>
+<lastmod>2018-12-18T12:07:00+08:00</lastmod>
+<changefreq>daily</changefreq>
+<priority>1.0</priority>
 </url>
 
 <url>
@@ -873,7 +880,7 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
 <url>
 <loc>/category/yin-shi-pin.html</loc>
-<lastmod>2016-06-06T11:13:00+08:06</lastmod>
+<lastmod>2018-12-18T12:07:00+08:06</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.8</priority>
 </url>
@@ -1237,7 +1244,7 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
 <url>
 <loc>/tag/algorithm.html</loc>
-<lastmod>2018-06-27T23:11:00+08:06</lastmod>
+<lastmod>2018-12-18T12:07:00+08:06</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.8</priority>
 </url>
@@ -1293,7 +1300,7 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
 <url>
 <loc>/tag/math.html</loc>
-<lastmod>2018-06-11T00:05:00+08:06</lastmod>
+<lastmod>2018-12-18T12:07:00+08:06</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.8</priority>
 </url>
@@ -1314,7 +1321,7 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
 <url>
 <loc>/author/kai_kai03.html</loc>
-<lastmod>2018-11-25T19:36:00+08:06</lastmod>
+<lastmod>2018-12-18T12:07:00+08:06</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.8</priority>
 </url>

@@ -1,0 +1,505 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="Access-Control-Allow-Origin" content="*">
+        <link rel="stylesheet" href="/theme/css/foundation.min.css" media="all">
+		<link rel="stylesheet" href="/theme/css/pygments.css" /> 
+		<link rel="stylesheet" href="/theme/css/style.css" />
+		<link rel="stylesheet" href="/theme/css/ukagaka.css" /> 
+        <script type="text/javascript" src="/theme/js/modernizr.js"></script>
+		<script type='text/javascript' src='/theme/js/jquery-1.11.1.min.js'></script>
+	    <script type="text/javascript" src="/theme/js/damoo.min.js"></script>
+		<script type="text/x-mathjax-config">MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});</script>
+        <script type="text/javascript">var js=document.createElement('script');js.setAttribute('src',(('https:' == document.location.protocol) ? ' https://' : ' http://')+'cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML');document.head.appendChild(js);</script>
+
+        <link href='https://fonts.lug.ustc.edu.cn/css?family=Exo+2:400,300,700,300italic,400italic,700italic,900,900italic' rel='stylesheet' type='text/css'>
+        <link rel="stylesheet" href="/theme/css/lamboz.css" media="all">
+        <title>静画变动画 - kairnsの记事簿</title>
+        <meta charset="utf-8" />
+        <link href="/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="kairnsの记事簿 Full Atom Feed" />
+        <link href="/feeds/all.rss.xml" type="application/rss+xml" rel="alternate" title="kairnsの记事簿 Full RSS Feed" />
+        <!-- |format(category.slug) -->
+        <link href="/feeds/{slug}.atom.xml" type="application/atom+xml" rel="alternate" title="kairnsの记事簿 Categories Atom Feed" />
+ 
+ 
+        
+        
+</head>
+<body onblur="leavePage()" onfocus="comebackPage()">
+    <div class="pages">
+        <ul>
+            <li class="home"><a href="/index.html">Home</a></li>
+            <li ><a href="/pages/about-me.html">About Me</a></li>
+        </ul>
+    </div>
+
+<div class="hp-header-inner">
+    <div class="page-header">
+        <div class="content-header">
+            <div id="title-block">
+            <h1>  <a href="/2018/painting_2018_12_14_20_18.html" rel="bookmark"
+                    title="Permalink to 静画变动画">静画变动画</a></h1>
+            </div>
+        </div>
+    </div>
+</div>
+    <div class="content">
+        <div class="data-holder">
+        <div class="row">
+           <div class="large-9 content-column column">
+<div class="content-article">
+    <header class="header-article">
+        <div class="read-more">Posted on Fri 14 December 2018</div>
+ 
+   </header>
+    <section class='article'>
+        
+        <div class="entry-summary">
+            <p>一个控件，将静态图片按照“画画”的形式，产生动画效果。</p>
+        </div>
+    
+        <div class="entry-content">
+            <h2>交代前提</h2>
+<p>前段休假中，一个巧合，突然想起一件欠着别人多年的事情来。</p>
+<p>三年前，朋友见我各种机器视觉玩具玩得飞起，让我给他们公司搞点装逼东西，需求很简单：“艺术范，科技感”。</p>
+<p>我就一搞技术的不懂你们什么感觉什么艺术啊，但又不好拒绝，于是“没问题，有时间的时候帮你弄”。这“有时间”一晃就是三年（其实是真没时间）。</p>
+<p>上个月初，在一个度假村的湖边，躺着发呆，眼前风景真是美如画。不知道是不是因为度假村想营造一种国际感，全部公共场合的电视放的都是英文节目，菜单什么的也都双语，我那段时间脑内活动语言也跟着切换到英文去。</p>
+<p>美如画 --&gt; 画的英文是啥来着 --&gt; picture好像太泛，不算画 --&gt; painting，这个动名词不错，既是画，又能指代画出来的画，又能指代画的动作 --&gt; 动作？？ --&gt; 输入一副画，输出的是绘画过程动画，岂不是很炫？ --&gt; 啊，好像以前欠着人点什么东西能还上了。</p>
+<p>以上就是现在今天要说的这个控件的来源。</p>
+<h2>演示</h2>
+<p><a href="https://www.bilibili.com/video/av39187627/">视频演示--打开bilibili</a></p>
+<p><img alt="1.gif" src="/article_img/painting_2018_12_14_20_18/1.gif"></p>
+<p><img alt="2.gif" src="/article_img/painting_2018_12_14_20_18/2.gif"></p>
+<p><img alt="3.gif" src="/article_img/painting_2018_12_14_20_18/3.gif"></p>
+<hr>
+<h2>过程描述</h2>
+<p>简单描述一下整体过程，细节计算就不说了，等有必要的时候在写（看心情）。会来RSS关联我日志的朋友，我相信通过关键字就知道我怎么干的了，没必要浪费唇舌。</p>
+<h4>初值准备</h4>
+<p>重新采样原图，避免原图太大招成过分低效。
+图像灰度、高斯作为后续使用素材避免重复采样。</p>
+<h4>区分绘画区块</h4>
+<ol>
+<li>haar取头位置及大小。</li>
+<li>二值化+降噪+突出主题（高亮度部分，相对较高，过爆区低权重）做预处理。形成一些“区域”。</li>
+<li>计算图像中的所有边界，然后利用随机膨胀来形成一些封闭区域。这一步与第二步并行。</li>
+<li>对（2）、（3）得到“区域”利用相关性系数法判断各之间的关系，合并。然后分水岭算法分区。</li>
+<li>最后建立包边，得到多边形包块列表。</li>
+</ol>
+<h4>笔触顺序</h4>
+<p>计算每块面积。</p>
+<p>各区块按头位置以及区块面积大小确定排序顺序。</p>
+<p>头所在区或最大面积区，向两边延伸，如果当前附近有小区块则优先考虑。接着由第二大面积区开始，向周围延伸。以此类推。</p>
+<p>根据区块排列顺序，重新采样canny的边界点。</p>
+<p>采样使用扫描线，从左往右，从上往下，  扫到的第一个点，取值后，点去除。然后开始递归，检查四向连通（左下，下，右下，右），优先完成一条最长的完整线。然后直到该点连接的全部线全部获取。不过递归容易爆栈，我在一条线长度超过400时强制中断掉了。</p>
+<p>至此，基本笔触顺序获取完成。</p>
+<p>不过后来进一步优化，因为有时候有些包块会很大，例如背景蓝天。此时如果画面上Y方向的长物体少的话，按照上述方法采样画出来的顺序像是打印机。于是把块度太宽或太长的区块分为几个部分分别采样，而不是直接横穿整个屏幕。</p>
+<h4>绘制草图</h4>
+<p>绘制素描线条时，并不使用canny的结果，因为太“干”。</p>
+<p>通过低强度高斯平滑取反，与高强度高斯做差，得到高斯平滑掉的突变，以此得到一张类似低密度阴影图。加上sobel或者拉普拉斯作为边界强化，就得到一张完整的铅笔“草图”。</p>
+<p>利用上一节获取到的笔触顺序，将草图绘制在图形上下文空间中，按照“帧率”和预设绘图时间渲染图像。</p>
+<h4>绘制底色</h4>
+<p>按照笔触的分块顺序，对草图进行上色。</p>
+<p>第一遍，按照区块抠原图，抠出的部分直接取均值，然后再与255平均，作为纯底色进行上色。</p>
+<p>第二遍，对整图使用最大强度的stylization进行风格化，然后用各区块进行抠图，分别与各自底色加权平均。</p>
+<p>第三遍，在第二遍的基础上加权平均一次，产生水彩效果。</p>
+<p>为了上色看起来不那么单调，对大块的区域模仿手工刷油漆效果先涂一遍，再以斜对角扫描线的形式补全毛刷没刷到的位置。</p>
+<h4>加强线条与阴影</h4>
+<p>作为水彩到原图的过度过程，我们知道水彩风格从整体上看，色彩是偏淡的。而现实照片是邻角分明，通过阴影来表现立体感。</p>
+<p>所以在图像绘制原图前，把“重色彩”部分，用黑色先“打底”。这步用拉普拉斯的粗略边界和阴影效果来覆盖，理论上有比较好的效果，但由于拉普拉斯本身的问题，效果不稳定。我最后直接用canny描个边就拉倒了（偷懒）。</p>
+<h4>绘制原图</h4>
+<p>进行两次涂抹，用模糊原图按区块顺序加权平均一次，让水彩效果产生立体感，接近原图。最后一次用原图覆盖。</p>
+<p>至此，整个绘图过程完成。</p>
+<h4>问题</h4>
+<p>因为基于信号波动来分区，基于高频高能信号来决定绘画顺序和笔触。</p>
+<p>所以高强度的高斯处理过的图像是没法处理的，帕金森手拍出来的是没法处理的，还有那种柔光美颜开到最大的那些。</p>
+<p>还有一个情况就是波光粼粼的水面，湿漉漉的高清草地，虽然能处理，但是需要处理的东西太多。高能信号太多，太零散，会导致性能消耗严重。</p>
+<p>最后，效果最好的当然就是专业摄影师的作品或者是人工作画的作品：有意识地利用光能来强调“主题”，主次边界分明，细节清晰。</p>
+<h2>源码</h2>
+<blockquote>
+<p><del>github</del></p>
+</blockquote>
+<p>2018-12-18 12:07 修改</p>
+<blockquote>
+<p><del>
+由于项目接收人表示要拿去弄知识产权还是什么专利之类的东西，所以我寻思着还是把网上的源码删掉好了，免得节外生枝。想要玩的朋友直接联系我，源码预计会在我手上保留至少到明年3月。</del></p>
+</blockquote>
+<p>2018-12-28 17:25 修改</p>
+<p>嗯，征得同意，旧版公开。</p>
+<p><a href="https://github.com/kaikai03/UIPaintingImageView">github</a></p>
+<p>未公开的版本也仅仅是草图多一步阴影纹理贴图，让草图更接近素描而已，并没有太大差别。</p>
+        </div>
+    </section>
+    <footer class="footer-article">
+        <div class="tags-and-categories">Filed under <a href="/category/yin-shi-pin.html">音视频</a>
+        | Tagged: <a href="/tag/algorithm.html">algorithm </a><a href="/tag/math.html">Math </a>
+        | <a href="/2018/painting_2018_12_14_20_18.html" rel="bookmark"
+         title="Permalink to 静画变动画">Permalink</a>            
+        </div>
+        <!-- metaldata 
+        -->
+    </footer>
+</div>
+<div id="disqus_thread"></div>
+<script type="text/javascript" src="/theme/js/disqus.js"></script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+            </div>
+            
+            
+			<div class="large-3 aside column">
+				<img class="headIcon-large avatar" src="/sys_img/head.jpg" alt="(┬＿┬)">
+                <h2>魏凯</h2>
+                <h3>kairns leeky</h3>
+				<a href="mailto:kai_kai03@hotmail.com?subject=%20&body=from%20blog"><Email>kai_kai03@hotmail.com</Email></a>
+            </div>
+            
+            
+			
+			<div class="large-3 aside column">
+                <h3>Socials</h3>
+                <ul>
+                    <li><a href="http://weibo.com/"><del>新浪weibo</del></a></li>
+                    <li><a href="https://plus.google.com/"><del>g+</del></a></li>
+                    <li><a href="https://baidu.com/"><del>公开简历期间社交通道关闭</del></a></li>
+                </ul>
+            </div> 
+            
+            <div class="large-3 category-column column">
+                <h3>Categories</h3>
+                <ul>
+                    <li><a href="/category/bu-kao-pu-chan-pin-ri-ji.html">不靠谱产品日记</a> (28)</li>
+                    <li><a href="/category/db.html">DB</a> (3)</li>
+                    <li><a href="/category/idev.html">iDev</a> (14)</li>
+                    <li><a href="/category/machinelearning.html">MachineLearning</a> (24)</li>
+                    <li><a href="/category/musical.html">Musical</a> (3)</li>
+                    <li><a href="/category/other.html">other</a> (3)</li>
+                    <li><a href="/category/pydev.html">pyDev</a> (19)</li>
+                    <li class="active"><a href="/category/yin-shi-pin.html">音视频</a> (19)</li>
+                </ul>
+            </div> 
+            
+            <div class="large-3 category-column column">
+                <h3>Feeds</h3>
+                <ul>
+                    <li ><a href="/feeds/all.atom.xml" type="application/atom+xml">Atom Feed</a></li>
+                    <li ><a href="/feeds/all.rss.xml" type="application/rss+xml">RSS Feed</a></li>
+                </ul>
+            </div>
+            
+        
+        
+
+                <!--
+            <iframe width="100%" height="600" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=600&fansRow=1&ptype=1&speed=0&skin=1&isTitle=0&noborder=0&isWeibo=1&isFans=0&uid=1819436507&verifier=4060feb2&colors=fc1f12,ffffff,666666,0082cb,ecfbfd&dpc=1"></iframe>            </div>
+            -->
+         
+    </div>
+</div>
+    <div class="footer">
+        <div class="data-holder">
+        <div class="row">
+            <div class="large-3 column">
+<div class="Verse">
+    <h3>bo主偈语</h3>
+    <p>これも欲しい</p>
+    <p>あれも欲しい</p>
+    <p1>金がなくて悲しい</p1>
+    <p>これもセール</p>
+    <p>あれもセール</p>
+    <p1>全部買うと責められる</p1>
+    <p>これかっこい</p>
+    <p>あれも可愛い</p>
+    <p1>買えないので悔しい</p1>
+    <p>いつ金が入る？</p>
+    <p>いつ金が入る？</p>
+    <p1>あの時まだ間に合う？</p1>
+    <p>phaも買った</p>
+    <p>hmzも買った</p>
+    <p>嬉しいけど.....</p>
+    <p1>土しか食べられるものは無かった</p1>
+    <p1>嗯...2015年...vps不续费了...</p1>
+</div>           </div>
+           <div class="large-6 tag-cloud column">
+                <h3>Tags</h3>
+                <ul class="tagcloud">
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/nao-dong.html">脑洞
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/chord.html">Chord
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/websocket.html">WebSocket
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/mongo.html">mongo
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/classification.html">classification
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/shi-xu-tu.html">时序图
+                        </a></li>
+                    <li>
+											<span class="badge">33</span>
+                        <a href="/tag/chan-pin.html">产品
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/fuck.html">fuck
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/gc.html">GC
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/rtmp.html">RTMP
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/unicode.html">unicode
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/dylib.html">dylib
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/protocol.html">protocol
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/pycon.html">PyCon
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/cai-ji.html">采集
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/clustering.html">clustering
+                        </a></li>
+                    <li>
+											<span class="badge">7</span>
+                        <a href="/tag/web.html">Web
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/yi-zhi.html">移植
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/network.html">network
+                        </a></li>
+                    <li>
+											<span class="badge">6</span>
+                        <a href="/tag/flask.html">Flask
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/review.html">review
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/nodejs.html">Node.js
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/pep.html">PEP
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/linear.html">Linear
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/features.html">Features
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/wu-tai.html">舞台
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/cnn.html">CNN
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/pca.html">PCA
+                        </a></li>
+                    <li>
+											<span class="badge">7</span>
+                        <a href="/tag/webrtc.html">webRtc
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/css.html">CSS
+                        </a></li>
+                    <li>
+											<span class="badge">8</span>
+                        <a href="/tag/object-c.html">Object-C
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/memory.html">Memory
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/life.html">life
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/flask-socketio.html">Flask-SocketIO
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/http.html">HTTP
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/finance.html">finance
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/dataprocessing.html">DataProcessing
+                        </a></li>
+                    <li>
+											<span class="badge">18</span>
+                        <a href="/tag/python.html">Python
+                        </a></li>
+                    <li>
+											<span class="badge">6</span>
+                        <a href="/tag/javascript.html">JavaScript
+                        </a></li>
+                    <li>
+											<span class="badge">18</span>
+                        <a href="/tag/ios.html">iOS
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/encode.html">encode
+                        </a></li>
+                    <li>
+											<span class="badge">2</span>
+                        <a href="/tag/xcode.html">xCode
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/appstore.html">appstore
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/html5.html">html5
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/liu-cheng.html">流程
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/uiimage.html">UIImage
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/decorator.html">Decorator
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/ipad.html">iPad
+                        </a></li>
+                    <li>
+											<span class="badge">5</span>
+                        <a href="/tag/c.html">C++
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/jia-gou.html">架构
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/ffmpeg.html">FFmpeg
+                        </a></li>
+                    <li>
+											<span class="badge">23</span>
+                        <a href="/tag/algorithm.html">algorithm
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/database.html">database
+                        </a></li>
+                    <li>
+											<span class="badge">17</span>
+                        <a href="/tag/ml.html">ML
+                        </a></li>
+                    <li>
+											<span class="badge">4</span>
+                        <a href="/tag/yan-zou.html">演奏
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/framework.html">framework
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/gbk.html">GBK
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/rfc.html">rfc
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/cache.html">cache
+                        </a></li>
+                    <li>
+											<span class="badge">20</span>
+                        <a href="/tag/math.html">Math
+                        </a></li>
+                    <li>
+											<span class="badge">3</span>
+                        <a href="/tag/audio.html">audio
+                        </a></li>
+                    <li>
+											<span class="badge">1</span>
+                        <a href="/tag/obs.html">OBS
+                        </a></li>
+                </ul>
+            </div>
+
+            <div class="large-3 aside column">
+                <h3>Links</h3>
+                <ul>
+                    <li><a href="http://mikanani.me/">蜜柑计划</a></li><br/>
+                    <li><a href="http://josh.agarrado.net/music/anime/index.php">ジョシュの楽譜集</a></li><br/>
+                    <li><a href="http://deeplearning.stanford.edu/">Deep Learning</a></li><br/>
+                    <li><a href="http://getpelican.com/">Pelican</a></li><br/>
+                    <li><a href="http://python.org/">Python</a></li><br/>
+                    <li><a href="http://jinja.pocoo.org/">Jinja2</a></li><br/>
+                </ul>
+                
+            </div>
+
+        </row>
+        </div>
+        <div class="row">
+            <div class="small-12 column">
+                <p style="font-size: 0.7em; text-align:center;">
+                ∠( ᐛ 」∠)＿不会有人拉到这么下边的呀就算拉下来也不会去看的呀这么小的字也看不清的口牙！ ©2015.
+                <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1257347159'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1257347159%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+                <!--<script type="text/javascript" src="/theme/js/analytics.js"></script> -->
+                </p>
+            </div>
+        </div>
+    </div>
+
+    
+</body>
+</html>
